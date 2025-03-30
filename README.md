@@ -21,15 +21,14 @@ table's as a list of options of things to download.
 
 ## Configuration File Instructions
 
-Mortar comes pre-configured for four different server types.
+Mortar comes pre-configured for three different server types.
 
 1. Apache
 2. nginx
-3. Caddy
-4. Rapscallion
+3Rapscallion
 
-These four defaults simplify the configuration process as they have default rules for parsing and cleaning the HTML
-tables. Don't worry you are not tied to these four options.
+These three defaults simplify the configuration process as they have default rules for parsing and cleaning the HTML
+tables. Don't worry you are not tied to these three options.
 
 Here is a complete example for any of the defined servers above.
 
