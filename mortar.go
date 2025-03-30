@@ -343,7 +343,7 @@ func showMessage(message string, timeout string) {
 	cmd := exec.Command("minui-presenter", args...)
 	err := cmd.Run()
 
-	if err != nil {
+	if err != nil && cmd.ProcessState.ExitCode() != 124 {
 		sugar.Fatalf("failed to run minui-presenter: %v", err)
 	}
 }
@@ -369,7 +369,7 @@ func searchBox() models.Selection {
 	}
 
 	err = cmd.Wait()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
+	if err != nil && cmd.ProcessState.ExitCode() == 1 {
 		sugar.Errorf("Error with keyboard: %s", stderrbuf.String())
 		showMessage("Unable to open keyboard!", "3")
 		return models.Selection{Code: 1}
