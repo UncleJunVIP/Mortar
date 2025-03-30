@@ -124,9 +124,14 @@ filter `En`. Any file with `En` in the filename will be included in the resultin
 
 _Note: These filters are applied pre-search._
 
-## External Gotchas
+## Gotchas
 
 While testing, I came across some gotchas. Here is what I caught.
+
+- Filtering Language Tags
+    - When using the filter feature on language tags `e.g. Filename (USA) (En, Fr, Jp).zip`, use the trailing comma or
+      parenthesis so that my naive filtering implementation (*`<cough>`* string compares *`</cough>`*) doesn't just
+      filter the filename.
 
 - Apache Hosts
     - Apache host running mod_autoindex by default truncate their table file names.
@@ -157,10 +162,14 @@ location / {
 
 ## 🌸 Flower Giving Time! 🌸
 
-Just want to give a huge shoutout to @ro8inmorgan, @frysee and the rest of the NextUI contributors for making the TrimUI
-Brick an amazing experience. Also huge props to the work @shauninman put into MinUI of which NextUI is based.
+Just want to give a huge shoutout
+to [@ro8inmorgan](https://github.com/ro8inmorgan), [@frysee](https://github.com/frysee) and the rest of the NextUI
+contributors for making the TrimUI
+Brick an amazing experience. Also huge props to the work [@shauninman](https://github.com/shauninman) put into MinUI of
+which NextUI is based.
 
-I want to also shoutout @josegonzalez for their awesome minui-list, miniui-presenter and minui-keyboard projects.
+I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their awesome minui-list, miniui-presenter
+and minui-keyboard projects.
 
 Without these phenomenal pieces of software I likely would not have built Mortar.
 
