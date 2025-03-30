@@ -65,6 +65,9 @@ func init() {
 	_ = os.Setenv("PATH", cwd+"/bin/tg5040")
 	_ = os.Setenv("LD_LIBRARY_PATH", "/mnt/SDCARD/.system/tg5040/lib:/usr/trimui/lib")
 
+	// So users don't have to install TrimUI_Ex
+	_ = os.Setenv("SSL_CERT_DIR", cwd+"/certs")
+
 	logFile, err := os.OpenFile(cwd+"/mortar.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Unable to open log file: %v", err)
@@ -245,12 +248,17 @@ func downloadList(cancel context.CancelFunc) error {
 	sourceURL := buildSourceURL()
 
 	var items []models.Item
+	var err error
 
 	switch appState.Config.Host.HostType {
 	case models.HostTypes.NGINX:
 		items, _ = parseJSONForUrl(sourceURL)
 	default:
-		items, _ = parseTableForUrl(sourceURL)
+		items, err = parseTableForUrl(sourceURL)
+	}
+
+	if err != nil {
+		sugar.Fatalf("Error while parsing list: %v", err)
 	}
 
 	appState.CurrentItemsList = items
