@@ -31,3 +31,15 @@ type HostType struct {
 }
 
 var HostTypes = sum.Int[HostType]{}.Sum()
+
+func (h Host) GetSectionIndices() map[string]int {
+	if h.SectionIndices == nil {
+		h.SectionIndices = map[string]int{}
+
+		for idx, section := range h.Sections {
+			h.SectionIndices[section.Name] = idx
+		}
+	}
+
+	return h.SectionIndices
+}
