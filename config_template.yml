@@ -1,21 +1,26 @@
-host:
-  host_type: # APACHE | NGINX | CADDY | RAPSCALLION | CUSTOM
-  root_url: ""
+hosts:
+  - display_name: ""
+    host_type: # APACHE | NGINX | SMB | RAPSCALLION | CUSTOM
+    root_uri: ""
 
-  sections:
-    - section_name: ""
-      host_subdirectory: ""
-      local_directory: ""
+    sections:
+      - section_name: ""
+        host_subdirectory: ""
+        local_directory: ""
 
-  table_columns:
-    filename_header: ""
-    file_size_header: ""
-    date_header: ""
+    table_columns:
+      filename_header: ""
+      file_size_header: ""
+      date_header: ""
 
-  source_replacements:
-    "]]": "]]"
+    source_replacements:
+      "]]": "]]"
 
-  filters:
-    - ""
+    filters:
+      - ""
+
+    smb_file_extensions:
+      - "iso"
+      - "zip"
 
 show_item_count: false

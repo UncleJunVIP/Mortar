@@ -6,17 +6,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"gopkg.in/yaml.v3"
-	"io"
 	"log"
+	"mortar/clients"
 	"mortar/models"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"qlova.tech/sum"
@@ -27,31 +25,35 @@ import (
 
 type AppState struct {
 	Config           *models.Config
+	CurrentHost      models.Host
 	CurrentScreen    sum.Int[Screen]
 	CurrentSection   string
 	SearchFilter     string
 	CurrentItemsList []models.Item
-	SectionIndices   map[string]int
+	HostIndices      map[string]int
 	SelectedFile     string
 	LogFile          *os.File
+	Logger           *zap.Logger
 }
 
 type Screen struct {
 	MainMenu,
-	ItemListScreen,
-	LoadingScreen,
+	SectionSelection,
+	ItemList,
+	Loading,
 	SearchBox,
-	DownloadScreen sum.Int[Screen]
+	Download sum.Int[Screen]
 }
 
 var Screens = sum.Int[Screen]{}.Sum()
 
 var screenFuncs = map[sum.Int[Screen]]func() models.Selection{
-	Screens.MainMenu:       mainMenuScreen,
-	Screens.ItemListScreen: itemListScreen,
-	Screens.LoadingScreen:  loadingScreen,
-	Screens.SearchBox:      searchBox,
-	Screens.DownloadScreen: downloadScreen,
+	Screens.MainMenu:         mainMenuScreen,
+	Screens.SectionSelection: sectionSelectionScreen,
+	Screens.ItemList:         itemListScreen,
+	Screens.Loading:          loadingScreen,
+	Screens.SearchBox:        searchBox,
+	Screens.Download:         downloadScreen,
 }
 
 var sugar *zap.SugaredLogger
@@ -84,20 +86,20 @@ func init() {
 		zap.InfoLevel,
 	)
 
-	logger := zap.New(core)
-	defer logger.Sync()
-
-	sugar = logger.Sugar()
+	appState.Logger = zap.New(core)
+	sugar = appState.Logger.Sugar()
 
 	appState.Config = loadConfig()
 
-	appState.SectionIndices = make(map[string]int)
+	appState.HostIndices = make(map[string]int)
+	for idx, host := range appState.Config.Hosts {
+		appState.HostIndices[host.DisplayName] = idx
 
-	for idx, section := range appState.Config.Host.Sections {
-		appState.SectionIndices[section.Name] = idx
+		host.SectionIndices = make(map[string]int)
+		for idx, section := range currentHost().Sections {
+			host.SectionIndices[section.Name] = idx
+		}
 	}
-
-	sugar.Info(appState.Config)
 }
 
 func loadConfig() *models.Config {
@@ -117,87 +119,41 @@ func loadConfig() *models.Config {
 	return &config
 }
 
-func currentSection() models.Section {
-	idx := appState.SectionIndices[appState.CurrentSection]
-	return appState.Config.Host.Sections[idx]
+func buildClient(host models.Host) (models.Client, error) {
+	switch host.HostType {
+	case models.HostTypes.APACHE,
+		models.HostTypes.RAPSCALLION,
+		models.HostTypes.CUSTOM:
+		return clients.NewHttpTableClient(
+			host.RootURI,
+			host.HostType,
+			host.TableColumns,
+			host.SourceReplacements,
+			host.Filters,
+		), nil
+	case models.HostTypes.SMB:
+		{
+			return clients.NewSMBClient(
+				host.RootURI,
+				host.Port,
+				host.Username,
+				host.Password,
+				host.ShareName,
+				host.Filters,
+			)
+		}
+	}
+
+	return nil, nil
 }
 
-func parseTableForUrl(tableURL string) ([]models.Item, error) {
-	params := url.Values{}
+func currentHost() models.Host {
+	return appState.CurrentHost
+}
 
-	switch appState.Config.Host.HostType {
-	case models.HostTypes.APACHE:
-		params.Add("F", "2") // To enable table mode for mod_autoindex
-	}
-
-	u, err := url.Parse(tableURL)
-	if err != nil {
-		return nil, fmt.Errorf("unable to parse table URL: %v", err)
-	}
-	u.RawQuery = params.Encode()
-
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, fmt.Errorf("unable to fetch table: %v", err)
-	}
-	defer resp.Body.Close()
-
-	jsonBytes, err := converthtmltabletodata.ConvertReaderToJSON(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("unable to parse table into json: %v", err)
-	}
-
-	rawJson := string(jsonBytes)
-
-	cleaned := rawJson
-
-	switch appState.Config.Host.HostType {
-	case models.HostTypes.APACHE:
-		cleaned = strings.ReplaceAll(cleaned, "[[", "[")
-		cleaned = strings.ReplaceAll(cleaned, "]]", "]")
-		cleaned = strings.ReplaceAll(cleaned, "Name", "filename")
-		cleaned = strings.ReplaceAll(cleaned, "Size", "file_size")
-		cleaned = strings.ReplaceAll(cleaned, "Last modified", "date")
-	case models.HostTypes.RAPSCALLION:
-		{
-			cleaned = strings.ReplaceAll(cleaned, "  ↓", "")
-			cleaned = strings.ReplaceAll(cleaned, "[[", "[")
-			cleaned = strings.ReplaceAll(cleaned, "]]", "]")
-			cleaned = strings.ReplaceAll(cleaned, "File Name", "filename")
-			cleaned = strings.ReplaceAll(cleaned, "File Size", "file_size")
-			cleaned = strings.ReplaceAll(cleaned, "Date", "date")
-		}
-	case models.HostTypes.CUSTOM:
-		{
-			for oldValue, newValue := range appState.Config.Host.SourceReplacements {
-				cleaned = strings.ReplaceAll(cleaned, oldValue, newValue)
-			}
-
-			cleaned = strings.ReplaceAll(cleaned, appState.Config.Host.TableColumns.FilenameHeader, "filename")
-			cleaned = strings.ReplaceAll(cleaned, appState.Config.Host.TableColumns.FileSizeHeader, "file_size")
-			cleaned = strings.ReplaceAll(cleaned, appState.Config.Host.TableColumns.DateHeader, "date")
-		}
-
-	}
-
-	var items []models.Item
-	err = json.Unmarshal([]byte(cleaned), &items)
-	if err != nil {
-		return nil, fmt.Errorf("unable to marshal json: %v", err)
-	}
-
-	// Skip the header row(s)
-	switch appState.Config.Host.HostType {
-	case models.HostTypes.APACHE,
-		models.HostTypes.RAPSCALLION:
-		{
-			if len(items) > 1 {
-				return items[1:], nil
-			}
-		}
-	}
-
-	return nil, errors.New("wtf")
+func currentSection() models.Section {
+	idx := currentHost().SectionIndices[appState.CurrentSection]
+	return currentHost().Sections[idx]
 }
 
 func parseJSONForUrl(jsonURL string) ([]models.Item, error) {
@@ -207,7 +163,7 @@ func parseJSONForUrl(jsonURL string) ([]models.Item, error) {
 	}
 	defer resp.Body.Close()
 
-	switch appState.Config.Host.HostType {
+	switch currentHost().HostType {
 	case models.HostTypes.NGINX:
 		{
 			var nginxItems []models.NginxDirectoryListing
@@ -235,30 +191,20 @@ func parseJSONForUrl(jsonURL string) ([]models.Item, error) {
 	return nil, nil
 }
 
-func buildSourceURL() string {
-	rootURL := appState.Config.Host.RootURL
-	subdirectory := currentSection().HostSubdirectory
-
-	return rootURL + subdirectory
-}
-
 func downloadList(cancel context.CancelFunc) error {
 	defer cancel()
 
-	sourceURL := buildSourceURL()
-
-	var items []models.Item
-	var err error
-
-	switch appState.Config.Host.HostType {
-	case models.HostTypes.NGINX:
-		items, _ = parseJSONForUrl(sourceURL)
-	default:
-		items, err = parseTableForUrl(sourceURL)
+	client, err := buildClient(currentHost())
+	if err != nil {
+		return err
 	}
 
+	defer client.Close() // TODO handle error
+
+	items, err := client.ListDirectory(currentSection().HostSubdirectory)
 	if err != nil {
-		sugar.Fatalf("Error while parsing list: %v", err)
+		sugar.Errorf("Unable to download listings: %v", err)
+		return err
 	}
 
 	appState.CurrentItemsList = items
@@ -269,27 +215,15 @@ func downloadList(cancel context.CancelFunc) error {
 func downloadFile(cancel context.CancelFunc) error {
 	defer cancel()
 
-	sourceURL := buildSourceURL() + appState.SelectedFile
-	resp, err := http.Get(sourceURL)
+	client, err := buildClient(currentHost())
 	if err != nil {
-		return fmt.Errorf("failed to download file: %w", err)
-	}
-	defer resp.Body.Close()
-
-	localDirectory := currentSection().LocalDirectory
-
-	outFile, err := os.Create(localDirectory + appState.SelectedFile)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	defer outFile.Close()
-
-	_, err = io.Copy(outFile, resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to save file: %w", err)
+		return err
 	}
 
-	return nil
+	defer client.Close() // TODO handle error
+
+	return client.DownloadFile(currentSection().HostSubdirectory,
+		currentSection().LocalDirectory, appState.SelectedFile)
 }
 
 func filterList(itemList []models.Item, keywords ...string) []models.Item {
@@ -392,17 +326,27 @@ func searchBox() models.Selection {
 func mainMenuScreen() models.Selection {
 	menu := ""
 
-	switch appState.Config.Host.HostType {
-	case models.HostTypes.APACHE, models.HostTypes.CADDY,
-		models.HostTypes.NGINX, models.HostTypes.RAPSCALLION, models.HostTypes.CUSTOM:
-		var sections []string
-		for _, section := range appState.Config.Host.Sections {
-			sections = append(sections, section.Name)
-		}
-		menu = strings.Join(sections, "\n")
+	var hosts []string
+	for _, host := range appState.Config.Hosts {
+		hosts = append(hosts, host.DisplayName)
 	}
 
+	menu = strings.Join(hosts, "\n")
+
 	return displayMinUiList(menu, "text", "Brick & Mortar")
+}
+
+func sectionSelectionScreen() models.Selection {
+	menu := ""
+
+	var sections []string
+	for _, section := range currentHost().Sections {
+		sections = append(sections, section.Name)
+	}
+
+	menu = strings.Join(sections, "\n")
+
+	return displayMinUiList(menu, "text", currentHost().DisplayName)
 }
 
 func itemListScreen() models.Selection {
@@ -411,8 +355,8 @@ func itemListScreen() models.Selection {
 
 	var extraArgs []string
 
-	if len(appState.Config.Host.Filters) > 0 {
-		itemList = filterList(itemList, appState.Config.Host.Filters...)
+	if len(currentHost().Filters) > 0 {
+		itemList = filterList(itemList, currentHost().Filters...)
 	}
 
 	if appState.SearchFilter != "" {
@@ -522,8 +466,30 @@ func drawScreen() models.Selection {
 	return screenFuncs[appState.CurrentScreen]()
 }
 
+func cleanup() {
+	appState.Logger.Sync()
+	appState.LogFile.Close()
+}
+
 func main() {
-	defer appState.LogFile.Close()
+	defer cleanup()
+
+	smb, err := buildClient(appState.Config.Hosts[1])
+	if err != nil {
+		fmt.Printf("Error creating smb client: %s", err)
+	}
+
+	list2, err := smb.ListDirectory(appState.Config.Hosts[1].Sections[0].HostSubdirectory)
+	if err != nil {
+		fmt.Printf("Error listing dir: %s", err)
+	}
+
+	fmt.Println(list2)
+
+	err = smb.DownloadFile(appState.Config.Hosts[1].Sections[0].HostSubdirectory, "", "Mother 3.gba")
+	if err != nil {
+		fmt.Printf("Error downloading file: %s", err)
+	}
 
 	for {
 		selection := drawScreen()
@@ -534,8 +500,9 @@ func main() {
 				switch selection.Code {
 				case 0:
 					{
-						appState.CurrentScreen = Screens.LoadingScreen
-						appState.CurrentSection = strings.TrimSpace(selection.Value)
+						appState.CurrentScreen = Screens.SectionSelection
+						idx := appState.HostIndices[strings.TrimSpace(selection.Value)]
+						appState.CurrentHost = appState.Config.Hosts[idx]
 					}
 				case 1, 2:
 					{
@@ -543,34 +510,54 @@ func main() {
 					}
 				}
 			}
-		case Screens.ItemListScreen:
+
+		case Screens.SectionSelection:
+			{
+				switch selection.Code {
+				case 0:
+					{
+						appState.CurrentScreen = Screens.Loading
+						appState.CurrentSection = strings.TrimSpace(selection.Value)
+					}
+				case 1, 2:
+					{
+						appState.CurrentScreen = Screens.MainMenu
+					}
+				}
+			}
+
+		case Screens.ItemList:
 			{
 				switch selection.Code {
 				case 0:
 					appState.SelectedFile = strings.TrimSpace(selection.Value)
-					appState.CurrentScreen = Screens.DownloadScreen
+					appState.CurrentScreen = Screens.Download
 				case 2:
 					if appState.SearchFilter != "" {
 						appState.SearchFilter = ""
 					} else {
-						appState.CurrentScreen = Screens.MainMenu
+						appState.CurrentScreen = Screens.SectionSelection
 					}
 				case 4:
 					appState.CurrentScreen = Screens.SearchBox
 				case 404:
 					{
-						showMessage("No results found for \""+appState.SearchFilter+"\"", "3")
-						appState.SearchFilter = ""
-						appState.CurrentScreen = Screens.SearchBox
+						if appState.SearchFilter != "" {
+							showMessage("No results found for "+appState.SearchFilter, "3")
+							appState.SearchFilter = ""
+							appState.CurrentScreen = Screens.SearchBox
+						}
+
+						appState.CurrentScreen = Screens.SectionSelection
 					}
 				}
 			}
 
-		case Screens.LoadingScreen:
+		case Screens.Loading:
 			{
 				switch selection.Code {
 				case 0:
-					appState.CurrentScreen = Screens.ItemListScreen
+					appState.CurrentScreen = Screens.ItemList
 				case 1:
 					showMessage("Unable to download item listing from source", "3")
 					appState.CurrentScreen = Screens.MainMenu
@@ -586,16 +573,17 @@ func main() {
 					appState.SearchFilter = ""
 				}
 
-				appState.CurrentScreen = Screens.ItemListScreen
+				appState.CurrentScreen = Screens.ItemList
 			}
-		case Screens.DownloadScreen:
+
+		case Screens.Download:
 			{
 				switch selection.Code {
 				case 1:
 					showMessage("Unable to download "+appState.SelectedFile, "3")
 				}
 
-				appState.CurrentScreen = Screens.ItemListScreen
+				appState.CurrentScreen = Screens.ItemList
 			}
 		}
 	}
