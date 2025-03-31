@@ -139,7 +139,7 @@ func buildClient(host models.Host) (models.Client, error) {
 				host.Username,
 				host.Password,
 				host.ShareName,
-				host.Filters,
+				host.ExtensionFilters,
 			)
 		}
 	}
