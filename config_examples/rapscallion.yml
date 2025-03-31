@@ -1,0 +1,30 @@
+hosts:
+  - display_name: "Fight Club"
+    host_type: RAPSCALLION
+    root_uri: "https://firstruleoffight.club"
+
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy%20Color/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy%20Advance/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
+      - section_name: "Nintendo Entertainment System"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20(Headered)/"
+        local_directory: "/mnt/SDCARD/Roms/Nintendo Entertainment System (FC)/"
+      - section_name: "Super Nintendo Entertainment System"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Super%20Nintendo%20Entertainment%20System/"
+        local_directory: "/mnt/SDCARD/Roms/Super Nintendo Entertainment System (SFC)/"
+      - section_name: "PlayStation"
+        host_subdirectory: "/files/Internet%20Archive/chadmaster/chd_psx/CHD-PSX-USA/"
+        local_directory: "/mnt/SDCARD/Roms/PlayStation (PS)/"
+
+    filters:
+      - "USA"
+      - "En,"
+
+show_item_count: false

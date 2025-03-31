@@ -1,0 +1,18 @@
+hosts:
+  - display_name: "nginx"
+    host_type: NGINX
+    root_uri: ""
+
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/GB/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/GBC/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
+
+    filters:
+      - "USA"
+      - "En,"
+
+show_item_count: false
