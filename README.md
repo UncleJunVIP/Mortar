@@ -25,7 +25,7 @@ Mortar comes pre-configured for three different server types.
 
 1. Apache
 2. nginx
-3Rapscallion
+3. Rapscallion
 
 These three defaults simplify the configuration process as they have default rules for parsing and cleaning the HTML
 tables. Don't worry you are not tied to these three options.
@@ -40,10 +40,10 @@ host:
   sections:
     - section_name: "Game Boy"
       host_subdirectory: "/GB/" # Note the trailing slash
-      local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/" # Note the trailing slash
+      local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Note the trailing slash
     - section_name: "Game Boy Color"
       host_subdirectory: "/GBC/"
-      local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+      local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
 
   filters:
     - "USA"
@@ -73,13 +73,13 @@ host:
   sections:
     - section_name: "Game Boy"
       host_subdirectory: "/files/GB/" # Note the trailing slash
-      local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/" # Note the trailing slash
+      local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Note the trailing slash
     - section_name: "Game Boy Color"
       host_subdirectory: "/files/GBC/"
-      local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+      local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
     - section_name: "Game Boy Advance"
       host_subdirectory: "/files/GBA/"
-      local_directory: "/mnt/SDCARD/Roms/3) Game Boy Advance (GBA)/"
+      local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
 
   table_columns:
     filename_header: "File Name"
@@ -97,6 +97,10 @@ host:
 
 show_item_count: false
 ```
+
+***
+
+
 
 ***
 
@@ -167,8 +171,8 @@ contributors for making the TrimUI
 Brick an amazing experience. Also huge props to the work [@shauninman](https://github.com/shauninman) put into MinUI of
 which NextUI is based.
 
-I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their awesome minui-list, miniui-presenter
-and minui-keyboard projects.
+I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their awesome [minui-list](https://github.com/josegonzalez/minui-list), [miniui-presenter](https://github.com/josegonzalez/minui-presenter)
+and [minui-keyboard](https://github.com/josegonzalez/minui-keyboard) projects.
 
 Without these phenomenal pieces of software I likely would not have built Mortar.
 
