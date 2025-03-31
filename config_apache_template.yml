@@ -1,17 +1,18 @@
-host:
-  host_type: APACHE
-  root_url: "http://192.168.1.23:8080"
+hosts:
+  - display_name: "Apache"
+    host_type: APACHE
+    root_uri: "http://192.168.1.23:8080"
 
-  sections:
-    - section_name: "Game Boy"
-      host_subdirectory: "/GB/"
-      local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/"
-    - section_name: "Game Boy Color"
-      host_subdirectory: "/GBC/"
-      local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/GB/"
+        local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/GBC/"
+        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
 
-  filters:
-    - "USA"
-    - "En,"
+    filters:
+      - "USA"
+      - "En,"
 
 show_item_count: false
