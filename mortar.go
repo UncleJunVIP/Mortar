@@ -474,23 +474,6 @@ func cleanup() {
 func main() {
 	defer cleanup()
 
-	smb, err := buildClient(appState.Config.Hosts[1])
-	if err != nil {
-		fmt.Printf("Error creating smb client: %s", err)
-	}
-
-	list2, err := smb.ListDirectory(appState.Config.Hosts[1].Sections[0].HostSubdirectory)
-	if err != nil {
-		fmt.Printf("Error listing dir: %s", err)
-	}
-
-	fmt.Println(list2)
-
-	err = smb.DownloadFile(appState.Config.Hosts[1].Sections[0].HostSubdirectory, "", "Mother 3.gba")
-	if err != nil {
-		fmt.Printf("Error downloading file: %s", err)
-	}
-
 	for {
 		selection := drawScreen()
 
