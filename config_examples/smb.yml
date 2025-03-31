@@ -1,0 +1,17 @@
+hosts:
+  - display_name: "SMB Test"
+    host_type: SMB
+    root_uri: "192.168.1.20"
+    port: 445
+    username: "GUEST"
+    share_name: "guest"
+
+    extension_filters:
+      - ".DS_Store"
+
+    sections:
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "GBA/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
+
+show_item_count: false

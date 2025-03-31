@@ -62,9 +62,20 @@ func NewSMBClient(hostname string, port int, username, password, shareName strin
 }
 
 func (c *SMBClient) Close() error {
-	_ = c.Mount.Umount()
-	_ = c.Session.Logoff()
-	_ = c.Connection.Close()
+	err := c.Mount.Umount()
+	if err != nil {
+		return err
+	}
+
+	err = c.Session.Logoff()
+	if err != nil {
+		return err
+	}
+
+	err = c.Connection.Close()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
