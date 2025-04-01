@@ -30,10 +30,10 @@ Here is a sample configuration for RomM.
 hosts:
   - display_name: "RomM"
     host_type: ROMM
-    root_uri: "http://192.168.1.20"
+    root_uri: ""
     port: 1550
-    username: "btk"
-    password: "Ue@TkuBZdi9!rJ!ME!W6_p7k3uL22qU-"
+    username: ""
+    password: ""
 
     sections:
       - section_name: "Game Boy Color"
