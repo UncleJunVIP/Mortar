@@ -79,8 +79,8 @@ func (c *SMBClient) Close() error {
 	return nil
 }
 
-func (c *SMBClient) ListDirectory(path string) ([]models.Item, error) {
-	ls, err := c.Mount.ReadDir(path)
+func (c *SMBClient) ListDirectory(section models.Section) ([]models.Item, error) {
+	ls, err := c.Mount.ReadDir(section.HostSubdirectory)
 	if err != nil {
 		return nil, err
 	}

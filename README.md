@@ -13,13 +13,69 @@ table's as a list of options of things to download.
 2. Connect your Brick to a Wi-Fi network.
 3. Download the latest Mortar release from this repo.
 4. Unzip the release download.
-5. Edit the `config_template.yml` file as described below. Once done save it as `config.yml`.
+5. Edit one of the templates in the `config_examples` directory. Once done save it as `config.yml` inside the
+   `Mortar.pak` directory.
 6. With your Brick powered off, eject the SD Card and connect it to your computer.
 7. Copy the entire Mortar.pak file to `SD_ROOT/Tools/tg5040`.
 8. Reinsert your SD Card into your Brick.
 9. Launch Mortar from the `Tools` menu and enjoy!
 
 ## Configuration File Instructions
+
+### RomM Support
+
+Here is a sample configuration for RomM.
+
+```yaml
+hosts:
+  - display_name: "RomM"
+    host_type: ROMM
+    root_uri: "http://192.168.1.20"
+    port: 1550
+    username: "btk"
+    password: "Ue@TkuBZdi9!rJ!ME!W6_p7k3uL22qU-"
+
+    sections:
+      - section_name: "Game Boy Color"
+        romm_platform_id: "3"
+        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+
+show_item_count: false
+```
+
+**Note:** The Mortar RomM configuration requires a `romm_platform_id` instead of the usual `host_subdirectory` option.
+
+***
+
+### SMB Support
+
+Here is a sample configuration for an SMB server.
+
+```yaml
+hosts:
+  - display_name: "SMB Test"
+    host_type: SMB
+    root_uri: "192.168.1.20"
+    port: 445
+    username: "GUEST"
+    password: ""
+    share_name: "guest"
+
+    extension_filters:
+      - ".DS_Store"
+
+    sections:
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "GBA/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
+
+show_item_count: false
+
+```
+
+***
+
+### Apache / nginx mod_autoindex & Arbitrary HTML Tables
 
 Mortar comes pre-configured for three different server types.
 
@@ -102,34 +158,7 @@ show_item_count: false
 
 ***
 
-### SMB Support
-
-Here is a sample configuration for SMB support
-
-```yaml
-hosts:
-  - display_name: "SMB Test"
-    host_type: SMB
-    root_uri: "192.168.1.20"
-    port: 445
-    username: "GUEST"
-    password: ""
-    share_name: "guest"
-
-    extension_filters:
-      - ".DS_Store"
-
-    sections:
-      - section_name: "Game Boy Advance"
-        host_subdirectory: "GBA/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
-
-show_item_count: false
-
-```
-***
-
-I should probably explain the rest of the non-obvious options.
+I should probably explain some of the non-self-explanatory options.
 
 **Sections** deal with the main menu for Mortar.
 
@@ -196,7 +225,8 @@ contributors for making the TrimUI
 Brick an amazing experience. Also huge props to the work [@shauninman](https://github.com/shauninman) put into MinUI of
 which NextUI is based.
 
-I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their awesome [minui-list](https://github.com/josegonzalez/minui-list), [miniui-presenter](https://github.com/josegonzalez/minui-presenter)
+I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their
+awesome [minui-list](https://github.com/josegonzalez/minui-list), [miniui-presenter](https://github.com/josegonzalez/minui-presenter)
 and [minui-keyboard](https://github.com/josegonzalez/minui-keyboard) projects.
 
 Without these phenomenal pieces of software I likely would not have built Mortar.

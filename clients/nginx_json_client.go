@@ -24,8 +24,8 @@ func (c *NginxJsonClient) Close() error {
 	return nil
 }
 
-func (c *NginxJsonClient) ListDirectory(path string) ([]models.Item, error) {
-	resp, err := http.Get(c.RootURL + path)
+func (c *NginxJsonClient) ListDirectory(section models.Section) ([]models.Item, error) {
+	resp, err := http.Get(c.RootURL + section.HostSubdirectory)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch json: %v", err)
 	}
