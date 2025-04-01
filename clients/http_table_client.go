@@ -37,7 +37,7 @@ func (c *HttpTableClient) Close() error {
 	return nil
 }
 
-func (c *HttpTableClient) ListDirectory(path string) ([]models.Item, error) {
+func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, error) {
 	params := url.Values{}
 
 	switch c.HostType {
@@ -45,7 +45,7 @@ func (c *HttpTableClient) ListDirectory(path string) ([]models.Item, error) {
 		params.Add("F", "2") // To enable table mode for mod_autoindex
 	}
 
-	combinedUrl := c.RootURL + path
+	combinedUrl := c.RootURL + section.HostSubdirectory
 	u, err := url.Parse(combinedUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse table URL: %v", err)

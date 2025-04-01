@@ -139,6 +139,15 @@ func buildClient(host models.Host) (models.Client, error) {
 				host.ExtensionFilters,
 			)
 		}
+	case models.HostTypes.ROMM:
+		{
+			return clients.NewRomMClient(
+				host.RootURI,
+				host.Port,
+				host.Username,
+				host.Password,
+			), nil
+		}
 	}
 
 	return nil, nil
@@ -159,7 +168,7 @@ func downloadList(cancel context.CancelFunc) error {
 		}
 	}(client)
 
-	items, err := client.ListDirectory(appState.CurrentSection.HostSubdirectory)
+	items, err := client.ListDirectory(appState.CurrentSection)
 	if err != nil {
 		sugar.Errorf("Unable to download listings: %v", err)
 		return err
@@ -185,7 +194,22 @@ func downloadFile(cancel context.CancelFunc) error {
 		}
 	}(client)
 
-	return client.DownloadFile(appState.CurrentSection.HostSubdirectory,
+	var hostSubdirectory string
+
+	if appState.CurrentHost.HostType == models.HostTypes.ROMM {
+		var selectedItem models.Item
+		for _, item := range appState.CurrentItemsList {
+			if item.Filename == appState.SelectedFile {
+				selectedItem = item
+				break
+			}
+		}
+		hostSubdirectory = selectedItem.RomID
+	} else {
+		hostSubdirectory = appState.CurrentSection.HostSubdirectory
+	}
+
+	return client.DownloadFile(hostSubdirectory,
 		appState.CurrentSection.LocalDirectory, appState.SelectedFile)
 }
 
@@ -296,7 +320,7 @@ func mainMenuScreen() models.Selection {
 
 	menu = strings.Join(hosts, "\n")
 
-	return displayMinUiList(menu, "text", "Brick & Mortar")
+	return displayMinUiList(menu, "text", "Mortar")
 }
 
 func sectionSelectionScreen() models.Selection {
@@ -313,7 +337,7 @@ func sectionSelectionScreen() models.Selection {
 }
 
 func itemListScreen() models.Selection {
-	title := appState.CurrentSection.Name
+	title := appState.CurrentHost.DisplayName + " | " + appState.CurrentSection.Name
 	itemList := appState.CurrentItemsList
 
 	var extraArgs []string
