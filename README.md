@@ -33,21 +33,22 @@ tables. Don't worry you are not tied to these three options.
 Here is a complete example for any of the defined servers above.
 
 ```yaml
-host:
-  host_type: APACHE # NGINX | RAPSCALLION
-  root_url: "http://192.168.1.23:8080"
+hosts:
+  - display_name: "My Server"
+    host_type: APACHE # NGINX | RAPSCALLION
+    root_uri: ""
 
-  sections:
-    - section_name: "Game Boy"
-      host_subdirectory: "/GB/" # Note the trailing slash
-      local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Note the trailing slash
-    - section_name: "Game Boy Color"
-      host_subdirectory: "/GBC/"
-      local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/GB/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/GBC/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
 
-  filters:
-    - "USA"
-    - "En,"
+    filters:
+      - "USA"
+      - "En,"
 
 show_item_count: false
 ```
@@ -66,42 +67,66 @@ For example if your table header has arrows that render for sorting in the brows
 be removed. Doing these replacements will make the resulting data that Mortar displays cleaner and more readable.
 
 ```yaml
-host:
-  host_type: CUSTOM
-  root_url: "https://itsmyturnonthexbox.org"
+hosts:
+  - display_name: "Custom HTML Table"
+    host_type: CUSTOM
+    root_url: ""
 
-  sections:
-    - section_name: "Game Boy"
-      host_subdirectory: "/files/GB/" # Note the trailing slash
-      local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Note the trailing slash
-    - section_name: "Game Boy Color"
-      host_subdirectory: "/files/GBC/"
-      local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
-    - section_name: "Game Boy Advance"
-      host_subdirectory: "/files/GBA/"
-      local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/files/GB/" # Note the trailing slash
+        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Note the trailing slash
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/files/GBC/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "/files/GBA/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
 
-  table_columns:
-    filename_header: "File Name"
-    file_size_header: "File Size"
-    date_header: "Date"
+    table_columns:
+      filename_header: "File Name"
+      file_size_header: "File Size"
+      date_header: "Date"
 
-  source_replacements:
-    "  ↓": ""
-    "[[": "[["
-    "]]": "]]"
+    source_replacements:
+      "  ↓": ""
+      "[[": "[["
+      "]]": "]]"
 
-  filters:
-    - "USA"
-    - "En,"
+    filters:
+      - "USA"
+      - "En,"
 
 show_item_count: false
 ```
 
 ***
 
+### SMB Support
 
+Here is a sample configuration for SMB support
 
+```yaml
+hosts:
+  - display_name: "SMB Test"
+    host_type: SMB
+    root_uri: "192.168.1.20"
+    port: 445
+    username: "GUEST"
+    password: ""
+    share_name: "guest"
+
+    extension_filters:
+      - ".DS_Store"
+
+    sections:
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "GBA/"
+        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
+
+show_item_count: false
+
+```
 ***
 
 I should probably explain the rest of the non-obvious options.

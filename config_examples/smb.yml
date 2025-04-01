@@ -4,6 +4,7 @@ hosts:
     root_uri: "192.168.1.20"
     port: 445
     username: "GUEST"
+    password: ""
     share_name: "guest"
 
     extension_filters:
