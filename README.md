@@ -2,10 +2,11 @@
 
 A customizable download client for your TrimUI Brick running NextUI.
 
-## What does Mortar do?
+## What does Mortar support?
 
-Mortar parses autoindex HTML and JSON of commonly used webservers (Apache, nginx) and presents the
-table's as a list of options of things to download.
+Mortar supports RomM, SMB, Apache / nginx mod_autoindex and arbitrary HTML tables. 
+
+It loads the content from these sources and presents a list of items you can download.
 
 ## How do I setup Mortar?
 
