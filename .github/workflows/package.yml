@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Mortar.pak.zip
+          name: Mortar.pak
           path: Mortar.pak
           if-no-files-found: error
           retention-days: 3
