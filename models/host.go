@@ -27,7 +27,7 @@ type HostType struct {
 	NGINX,
 	SMB,
 	ROMM,
-	RAPSCALLION,
+	MEGATHREAD,
 	CUSTOM sum.Int[HostType]
 }
 

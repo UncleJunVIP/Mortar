@@ -1,6 +1,6 @@
 hosts:
   - display_name: "Fight Club"
-    host_type: RAPSCALLION
+    host_type: MEGATHREAD
     root_uri: "https://firstruleoffight.club"
 
     sections:
