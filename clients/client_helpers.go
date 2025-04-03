@@ -9,7 +9,7 @@ import (
 )
 
 func HttpDownload(rootURL, remotePath, localPath, filename string) error {
-	sourceURL := rootURL + remotePath
+	sourceURL := rootURL + remotePath + filename
 	resp, err := http.Get(sourceURL)
 	if err != nil {
 		return fmt.Errorf("failed to download file: %w", err)

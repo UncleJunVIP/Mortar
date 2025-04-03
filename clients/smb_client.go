@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"errors"
 	"fmt"
 	"github.com/hirochachacha/go-smb2"
 	"mortar/models"
@@ -62,20 +63,11 @@ func NewSMBClient(hostname string, port int, username, password, shareName strin
 }
 
 func (c *SMBClient) Close() error {
-	err := c.Mount.Umount()
+	err := c.Connection.Close()
 	if err != nil {
-		return err
+		return errors.New("failed to close connection")
 	}
 
-	err = c.Session.Logoff()
-	if err != nil {
-		return err
-	}
-
-	err = c.Connection.Close()
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
