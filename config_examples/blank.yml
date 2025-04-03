@@ -1,6 +1,6 @@
 hosts:
   - display_name: ""
-    host_type: # APACHE | NGINX | SMB | RAPSCALLION | CUSTOM
+    host_type: # APACHE | NGINX | SMB | MEGATHREAD | CUSTOM
     root_uri: ""
 
     sections:

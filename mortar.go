@@ -117,7 +117,7 @@ func loadConfig() *models.Config {
 func buildClient(host models.Host) (models.Client, error) {
 	switch host.HostType {
 	case models.HostTypes.APACHE,
-		models.HostTypes.RAPSCALLION,
+		models.HostTypes.MEGATHREAD,
 		models.HostTypes.CUSTOM:
 		return clients.NewHttpTableClient(
 			host.RootURI,
@@ -228,8 +228,8 @@ func filterList(itemList []models.Item, keywords ...string) []models.Item {
 	return filteredItemList
 }
 
-func displayMinUiList(list string, format string, title string) models.Selection {
-	return displayMinUiListWithAction(list, format, title, "")
+func displayMinUiList(list string, format string, title string, extraArgs ...string) models.Selection {
+	return displayMinUiListWithAction(list, format, title, "", extraArgs...)
 }
 
 func displayMinUiListWithAction(list string, format string, title string, actionText string, extraArgs ...string) models.Selection {
@@ -320,7 +320,10 @@ func mainMenuScreen() models.Selection {
 
 	menu = strings.Join(hosts, "\n")
 
-	return displayMinUiList(menu, "text", "Mortar")
+	var extraArgs []string
+	extraArgs = append(extraArgs, "--cancel-text", "QUIT")
+
+	return displayMinUiList(menu, "text", "Mortar", extraArgs...)
 }
 
 func sectionSelectionScreen() models.Selection {
@@ -333,7 +336,13 @@ func sectionSelectionScreen() models.Selection {
 
 	menu = strings.Join(sections, "\n")
 
-	return displayMinUiList(menu, "text", appState.CurrentHost.DisplayName)
+	var extraArgs []string
+
+	if len(appState.Config.Hosts) == 1 {
+		extraArgs = append(extraArgs, "--cancel-text", "QUIT")
+	}
+
+	return displayMinUiList(menu, "text", appState.CurrentHost.DisplayName, extraArgs...)
 }
 
 func itemListScreen() models.Selection {
@@ -341,13 +350,14 @@ func itemListScreen() models.Selection {
 	itemList := appState.CurrentItemsList
 
 	var extraArgs []string
+	extraArgs = append(extraArgs, "--confirm-text", "DOWNLOAD")
 
 	if len(appState.CurrentHost.Filters) > 0 {
 		itemList = filterList(itemList, appState.CurrentHost.Filters...)
 	}
 
 	if appState.SearchFilter != "" {
-		title = title + "   [Search: \"" + appState.SearchFilter + "\"]"
+		title = "[Search: \"" + appState.SearchFilter + "\"]"
 		extraArgs = append(extraArgs, "--cancel-text", "CLEAR SEARCH")
 		itemList = filterList(itemList, appState.SearchFilter)
 	}
@@ -457,8 +467,20 @@ func cleanup() {
 func main() {
 	defer cleanup()
 
+	if len(appState.Config.Hosts) == 1 {
+		appState.CurrentScreen = Screens.SectionSelection
+		appState.CurrentHost = appState.Config.Hosts[0]
+	} else {
+		appState.CurrentScreen = Screens.MainMenu
+	}
+
 	for {
 		selection := screenFuncs[appState.CurrentScreen]()
+
+		// Hacky way to handle bad input on deep sleep
+		if strings.Contains(selection.Value, "SetRawBrightness") || strings.Contains(selection.Value, "nSetRawVolume") {
+			continue
+		}
 
 		switch appState.CurrentScreen {
 		case Screens.MainMenu:
@@ -488,6 +510,9 @@ func main() {
 					}
 				case 1, 2:
 					{
+						if len(appState.Config.Hosts) == 1 {
+							os.Exit(0)
+						}
 						appState.CurrentScreen = Screens.MainMenu
 					}
 				}

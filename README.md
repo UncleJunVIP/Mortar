@@ -1,11 +1,7 @@
 # _Mortar_
 
-A customizable download client for your TrimUI Brick running NextUI.
-
-## What does Mortar do?
-
-Mortar parses autoindex HTML and JSON of commonly used webservers (Apache, nginx) and presents the
-table's as a list of options of things to download.
+A download client for your TrimUI Brick running NextUI that supports RomM, SMB, Megathread, Apache / nginx mod_autoindex
+and arbitrary HTML tables.
 
 ## How do I setup Mortar?
 
@@ -43,7 +39,7 @@ hosts:
 show_item_count: false
 ```
 
-**Note:** The Mortar RomM configuration requires a `romm_platform_id` instead of the usual `host_subdirectory` option.
+**Note:** The Mortar RomM configuration requires a `romm_platform_id` instead of the usual `host_subdirectory`.
 
 ***
 
@@ -75,13 +71,13 @@ show_item_count: false
 
 ***
 
-### Apache / nginx mod_autoindex & Arbitrary HTML Tables
+### Megathread / Apache / nginx mod_autoindex & Arbitrary HTML Tables
 
-Mortar comes pre-configured for three different server types.
+Mortar comes pre-configured for three host types.
 
-1. Apache
-2. nginx
-3. Rapscallion
+1. Megathread
+2. Apache
+3. nginx
 
 These three defaults simplify the configuration process as they have default rules for parsing and cleaning the HTML
 tables. Don't worry you are not tied to these three options.
@@ -91,7 +87,7 @@ Here is a complete example for any of the defined servers above.
 ```yaml
 hosts:
   - display_name: "My Server"
-    host_type: APACHE # NGINX | RAPSCALLION
+    host_type: APACHE # NGINX | MEGATHREAD
     root_uri: ""
 
     sections:

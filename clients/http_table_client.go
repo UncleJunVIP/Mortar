@@ -74,7 +74,7 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 		cleaned = strings.ReplaceAll(cleaned, "Name", "filename")
 		cleaned = strings.ReplaceAll(cleaned, "Size", "file_size")
 		cleaned = strings.ReplaceAll(cleaned, "Last modified", "date")
-	case models.HostTypes.RAPSCALLION:
+	case models.HostTypes.MEGATHREAD:
 		{
 			cleaned = strings.ReplaceAll(cleaned, "  ↓", "")
 			cleaned = strings.ReplaceAll(cleaned, "[[", "[")
@@ -105,7 +105,7 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 	// Skip the header row(s)
 	switch c.HostType {
 	case models.HostTypes.APACHE,
-		models.HostTypes.RAPSCALLION:
+		models.HostTypes.MEGATHREAD:
 		{
 			if len(items) > 1 {
 				return items[1:], nil
