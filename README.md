@@ -1,7 +1,14 @@
 # _Mortar_
 
-A download client for your TrimUI Brick running NextUI that supports RomM, SMB, Megathread, Apache / nginx mod_autoindex
-and arbitrary HTML tables.
+A download client for your TrimUI Brick running NextUI.
+
+Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
+
+---
+
+![Mortar Animated Preview](docs/images/mortar_preview.webp)
+
+---
 
 ## How do I setup Mortar?
 
