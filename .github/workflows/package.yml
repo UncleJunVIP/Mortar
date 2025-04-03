@@ -3,6 +3,7 @@ name: Package Mortar
 on:
   release:
     types: [published]
+  workflow_run:
 
 jobs:
 
