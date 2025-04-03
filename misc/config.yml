@@ -1,0 +1,93 @@
+hosts:
+  - display_name: "Megathread"
+    host_type: MEGATHREAD
+    root_uri: "https://myrient.erista.me"
+
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/"
+        local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy%20Color/"
+        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy%20Advance/"
+        local_directory: "/mnt/SDCARD/Roms/3) Game Boy Advance (GBA)/"
+      - section_name: "Nintendo Entertainment System"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20(Headered)/"
+        local_directory: "/mnt/SDCARD/Roms/4) Nintendo Entertainment System (FC)/"
+      - section_name: "Super Nintendo Entertainment System"
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Super%20Nintendo%20Entertainment%20System/"
+        local_directory: "/mnt/SDCARD/Roms/5) Super Nintendo Entertainment System (SFC)/"
+      - section_name: "PlayStation"
+        host_subdirectory: "/files/Internet%20Archive/chadmaster/chd_psx/CHD-PSX-USA/"
+        local_directory: "/mnt/SDCARD/Roms/6) PlayStation (PS)/"
+
+    filters:
+      - "USA"
+      - "En,"
+
+  - display_name: "SMB Test"
+    host_type: SMB
+    root_uri: "192.168.1.20"
+    port: 445
+    username: "GUEST"
+    share_name: "guest"
+
+    extension_filters:
+      - ".DS_Store"
+
+    sections:
+      - section_name: "Game Boy Advance"
+        host_subdirectory: "GBA/"
+        local_directory: "/mnt/SDCARD/Roms/3) Game Boy Advance (GBA)/"
+
+  - display_name: "RomM"
+    host_type: ROMM
+    root_uri: "http://192.168.1.20"
+    port: 1550
+    username: "btk"
+    password: "Ue@TkuBZdi9!rJ!ME!W6_p7k3uL22qU-"
+
+    sections:
+      - section_name: "Game Boy Color"
+        romm_platform_id: "3"
+        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+      - section_name: "Game Boy Advance"
+        romm_platform_id: "2"
+        local_directory: "/mnt/SDCARD/Roms/3) Game Boy Advance (GBA)/"
+
+  - display_name: "nginx"
+    host_type: NGINX
+    root_uri: "http://192.168.1.23:8181"
+
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/GB/"
+        local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/GBC/"
+        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+
+    filters:
+      - "USA"
+      - "En,"
+
+
+  - display_name: "Apache"
+    host_type: APACHE
+    root_uri: "http://192.168.1.23:8080"
+
+    sections:
+      - section_name: "Game Boy"
+        host_subdirectory: "/GB/"
+        local_directory: "/mnt/SDCARD/Roms/1) Game Boy (GB)/"
+      - section_name: "Game Boy Color"
+        host_subdirectory: "/GBC/"
+        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+
+    filters:
+      - "USA"
+      - "En,"
+
+show_item_count: false
