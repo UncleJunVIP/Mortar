@@ -642,12 +642,14 @@ func main() {
 					{
 						if appState.Config.DownloadArt {
 							appState.CurrentScreen = Screens.DownloadArt
+						} else {
+							appState.CurrentScreen = Screens.ItemList
 						}
 					}
 
 				case 1:
 					showMessage("Unable to download "+appState.SelectedFile, "3")
-					fallthrough
+					appState.CurrentScreen = Screens.ItemList
 
 				default:
 					appState.CurrentScreen = Screens.ItemList
