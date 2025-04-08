@@ -1,7 +1,6 @@
 <div align="center">
 
-<img src=".github/resources/mortar-logo.png" height="250px" width="auto" alt="Mortar wordmark">
-
+<img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
 <h3 style="font-size: 25px;">
     A download client for your TrimUI Brick running NextUI.
 </h3>
@@ -25,7 +24,7 @@ Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
 ---
 
 <div align="center">
-![Mortar Animated Preview](.github/resources/mortar_preview.webp)
+    <img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar Preview Animation">
 </div>
 
 ---
