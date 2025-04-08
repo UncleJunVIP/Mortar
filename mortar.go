@@ -174,6 +174,42 @@ func filterList(itemList []models.Item, keywords ...string) []models.Item {
 }
 
 func findArt() bool {
+
+	if appState.CurrentHost.HostType == models.HostTypes.ROMM {
+		// Skip all this silliness and grab the art from RoMM
+		client, err := buildClient(appState.CurrentHost)
+		if err != nil {
+			return false
+		}
+
+		var selectedItem models.Item
+
+		for _, item := range appState.CurrentItemsList {
+			if item.Filename == appState.SelectedFile {
+				selectedItem = item
+				break
+			}
+		}
+
+		if selectedItem.ArtURL == "" {
+			return false
+		}
+
+		slashIdx := strings.LastIndex(selectedItem.ArtURL, "/")
+		artSubdirectory, artFilename := selectedItem.ArtURL[:slashIdx], selectedItem.ArtURL[slashIdx+1:]
+
+		artFilename = strings.Split(artFilename, "?")[0] // For the query string caching stuff
+
+		err = client.DownloadFileRename(artSubdirectory,
+			filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), artFilename, appState.SelectedFile)
+
+		if err != nil {
+			return false
+		}
+
+		return true
+	}
+
 	re := regexp.MustCompile(`\((.*?)\)`)
 	tag := re.FindStringSubmatch(appState.CurrentSection.LocalDirectory)
 

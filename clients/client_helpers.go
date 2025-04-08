@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +15,11 @@ func HttpDownload(rootURL, remotePath, localPath, filename string) error {
 }
 
 func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string) error {
-	sourceURL := rootURL + remotePath + filename
+	sourceURL, err := url.JoinPath(rootURL, remotePath, filename)
+	if err != nil {
+		return fmt.Errorf("unable to build download url: %w", err)
+	}
+
 	resp, err := http.Get(sourceURL)
 	if err != nil {
 		return fmt.Errorf("failed to download file: %w", err)

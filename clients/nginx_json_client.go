@@ -52,3 +52,7 @@ func (c *NginxJsonClient) ListDirectory(section models.Section) ([]models.Item, 
 func (c *NginxJsonClient) DownloadFile(remotePath, localPath, filename string) error {
 	return HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
+
+func (c *NginxJsonClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+	panic("not implemented")
+}
