@@ -116,3 +116,7 @@ func (c *SMBClient) DownloadFile(remotePath, localPath, filename string) error {
 
 	return nil
 }
+
+func (c *SMBClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+	panic("not implemented")
+}

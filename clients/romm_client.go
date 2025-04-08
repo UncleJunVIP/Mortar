@@ -241,6 +241,7 @@ func (c *RomMClient) ListDirectory(section models.Section) ([]models.Item, error
 			FileSize: strconv.Itoa(rawItem.FsSizeBytes),
 			Date:     rawItem.UpdatedAt.String(),
 			RomID:    strconv.Itoa(rawItem.ID),
+			ArtURL:   rawItem.PathCoverSmall,
 		})
 	}
 
@@ -251,7 +252,12 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) error 
 	auth := c.Username + ":" + c.Password
 	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 
-	u, err := url.Parse(c.buildRootURL() + RomsEndpoint + remotePath + "/content/" + filename)
+	sourceURL, err := url.JoinPath(c.buildRootURL(), RomsEndpoint, remotePath, "content", filename)
+	if err != nil {
+		return fmt.Errorf("unable to build url for rom download: %v", err)
+	}
+
+	u, err := url.Parse(sourceURL)
 	if err != nil {
 		return fmt.Errorf("unable to parse url for rom download: %v", err)
 	}
@@ -287,4 +293,8 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) error 
 	}
 
 	return nil
+}
+
+func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+	return HttpDownloadRename(c.buildRootURL(), remotePath, localPath, filename, rename)
 }

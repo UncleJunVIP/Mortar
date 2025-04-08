@@ -118,3 +118,7 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 func (c *HttpTableClient) DownloadFile(remotePath, localPath, filename string) error {
 	return HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
+
+func (c *HttpTableClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+	panic("not implemented")
+}
