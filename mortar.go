@@ -15,48 +15,27 @@ import (
 	"mortar/models"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"qlova.tech/sum"
+	"regexp"
 	"strings"
 	"time"
 )
 
-type AppState struct {
-	Config      *models.Config
-	HostIndices map[string]int
+var Screens = sum.Int[models.Screen]{}.Sum()
 
-	CurrentHost      models.Host
-	CurrentScreen    sum.Int[Screen]
-	CurrentSection   models.Section
-	CurrentItemsList []models.Item
-	SearchFilter     string
-	SelectedFile     string
-
-	LogFile *os.File
-	Logger  *zap.Logger
-}
-
-type Screen struct {
-	MainMenu,
-	SectionSelection,
-	ItemList,
-	Loading,
-	SearchBox,
-	Download sum.Int[Screen]
-}
-
-var Screens = sum.Int[Screen]{}.Sum()
-
-var screenFuncs = map[sum.Int[Screen]]func() models.Selection{
+var screenFuncs = map[sum.Int[models.Screen]]func() models.Selection{
 	Screens.MainMenu:         mainMenuScreen,
 	Screens.SectionSelection: sectionSelectionScreen,
 	Screens.ItemList:         itemListScreen,
 	Screens.Loading:          loadingScreen,
 	Screens.SearchBox:        searchBox,
 	Screens.Download:         downloadScreen,
+	Screens.DownloadArt:      downloadArtScreen,
 }
 
 var sugar *zap.SugaredLogger
-var appState AppState
+var appState models.AppState
 
 func init() {
 	cwd, _ := os.Getwd()
@@ -153,7 +132,7 @@ func buildClient(host models.Host) (models.Client, error) {
 	return nil, nil
 }
 
-func downloadList(cancel context.CancelFunc) error {
+func fetchList(cancel context.CancelFunc) error {
 	defer cancel()
 
 	client, err := buildClient(appState.CurrentHost)
@@ -177,6 +156,68 @@ func downloadList(cancel context.CancelFunc) error {
 	appState.CurrentItemsList = items
 
 	return nil
+}
+
+func filterList(itemList []models.Item, keywords ...string) []models.Item {
+	var filteredItemList []models.Item
+
+	for _, item := range itemList {
+		for _, keyword := range keywords {
+			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(keyword)) {
+				filteredItemList = append(filteredItemList, item)
+				break
+			}
+		}
+	}
+
+	return filteredItemList
+}
+
+func findArt() bool {
+	re := regexp.MustCompile(`\((.*?)\)`)
+	tag := re.FindStringSubmatch(appState.CurrentSection.LocalDirectory)
+
+	if len(tag) < 2 {
+		return false
+	}
+
+	client := clients.NewThumbnailClient()
+	section := client.BuildThumbnailSection(tag[1])
+
+	artList, err := client.ListDirectory(section)
+
+	if err != nil {
+		sugar.Infof("Unable to fetch artlist: %v", err)
+		return false
+	}
+
+	noExtension := strings.Split(appState.SelectedFile, ".")[0]
+
+	var matched models.Item
+
+	// naive search first
+	for _, art := range artList {
+		if strings.Contains(strings.ToLower(art.Filename), strings.ToLower(noExtension)) {
+			matched = art
+			break
+		}
+	}
+
+	if matched.Filename == "" {
+		// TODO Levenshtein Distance support at some point
+	}
+
+	if matched.Filename != "" {
+		err = client.DownloadFile(section.HostSubdirectory, filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), matched.Filename)
+
+		if err != nil {
+			return false
+		}
+
+		return true
+	}
+
+	return false
 }
 
 func downloadFile(cancel context.CancelFunc) error {
@@ -211,21 +252,6 @@ func downloadFile(cancel context.CancelFunc) error {
 
 	return client.DownloadFile(hostSubdirectory,
 		appState.CurrentSection.LocalDirectory, appState.SelectedFile)
-}
-
-func filterList(itemList []models.Item, keywords ...string) []models.Item {
-	var filteredItemList []models.Item
-
-	for _, item := range itemList {
-		for _, keyword := range keywords {
-			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(keyword)) {
-				filteredItemList = append(filteredItemList, item)
-				break
-			}
-		}
-	}
-
-	return filteredItemList
 }
 
 func displayMinUiList(list string, format string, title string, extraArgs ...string) models.Selection {
@@ -277,39 +303,6 @@ func showMessage(message string, timeout string) {
 	}
 }
 
-func searchBox() models.Selection {
-	args := []string{"--title", "Mortar Search"}
-
-	cmd := exec.Command("minui-keyboard", args...)
-	cmd.Env = os.Environ()
-	cmd.Env = os.Environ()
-
-	var stdoutbuf, stderrbuf bytes.Buffer
-	cmd.Stdout = &stdoutbuf
-	cmd.Stderr = &stderrbuf
-
-	if errors.Is(cmd.Err, exec.ErrDot) {
-		cmd.Err = nil
-	}
-
-	err := cmd.Start()
-	if err != nil {
-		sugar.Fatalf("failed to start minui-keyboard: %v", err)
-	}
-
-	err = cmd.Wait()
-	if err != nil && cmd.ProcessState.ExitCode() == 1 {
-		sugar.Errorf("Error with keyboard: %s", stderrbuf.String())
-		showMessage("Unable to open keyboard!", "3")
-		return models.Selection{Code: 1}
-	}
-
-	outValue := stdoutbuf.String()
-	_ = stderrbuf.String()
-
-	return models.Selection{Value: strings.TrimSpace(outValue), Code: cmd.ProcessState.ExitCode()}
-}
-
 func mainMenuScreen() models.Selection {
 	menu := ""
 
@@ -343,6 +336,73 @@ func sectionSelectionScreen() models.Selection {
 	}
 
 	return displayMinUiList(menu, "text", appState.CurrentHost.DisplayName, extraArgs...)
+}
+
+func loadingScreen() models.Selection {
+	ctx := context.Background()
+	ctxWithCancel, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	args := []string{"--message", "Loading " + appState.CurrentSection.Name + "...", "--timeout", "-1"}
+	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
+
+	err := cmd.Start()
+	if err != nil && cmd.ProcessState.ExitCode() != -1 {
+		sugar.Fatalf("Error with starting miniui-presenter loading message: %s", err)
+	}
+
+	time.Sleep(1000 * time.Millisecond)
+
+	exitCode := 0
+
+	go func() {
+		err := fetchList(cancel)
+		if err != nil {
+			sugar.Errorf("Error downloading Item List: %s", err)
+			exitCode = 1
+		}
+		cancel()
+	}()
+
+	err = cmd.Wait()
+	if err != nil && cmd.ProcessState.ExitCode() != -1 {
+		sugar.Fatalf("Error while waiting for miniui-presenter loading message to be killed: %s", err)
+	}
+
+	return models.Selection{Code: exitCode}
+}
+
+func searchBox() models.Selection {
+	args := []string{"--title", "Mortar Search"}
+
+	cmd := exec.Command("minui-keyboard", args...)
+	cmd.Env = os.Environ()
+	cmd.Env = os.Environ()
+
+	var stdoutbuf, stderrbuf bytes.Buffer
+	cmd.Stdout = &stdoutbuf
+	cmd.Stderr = &stderrbuf
+
+	if errors.Is(cmd.Err, exec.ErrDot) {
+		cmd.Err = nil
+	}
+
+	err := cmd.Start()
+	if err != nil {
+		sugar.Fatalf("failed to start minui-keyboard: %v", err)
+	}
+
+	err = cmd.Wait()
+	if err != nil && cmd.ProcessState.ExitCode() == 1 {
+		sugar.Errorf("Error with keyboard: %s", stderrbuf.String())
+		showMessage("Unable to open keyboard!", "3")
+		return models.Selection{Code: 1}
+	}
+
+	outValue := stdoutbuf.String()
+	_ = stderrbuf.String()
+
+	return models.Selection{Value: strings.TrimSpace(outValue), Code: cmd.ProcessState.ExitCode()}
 }
 
 func itemListScreen() models.Selection {
@@ -414,6 +474,11 @@ func downloadScreen() models.Selection {
 			sugar.Errorf("Error downloading file: %s", err)
 			exitCode = 1
 		}
+
+		if appState.Config.DownloadArt {
+			findArt()
+		}
+
 		cancel()
 	}()
 
@@ -425,17 +490,17 @@ func downloadScreen() models.Selection {
 	return models.Selection{Code: exitCode}
 }
 
-func loadingScreen() models.Selection {
+func downloadArtScreen() models.Selection {
 	ctx := context.Background()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	args := []string{"--message", "Loading " + appState.CurrentSection.Name + "...", "--timeout", "-1"}
+	args := []string{"--message", "Attempting to download art...", "--timeout", "-1"}
 	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
 
 	err := cmd.Start()
 	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		sugar.Fatalf("Error with starting miniui-presenter loading message: %s", err)
+		sugar.Fatalf("Error with starting miniui-presenter download message: %s", err)
 	}
 
 	time.Sleep(1000 * time.Millisecond)
@@ -443,17 +508,18 @@ func loadingScreen() models.Selection {
 	exitCode := 0
 
 	go func() {
-		err := downloadList(cancel)
-		if err != nil {
-			sugar.Errorf("Error downloading Item List: %s", err)
+		res := findArt()
+		if !res {
+			sugar.Errorf("Could not find art!: %s", err)
 			exitCode = 1
 		}
+
 		cancel()
 	}()
 
 	err = cmd.Wait()
 	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		sugar.Fatalf("Error while waiting for miniui-presenter loading message to be killed: %s", err)
+		sugar.Fatalf("Error with minui-presenter display of download message: %s", err)
 	}
 
 	return models.Selection{Code: exitCode}
@@ -572,10 +638,30 @@ func main() {
 		case Screens.Download:
 			{
 				switch selection.Code {
+				case 0:
+					{
+						if appState.Config.DownloadArt {
+							appState.CurrentScreen = Screens.DownloadArt
+						}
+					}
+
 				case 1:
 					showMessage("Unable to download "+appState.SelectedFile, "3")
-				}
+					fallthrough
 
+				default:
+					appState.CurrentScreen = Screens.ItemList
+				}
+			}
+
+		case Screens.DownloadArt:
+			{
+				switch selection.Code {
+				case 0:
+					showMessage("Found art! :)", "3")
+				case 1:
+					showMessage("Could not find art :(", "3")
+				}
 				appState.CurrentScreen = Screens.ItemList
 			}
 		}
