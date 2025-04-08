@@ -2,7 +2,6 @@ package clients
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
 	"mortar/models"
@@ -113,7 +112,7 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 		}
 	}
 
-	return nil, errors.New("wtf")
+	return nil, nil
 }
 
 func (c *HttpTableClient) DownloadFile(remotePath, localPath, filename string) error {
