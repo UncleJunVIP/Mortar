@@ -1,14 +1,32 @@
-# _Mortar_
+<div align="center">
 
-A download client for your TrimUI Brick running NextUI.
+<img src=".github/resources/mortar-logo.png" height="250px" width="auto" alt="Mortar wordmark">
 
+<h3 style="font-size: 25px;">
+    A download client for your TrimUI Brick running NextUI.
+</h3>
+
+<h4 style="font-size: 18px;">
 Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
 
 **Now with Thumbnail Support! _(Powered by the Libretro Thumbnail Project)_**
+</h4>
+
+
+![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar.pak?style=for-the-badge)
+![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar.pak?sort=semver&style=for-the-badge)
+![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar.pak?style=for-the-badge)
+
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/UncleJunVip/Mortar.pak?style=for-the-badge)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/UncleJunVip/Mortar.pak?style=for-the-badge)
+
+</div>
 
 ---
 
-![Mortar Animated Preview](docs/images/mortar_preview.webp)
+<div align="center">
+![Mortar Animated Preview](.github/resources/mortar_preview.webp)
+</div>
 
 ---
 
