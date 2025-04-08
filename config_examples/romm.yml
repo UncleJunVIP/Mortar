@@ -12,3 +12,4 @@ hosts:
         local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
 
 show_item_count: false
+download_art: false
