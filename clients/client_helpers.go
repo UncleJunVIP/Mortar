@@ -6,9 +6,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func HttpDownload(rootURL, remotePath, localPath, filename string) error {
+	return HttpDownloadRename(rootURL, remotePath, localPath, filename, "")
+}
+
+func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string) error {
 	sourceURL := rootURL + remotePath + filename
 	resp, err := http.Get(sourceURL)
 	if err != nil {
@@ -21,7 +26,16 @@ func HttpDownload(rootURL, remotePath, localPath, filename string) error {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	f, err := os.Create(filepath.Join(localPath, filename))
+	fn := filename
+
+	if rename != "" {
+		// Used by the thumbnail downloader when a filename doesn't have the matching tags
+		imageExt := filepath.Ext(filename)
+		fn = strings.TrimSuffix(rename, filepath.Ext(rename))
+		fn = fn + imageExt
+	}
+
+	f, err := os.Create(filepath.Join(localPath, fn))
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
