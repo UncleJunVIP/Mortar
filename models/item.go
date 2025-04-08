@@ -5,5 +5,6 @@ type Item struct {
 	FileSize string `json:"file_size"`
 	Date     string `json:"date"`
 
-	RomID string `json:"-"` // For RomM Support
+	RomID  string `json:"-"` // For RomM Support
+	ArtURL string `json:"-"` // For RomM Support
 }
