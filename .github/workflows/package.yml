@@ -23,7 +23,7 @@ jobs:
       - name: Build Package Folder
         run: |
           mkdir Mortar.pak
-          cp -R mortar launch.sh README.md LICENSE misc/config.json bin certs Mortar.pak
+          cp -R mortar launch.sh README.md LICENSE misc/config.json bin certs data Mortar.pak
 
       - uses: actions/upload-artifact@v4
         with:

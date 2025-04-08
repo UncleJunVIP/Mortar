@@ -28,3 +28,4 @@ hosts:
       - "En,"
 
 show_item_count: false
+download_art: true

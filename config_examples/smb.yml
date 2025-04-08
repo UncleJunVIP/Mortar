@@ -16,3 +16,4 @@ hosts:
         local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
 
 show_item_count: false
+download_art: false
