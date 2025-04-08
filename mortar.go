@@ -191,7 +191,7 @@ func findArt() bool {
 		return false
 	}
 
-	noExtension := strings.Split(appState.SelectedFile, ".")[0]
+	noExtension := strings.TrimSuffix(appState.SelectedFile, filepath.Ext(appState.SelectedFile))
 
 	var matched models.Item
 
@@ -208,7 +208,8 @@ func findArt() bool {
 	}
 
 	if matched.Filename != "" {
-		err = client.DownloadFile(section.HostSubdirectory, filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), matched.Filename)
+		err = client.DownloadFileRename(section.HostSubdirectory,
+			filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), matched.Filename, appState.SelectedFile)
 
 		if err != nil {
 			return false

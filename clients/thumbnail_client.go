@@ -69,3 +69,7 @@ func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Item, 
 func (c *ThumbnailClient) DownloadFile(remotePath, localPath, filename string) error {
 	return HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
+
+func (c *ThumbnailClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+	return HttpDownloadRename(c.RootURL, remotePath, localPath, filename, rename)
+}
