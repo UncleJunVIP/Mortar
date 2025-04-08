@@ -4,6 +4,8 @@ A download client for your TrimUI Brick running NextUI.
 
 Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
 
+**Now with Thumbnail Support! _(Powered by the Libretro Thumbnail Project)_**
+
 ---
 
 ![Mortar Animated Preview](docs/images/mortar_preview.webp)
@@ -44,6 +46,7 @@ hosts:
         local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
 
 show_item_count: false
+download_art: true
 ```
 
 **Note:** The Mortar RomM configuration requires a `romm_platform_id` instead of the usual `host_subdirectory`.
@@ -73,6 +76,7 @@ hosts:
         local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
 
 show_item_count: false
+download_art: false
 
 ```
 
@@ -110,6 +114,7 @@ hosts:
       - "En,"
 
 show_item_count: false
+download_art: false
 ```
 
 Change `host_type` to match your host, configure the `root_url` and add or remove the sections to your liking.
@@ -157,6 +162,7 @@ hosts:
       - "En,"
 
 show_item_count: false
+download_art: false
 ```
 
 ***

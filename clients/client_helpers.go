@@ -16,7 +16,12 @@ func HttpDownload(rootURL, remotePath, localPath, filename string) error {
 	}
 	defer resp.Body.Close()
 
-	f, err := os.OpenFile(filepath.Join(localPath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	err = os.MkdirAll(localPath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	f, err := os.Create(filepath.Join(localPath, filename))
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
