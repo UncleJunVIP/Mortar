@@ -2,7 +2,7 @@ package clients
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
 	"mortar/models"
 	"os"
 	"path/filepath"
@@ -35,11 +35,7 @@ func NewThumbnailClient() *ThumbnailClient {
 	file, err := os.Open(jsonPath)
 	if err == nil {
 		defer file.Close()
-		err := json.NewDecoder(file).Decode(&client.SystemMapping)
-
-		if err != nil {
-			log.Fatal(err) // TODO Remove!
-		}
+		_ = json.NewDecoder(file).Decode(&client.SystemMapping)
 	}
 
 	return client
@@ -64,8 +60,7 @@ func (c *ThumbnailClient) ListDirectory(section models.Section) ([]models.Item, 
 	artList, err := c.HttpTableClient.ListDirectory(section)
 
 	if err != nil {
-		// return nil, errors.New("unable to fetch art for " + section.Name)
-		log.Fatal(err) // TODO remove!
+		return nil, errors.New("unable to list thumbnail directory")
 	}
 
 	return artList, nil
