@@ -174,7 +174,6 @@ func filterList(itemList []models.Item, keywords ...string) []models.Item {
 }
 
 func findArt() bool {
-
 	if appState.CurrentHost.HostType == models.HostTypes.ROMM {
 		// Skip all this silliness and grab the art from RoMM
 		client, err := buildClient(appState.CurrentHost)
@@ -465,7 +464,8 @@ func itemListScreen() models.Selection {
 
 	var itemEntries []string
 	for _, item := range itemList {
-		itemEntries = append(itemEntries, item.Filename)
+		itemName := strings.TrimSuffix(item.Filename, filepath.Ext(item.Filename))
+		itemEntries = append(itemEntries, itemName)
 	}
 
 	if len(itemEntries) > 500 {
@@ -625,7 +625,15 @@ func main() {
 			{
 				switch selection.Code {
 				case 0:
-					appState.SelectedFile = strings.TrimSpace(selection.Value)
+					selectedItem := strings.TrimSpace(selection.Value)
+
+					for _, item := range appState.CurrentItemsList {
+						if strings.Contains(item.Filename, selectedItem) {
+							appState.SelectedFile = item.Filename
+							break
+						}
+					}
+
 					appState.CurrentScreen = Screens.Download
 				case 2:
 					if appState.SearchFilter != "" {
