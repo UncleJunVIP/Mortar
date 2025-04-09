@@ -2,8 +2,10 @@ package models
 
 type Section struct {
 	Name             string `yaml:"section_name"`
+	SystemTag        string `yaml:"system_tag"`
 	HostSubdirectory string `yaml:"host_subdirectory"`
-	LocalDirectory   string `yaml:"local_directory"`
+
+	LocalDirectory string `yaml:"local_directory"`
 
 	RomMPlatformID string `yaml:"romm_platform_id"`
 }

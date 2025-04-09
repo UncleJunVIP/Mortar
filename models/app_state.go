@@ -1,8 +1,6 @@
 package models
 
 import (
-	"go.uber.org/zap"
-	"os"
 	"qlova.tech/sum"
 )
 
@@ -16,7 +14,4 @@ type AppState struct {
 	CurrentItemsList []Item
 	SearchFilter     string
 	SelectedFile     string
-
-	LogFile *os.File
-	Logger  *zap.Logger
 }
