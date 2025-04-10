@@ -6,7 +6,7 @@
 </h3>
 
 <h4 style="font-size: 18px;">
-Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
+Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
 
 **Now with Thumbnail Support! _(Powered by the Libretro Thumbnail Project)_**
 </h4>
