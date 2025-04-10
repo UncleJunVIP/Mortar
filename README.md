@@ -88,6 +88,8 @@ download_art: true # If true, Mortar will attempt to find box art. If found it w
 log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
 ```
 
+Sample configuration files by host can be [found here](/resources/config_examples).
+
 ***
 
 ## Gotchas
