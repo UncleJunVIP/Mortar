@@ -37,7 +37,6 @@ func fetchList(cancel context.CancelFunc) error {
 
 	items, err := client.ListDirectory(appState.CurrentSection)
 	if err != nil {
-		logger.Error("Unable to download listings", zap.Error(err))
 		return err
 	}
 

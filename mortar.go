@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	common.SetLogLevel("DEBUG")
+	common.SetLogLevel("ERROR")
 	common.ConfigureEnvironment()
 
 	config, err := common.LoadConfig()
@@ -18,6 +18,8 @@ func init() {
 		ui.ShowMessage("Unable to parse config.yml! Quitting!", "3")
 		common.LogStandardFatal("Error loading config", err)
 	}
+
+	common.SetLogLevel(config.LogLevel)
 
 	logger := common.GetLoggerInstance()
 
