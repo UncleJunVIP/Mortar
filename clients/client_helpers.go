@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"io"
+	"mortar/common"
 	"mortar/models"
-	"mortar/utils"
 	"net/http"
 	"net/url"
 	"os"
@@ -57,7 +57,7 @@ func HttpDownload(rootURL, remotePath, localPath, filename string) error {
 }
 
 func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string) error {
-	logger := utils.GetLoggerInstance()
+	logger := common.GetLoggerInstance()
 
 	logger.Debug("Downloading file...",
 		zap.String("remotePath", remotePath),
@@ -88,6 +88,12 @@ func HttpDownloadRename(rootURL, remotePath, localPath, filename, rename string)
 		imageExt := filepath.Ext(filename)
 		fn = strings.TrimSuffix(rename, filepath.Ext(rename))
 		fn = fn + imageExt
+
+		appState := common.GetAppState()
+
+		appState.LastSavedArtPath = filepath.Join(localPath, fn)
+
+		common.UpdateAppState(appState)
 	}
 
 	f, err := os.Create(filepath.Join(localPath, fn))
