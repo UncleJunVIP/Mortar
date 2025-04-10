@@ -14,9 +14,8 @@ Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar.pak?style=for-the-badge)
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar.pak?sort=semver&style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar.pak?style=for-the-badge)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/UncleJunVIP/Mortar.pak/total?style=for-the-badge&label=Total%20Downloads)
 
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/UncleJunVip/Mortar.pak?style=for-the-badge)
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/UncleJunVip/Mortar.pak?style=for-the-badge)
 
 </div>
 
