@@ -12,8 +12,9 @@ hosts:
 
     sections:
       - section_name: "Game Boy Advance"
+        system_tag: "GBA"
         host_subdirectory: "GBA/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
 
 show_item_count: false
 download_art: false
+log_level: "ERROR"

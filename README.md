@@ -11,7 +11,6 @@ Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
 **Now with Thumbnail Support! _(Powered by the Libretro Thumbnail Project)_**
 </h4>
 
-
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar.pak?style=for-the-badge)
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar.pak?sort=semver&style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar.pak?style=for-the-badge)
@@ -40,172 +39,56 @@ Supports RomM, SMB, Megathread, Apache / nginx mod_autoindex & HTML tables.
 6. With your Brick powered off, eject the SD Card and connect it to your computer.
 7. Copy the entire Mortar.pak file to `SD_ROOT/Tools/tg5040`.
 8. Reinsert your SD Card into your Brick.
-9. Launch Mortar from the `Tools` menu and enjoy!
+9. Launch `Mortar` from the `Tools` menu and enjoy!
 
-## Configuration File Instructions
-
-### RomM Support
-
-Here is a sample configuration for RomM.
+## Configuration Reference
 
 ```yaml
 hosts:
-  - display_name: "RomM"
-    host_type: ROMM
-    root_uri: ""
-    port: 1550
-    username: ""
-    password: ""
+  - display_name: "Display Name"
+    host_type: ROMM # Valid Choices: ROMM | MEGATHREAD | SMB | APACHE | NGINX | CUSTOM
+    root_uri: "https://domain.tld" # This can be the start of a URL with protocol (e.g. https://), a host name or an IP Address
 
-    sections:
-      - section_name: "Game Boy Color"
-        romm_platform_id: "3"
-        local_directory: "/mnt/SDCARD/Roms/2) Game Boy Color (GBC)/"
+    port: 445 # Needed by SMB, optional otherwise unless using non-standard ports
 
-show_item_count: false
-download_art: true
-```
+    username: "GUEST" # Used by RomM and SMB
+    password: "hunter2" # Used by RomM and SMB
 
-**Note:** The Mortar RomM configuration requires a `romm_platform_id` instead of the usual `host_subdirectory`.
+    share_name: "guest" # Used by SMB
 
-***
-
-### SMB Support
-
-Here is a sample configuration for an SMB server.
-
-```yaml
-hosts:
-  - display_name: "SMB Test"
-    host_type: SMB
-    root_uri: "192.168.1.20"
-    port: 445
-    username: "GUEST"
-    password: ""
-    share_name: "guest"
-
-    extension_filters:
+    extension_filters: # Used by SMB to hide files with given extensions
       - ".DS_Store"
 
-    sections:
-      - section_name: "Game Boy Advance"
-        host_subdirectory: "GBA/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
+    sections: # One or more mappings of host directory to the local filesystem
+      - section_name: "Game Boy" # Name it whatever you want
+        system_tag: "GB" # Must match the tag in the `SDCARD_ROOT/Roms` directories
+        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Explicitly set the path. This will be overwritten if `system_tag` is set
+        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/" # The subdirectory on the host, not used by RomM
+        romm_platform_id: "1" # Used by RomM in place of `host_subdirectory`
 
-show_item_count: false
-download_art: false
+        # Define more sections if desired
 
-```
-
-***
-
-### Megathread / Apache / nginx mod_autoindex & Arbitrary HTML Tables
-
-Mortar comes pre-configured for three host types.
-
-1. Megathread
-2. Apache
-3. nginx
-
-These three defaults simplify the configuration process as they have default rules for parsing and cleaning the HTML
-tables. Don't worry you are not tied to these three options.
-
-Here is a complete example for any of the defined servers above.
-
-```yaml
-hosts:
-  - display_name: "My Server"
-    host_type: APACHE # NGINX | MEGATHREAD
-    root_uri: ""
-
-    sections:
-      - section_name: "Game Boy"
-        host_subdirectory: "/GB/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/"
-      - section_name: "Game Boy Color"
-        host_subdirectory: "/GBC/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
-
-    filters:
+    filters: # Filter out files that do not contain the filter string
       - "USA"
       - "En,"
 
-show_item_count: false
-download_art: false
-```
-
-Change `host_type` to match your host, configure the `root_url` and add or remove the sections to your liking.
-
-***
-
-A custom host requires a few extra settings.
-
-Here you must define a filename header, file size header and a date header.
-
-Additionally, you can configure source replacements. These will run before the HTML is parsed.
-
-For example if your table header has arrows that render for sorting in the browser you'll want to specify them here to
-be removed. Doing these replacements will make the resulting data that Mortar displays cleaner and more readable.
-
-```yaml
-hosts:
-  - display_name: "Custom HTML Table"
-    host_type: CUSTOM
-    root_url: ""
-
-    sections:
-      - section_name: "Game Boy"
-        host_subdirectory: "/files/GB/" # Note the trailing slash
-        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Note the trailing slash
-      - section_name: "Game Boy Color"
-        host_subdirectory: "/files/GBC/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
-      - section_name: "Game Boy Advance"
-        host_subdirectory: "/files/GBA/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
-
-    table_columns:
+    table_columns: # Used by CUSTOM hosts. Match each value with the exact text used in the HTML Table
       filename_header: "File Name"
       file_size_header: "File Size"
       date_header: "Date"
 
-    source_replacements:
-      "  ↓": ""
+    source_replacements: # Used by CUSTOM hosts. If the table contains extra junk (e.g. sort arrows, brackets, etc.) specify them here. They will be removed before parsing the table
       "[[": "[["
       "]]": "]]"
 
-    filters:
-      - "USA"
-      - "En,"
+  # Define more hosts if desired
 
-show_item_count: false
-download_art: false
+show_item_count: false # Shows file count before displaying list
+download_art: true # If true, Mortar will attempt to find box art. If found it will display it and let you indicate if you want it
+log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
 ```
 
 ***
-
-I should probably explain some of the non-self-explanatory options.
-
-**Sections** deal with the main menu for Mortar.
-
-The sections are displayed in the order you add them to the section array.
-
-`host_subdirectory` corresponds to the subdirectory on the host where the files are located.
-e.g. if the address to your HTML table is `http://192.168.1.20/files/GB/` your `host` would be `http://192.168.1.20` and
-your `host_subdirectory` would be `/files/GB` (note the leading and trailing slashes).
-
-`local_directory` corresponds to where you want Mortar to place the files downloaded for this section. To get to the
-root of your ROMs folder use this path `/mnt/SDCARD/Roms`. You can then complete the rest of the path to match the
-naming scheme you chose for your Brick. *Just be sure to end the path with a slash*
-
-**Filters** do exactly that filter. While Mortar has a basic search feature, a table with many entries can become
-unwieldy.
-
-To fix this you can specify filters. These filters are *inclusive*, that is you are specify what you want to be
-included. For example if you are filtering a list of ROMs and want to only display ones in English you could use the
-filter `En`. Any file with `En` in the filename will be included in the resulting list.
-
-_Note: These filters are applied pre-search._
 
 ## Gotchas
 

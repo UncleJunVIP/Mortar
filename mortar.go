@@ -1,6 +1,8 @@
 package main
 
 import (
+	"go.uber.org/zap"
+	"mortar/common"
 	"mortar/ui"
 	"mortar/utils"
 	"os"
@@ -8,23 +10,36 @@ import (
 )
 
 func init() {
-	utils.SetLogLevel("DEBUG")
-	utils.ConfigureEnvironment()
+	common.SetLogLevel("DEBUG")
+	common.ConfigureEnvironment()
 
-	config, err := utils.LoadConfig()
+	config, err := common.LoadConfig()
 	if err != nil {
 		ui.ShowMessage("Unable to parse config.yml! Quitting!", "3")
-		utils.LogStandardFatal("Error loading config", err)
+		common.LogStandardFatal("Error loading config", err)
 	}
 
-	utils.SetConfig(config)
+	logger := common.GetLoggerInstance()
 
-	appState := utils.GetAppState()
-
-	appState.HostIndices = make(map[string]int)
-	for idx, host := range appState.Config.Hosts {
-		appState.HostIndices[host.DisplayName] = idx
+	romDirectories, err := utils.FetchRomDirectories()
+	if err != nil {
+		logger.Error("Issue fetching rom directories", zap.Error(err))
+	} else {
+		for hostIdx, host := range config.Hosts {
+			for sectionIdx, section := range host.Sections {
+				if section.SystemTag != "" {
+					config.Hosts[hostIdx].Sections[sectionIdx].LocalDirectory = romDirectories[section.SystemTag]
+				}
+			}
+		}
 	}
+
+	logger.Debug("Config Loaded",
+		zap.Object("config", config))
+
+	common.SetConfig(config)
+
+	appState := common.GetAppState()
 
 	if len(appState.Config.Hosts) == 1 {
 		appState.CurrentScreen = ui.Screens.SectionSelection
@@ -33,18 +48,18 @@ func init() {
 		appState.CurrentScreen = ui.Screens.MainMenu
 	}
 
-	utils.UpdateAppState(appState)
+	common.UpdateAppState(appState)
 }
 
 func cleanup() {
-	utils.CloseLogger()
+	common.CloseLogger()
 }
 
 func main() {
 	defer cleanup()
 
 	for {
-		appState := utils.GetAppState()
+		appState := common.GetAppState()
 
 		selection := ui.ScreenFuncs[appState.CurrentScreen]()
 
@@ -60,7 +75,7 @@ func main() {
 			case 0:
 				ui.SetScreen(ui.Screens.SectionSelection)
 				idx := appState.HostIndices[strings.TrimSpace(selection.Value)]
-				utils.SetHost(appState.Config.Hosts[idx])
+				common.SetHost(appState.Config.Hosts[idx])
 			case 1, 2:
 				os.Exit(0)
 			}
@@ -70,7 +85,7 @@ func main() {
 			case 0:
 				ui.SetScreen(ui.Screens.Loading)
 				idx := appState.CurrentHost.GetSectionIndices()[strings.TrimSpace(selection.Value)]
-				utils.SetSection(appState.CurrentHost.Sections[idx])
+				common.SetSection(appState.CurrentHost.Sections[idx])
 			case 1, 2:
 				if len(appState.Config.Hosts) == 1 {
 					os.Exit(0)
@@ -83,7 +98,7 @@ func main() {
 			case 0:
 				for _, item := range appState.CurrentItemsList {
 					if strings.Contains(item.Filename, strings.TrimSpace(selection.Value)) {
-						utils.SetSelectedFile(item.Filename)
+						common.SetSelectedFile(item.Filename)
 						break
 					}
 				}
@@ -91,7 +106,7 @@ func main() {
 				ui.SetScreen(ui.Screens.Download)
 			case 2:
 				if appState.SearchFilter != "" {
-					utils.SetSearchFilter("")
+					common.SetSearchFilter("")
 				} else {
 					ui.SetScreen(ui.Screens.SectionSelection)
 				}
@@ -100,7 +115,7 @@ func main() {
 			case 404:
 				if appState.SearchFilter != "" {
 					ui.ShowMessage("No results found for \""+appState.SearchFilter+"\"", "3")
-					utils.SetSearchFilter("")
+					common.SetSearchFilter("")
 					ui.SetScreen(ui.Screens.SearchBox)
 				} else {
 					ui.ShowMessage("This section contains no items", "3")
@@ -120,9 +135,9 @@ func main() {
 		case ui.Screens.SearchBox:
 			switch selection.Code {
 			case 0:
-				utils.SetSearchFilter(selection.Value)
+				common.SetSearchFilter(selection.Value)
 			case 1, 2, 3:
-				utils.SetSearchFilter("")
+				common.SetSearchFilter("")
 			}
 
 			ui.SetScreen(ui.Screens.ItemList)
@@ -147,7 +162,18 @@ func main() {
 		case ui.Screens.DownloadArt:
 			switch selection.Code {
 			case 0:
-				ui.ShowMessage("Found art! :)", "3")
+				code := ui.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
+					"--background-image", common.GetAppState().LastSavedArtPath,
+					"--confirm-text", "Use",
+					"--confirm-show", "true",
+					"--action-button", "X",
+					"--action-text", "I'll Find My Own",
+					"--action-show", "true",
+					"--message-alignment", "bottom")
+
+				if code == 2 || code == 4 {
+					utils.DeleteFile(common.GetAppState().LastSavedArtPath)
+				}
 			case 1:
 				ui.ShowMessage("Could not find art :(", "3")
 			}

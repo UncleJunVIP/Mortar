@@ -1,4 +1,4 @@
-package utils
+package common
 
 import (
 	"go.uber.org/atomic"
@@ -14,6 +14,9 @@ import (
 var logFile *os.File
 var atomicLevel = zap.NewAtomicLevel()
 var logger atomic.Pointer[zap.Logger]
+
+var LoggerInitialized atomic.Bool
+
 var onceLogger sync.Once
 
 func LogStandardFatal(msg string, err error) {
@@ -29,11 +32,13 @@ func GetLoggerInstance() *zap.Logger {
 }
 
 func CloseLogger() {
-	GetLoggerInstance().Sync() // TODO handle this
+	GetLoggerInstance().Sync()
 	logFile.Close()
 }
 
 func createLogger() *zap.Logger {
+	LoggerInitialized.Store(false)
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		LogStandardFatal("Failed to get current working directory", err)
@@ -54,6 +59,8 @@ func createLogger() *zap.Logger {
 		writeSyncer,
 		atomicLevel,
 	)
+
+	LoggerInitialized.Store(true)
 
 	return zap.New(core)
 }

@@ -5,11 +5,11 @@ hosts:
 
     sections:
       - section_name: "Game Boy"
+        system_tag: "GB"
         host_subdirectory: "/GB/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/"
       - section_name: "Game Boy Color"
+        system_tag: "GBC"
         host_subdirectory: "/GBC/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
 
     filters:
       - "USA"
@@ -17,3 +17,4 @@ hosts:
 
 show_item_count: false
 download_art: false
+log_level: "ERROR"

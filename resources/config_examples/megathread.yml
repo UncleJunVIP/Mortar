@@ -5,23 +5,23 @@ hosts:
 
     sections:
       - section_name: "Game Boy"
+        system_tag: "GB"
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/"
       - section_name: "Game Boy Color"
+        system_tag: "GBC"
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy%20Color/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Color (GBC)/"
       - section_name: "Game Boy Advance"
+        system_tag: "GBA"
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy%20Advance/"
-        local_directory: "/mnt/SDCARD/Roms/Game Boy Advance (GBA)/"
       - section_name: "Nintendo Entertainment System"
+        system_tag: "FC"
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20(Headered)/"
-        local_directory: "/mnt/SDCARD/Roms/Nintendo Entertainment System (FC)/"
       - section_name: "Super Nintendo Entertainment System"
+        system_tag: "SFC"
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Super%20Nintendo%20Entertainment%20System/"
-        local_directory: "/mnt/SDCARD/Roms/Super Nintendo Entertainment System (SFC)/"
       - section_name: "PlayStation"
+        system_tag: "PS"
         host_subdirectory: "/files/Internet%20Archive/chadmaster/chd_psx/CHD-PSX-USA/"
-        local_directory: "/mnt/SDCARD/Roms/PlayStation (PS)/"
 
     filters:
       - "USA"
@@ -29,3 +29,4 @@ hosts:
 
 show_item_count: false
 download_art: true
+log_level: "ERROR"

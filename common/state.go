@@ -1,4 +1,4 @@
-package utils
+package common
 
 import (
 	"fmt"
@@ -47,6 +47,12 @@ func SetHost(host models.Host) {
 func SetConfig(config *models.Config) {
 	temp := GetAppState()
 	temp.Config = config
+
+	temp.HostIndices = make(map[string]int)
+	for idx, host := range temp.Config.Hosts {
+		temp.HostIndices[host.DisplayName] = idx
+	}
+
 	UpdateAppState(temp)
 }
 

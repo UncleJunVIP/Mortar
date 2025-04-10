@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
+	"mortar/common"
 	"mortar/models"
 	"mortar/utils"
 	"os"
@@ -31,13 +32,13 @@ var ScreenFuncs = map[sum.Int[models.Screen]]func() models.Selection{
 }
 
 func SetScreen(screen sum.Int[models.Screen]) {
-	tempAppState := utils.GetAppState()
+	tempAppState := common.GetAppState()
 	tempAppState.CurrentScreen = screen
-	utils.UpdateAppState(tempAppState)
+	common.UpdateAppState(tempAppState)
 }
 
 func mainMenuScreen() models.Selection {
-	appState := utils.GetAppState()
+	appState := common.GetAppState()
 
 	menu := ""
 
@@ -55,7 +56,7 @@ func mainMenuScreen() models.Selection {
 }
 
 func sectionSelectionScreen() models.Selection {
-	appState := utils.GetAppState()
+	appState := common.GetAppState()
 
 	menu := ""
 
@@ -76,8 +77,8 @@ func sectionSelectionScreen() models.Selection {
 }
 
 func loadingScreen() models.Selection {
-	logger := utils.GetLoggerInstance()
-	appState := utils.GetAppState()
+	logger := common.GetLoggerInstance()
+	appState := common.GetAppState()
 
 	ctx := context.Background()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
@@ -113,7 +114,7 @@ func loadingScreen() models.Selection {
 }
 
 func searchBox() models.Selection {
-	logger := utils.GetLoggerInstance()
+	logger := common.GetLoggerInstance()
 
 	args := []string{"--title", "Mortar Search"}
 
@@ -148,7 +149,7 @@ func searchBox() models.Selection {
 }
 
 func itemListScreen() models.Selection {
-	appState := utils.GetAppState()
+	appState := common.GetAppState()
 
 	title := appState.CurrentHost.DisplayName + " | " + appState.CurrentSection.Name
 	itemList := appState.CurrentItemsList
@@ -197,8 +198,8 @@ func itemListScreen() models.Selection {
 }
 
 func downloadScreen() models.Selection {
-	logger := utils.GetLoggerInstance()
-	appState := utils.GetAppState()
+	logger := common.GetLoggerInstance()
+	appState := common.GetAppState()
 
 	ctx := context.Background()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
@@ -217,14 +218,14 @@ func downloadScreen() models.Selection {
 	exitCode := 0
 
 	go func() {
-		err := downloadFile(cancel)
+		err := utils.DownloadFile(cancel)
 		if err != nil {
 			logger.Error("Error downloading file: %s", zap.Error(err))
 			exitCode = 1
 		}
 
 		if appState.Config.DownloadArt {
-			findArt()
+			utils.FindArt()
 		}
 
 		cancel()
@@ -239,7 +240,7 @@ func downloadScreen() models.Selection {
 }
 
 func downloadArtScreen() models.Selection {
-	logger := utils.GetLoggerInstance()
+	logger := common.GetLoggerInstance()
 
 	ctx := context.Background()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
@@ -258,7 +259,7 @@ func downloadArtScreen() models.Selection {
 	exitCode := 0
 
 	go func() {
-		res := findArt()
+		res := utils.FindArt()
 		if !res {
 			logger.Error("Could not find art!", zap.Error(err))
 			exitCode = 1

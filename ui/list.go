@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"mortar/clients"
+	"mortar/common"
 	"mortar/models"
-	"mortar/utils"
 	"os"
 	"os/exec"
 	"strings"
@@ -17,8 +17,11 @@ import (
 func fetchList(cancel context.CancelFunc) error {
 	defer cancel()
 
-	logger := utils.GetLoggerInstance()
-	appState := utils.GetAppState()
+	logger := common.GetLoggerInstance()
+	appState := common.GetAppState()
+
+	logger.Debug("Fetching Item List",
+		zap.Object("AppState", appState))
 
 	client, err := clients.BuildClient(appState.CurrentHost)
 	if err != nil {
@@ -58,19 +61,19 @@ func filterList(itemList []models.Item, keywords ...string) []models.Item {
 	return filteredItemList
 }
 
-func displayMinUiList(list string, format string, title string, extraArgs ...string) models.Selection {
-	return displayMinUiListWithAction(list, format, title, "", extraArgs...)
+func displayMinUiList(list string, format string, title string, options ...string) models.Selection {
+	return displayMinUiListWithAction(list, format, title, "", options...)
 }
 
-func displayMinUiListWithAction(list string, format string, title string, actionText string, extraArgs ...string) models.Selection {
+func displayMinUiListWithAction(list string, format string, title string, actionText string, options ...string) models.Selection {
 	args := []string{"--format", format, "--title", title, "--file", "-"}
 
 	if actionText != "" {
 		args = append(args, "--action-button", "X", "--action-text", actionText)
 	}
 
-	if extraArgs != nil {
-		args = append(args, extraArgs...)
+	if options != nil {
+		args = append(args, options...)
 	}
 
 	cmd := exec.Command("minui-list", args...)
