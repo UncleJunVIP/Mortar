@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"io"
 	"mortar/models"
 	"net/http"
@@ -200,7 +202,7 @@ func (c *RomMClient) buildRootURL() string {
 	return c.Hostname
 }
 
-func (c *RomMClient) ListDirectory(section models.Section) ([]models.Item, error) {
+func (c *RomMClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
 	auth := c.Username + ":" + c.Password
 	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 
@@ -234,10 +236,12 @@ func (c *RomMClient) ListDirectory(section models.Section) ([]models.Item, error
 		return nil, fmt.Errorf("failed to decode roms list JSON: %w", err)
 	}
 
-	var items []models.Item
+	var items []models.MortarItem
 	for _, rawItem := range rawItems {
-		items = append(items, models.Item{
-			Filename: rawItem.FsName,
+		items = append(items, models.MortarItem{
+			Item: sharedModels.Item{
+				Filename: rawItem.FsName,
+			},
 			FileSize: strconv.Itoa(rawItem.FsSizeBytes),
 			Date:     rawItem.UpdatedAt.String(),
 			RomID:    strconv.Itoa(rawItem.ID),
@@ -295,6 +299,6 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) error 
 	return nil
 }
 
-func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
-	return HttpDownloadRename(c.buildRootURL(), remotePath, localPath, filename, rename)
+func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
+	return common.HttpDownloadRename(c.buildRootURL(), remotePath, localPath, filename, rename)
 }

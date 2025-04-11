@@ -3,6 +3,7 @@ package clients
 import (
 	"errors"
 	"fmt"
+	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/hirochachacha/go-smb2"
 	"mortar/models"
 	"net"
@@ -71,25 +72,30 @@ func (c *SMBClient) Close() error {
 	return nil
 }
 
-func (c *SMBClient) ListDirectory(section models.Section) ([]models.Item, error) {
+func (c *SMBClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
 	ls, err := c.Mount.ReadDir(section.HostSubdirectory)
 	if err != nil {
 		return nil, err
 	}
 
-	filenames := make([]models.Item, 0, len(ls))
+	filenames := make([]models.MortarItem, 0, len(ls))
 
 	if len(c.ExtensionFilters) > 0 {
 		for _, l := range ls {
 			for _, f := range c.ExtensionFilters {
 				if !strings.Contains(l.Name(), f) {
-					filenames = append(filenames, models.Item{Filename: l.Name()})
+					filenames = append(filenames, models.MortarItem{
+						Item: sharedModels.Item{
+							Filename: l.Name(),
+						}})
 				}
 			}
 		}
 	} else {
 		for _, l := range ls {
-			filenames = append(filenames, models.Item{Filename: l.Name()})
+			filenames = append(filenames, models.MortarItem{Item: sharedModels.Item{
+				Filename: l.Name(),
+			}})
 		}
 	}
 
@@ -117,6 +123,6 @@ func (c *SMBClient) DownloadFile(remotePath, localPath, filename string) error {
 	return nil
 }
 
-func (c *SMBClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+func (c *SMBClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
 	panic("not implemented")
 }

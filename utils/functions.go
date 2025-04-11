@@ -2,69 +2,28 @@ package utils
 
 import (
 	"context"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
 	"mortar/clients"
-	"mortar/common"
 	"mortar/models"
-	"os"
+	"mortar/state"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
-const romDirectory = "/mnt/SDCARD/Roms"
-
-var tagRegex = regexp.MustCompile(`\((.*?)\)`)
-
-func FetchRomDirectories() (map[string]string, error) {
-	dirs := make(map[string]string)
-
-	entries, err := os.ReadDir(romDirectory)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			tag := tagRegex.FindStringSubmatch(entry.Name())
-			if tag == nil {
-				continue
-			}
-
-			path := filepath.Join(romDirectory, entry.Name())
-			dirs[tag[1]] = path
-
-		}
-	}
-
-	return dirs, nil
-}
-
-func DeleteFile(path string) {
-	logger := common.GetLoggerInstance()
-
-	err := os.Remove(path)
-	if err != nil {
-		logger.Error("Issue removing file",
-			zap.String("path", path),
-			zap.Error(err))
-	} else {
-		logger.Debug("Removed file", zap.String("path", path))
-	}
-}
-
 func FindArt() bool {
 	logger := common.GetLoggerInstance()
-	appState := common.GetAppState()
+	appState := state.GetAppState()
 
-	if appState.CurrentHost.HostType == models.HostTypes.ROMM {
+	if appState.CurrentHost.HostType == sharedModels.HostTypes.ROMM {
 		// Skip all this silliness and grab the art from RoMM
 		client, err := clients.BuildClient(appState.CurrentHost)
 		if err != nil {
 			return false
 		}
 
-		var selectedItem models.Item
+		var selectedItem models.MortarItem
 
 		for _, item := range appState.CurrentItemsList {
 			if item.Filename == appState.SelectedFile {
@@ -84,8 +43,12 @@ func FindArt() bool {
 
 		mediaPath := filepath.Join(appState.CurrentSection.LocalDirectory, ".media")
 
-		err = client.DownloadFileRename(artSubdirectory,
+		LastSavedArtPath, err := client.DownloadFileRename(artSubdirectory,
 			mediaPath, artFilename, appState.SelectedFile)
+
+		appState.LastSavedArtPath = LastSavedArtPath
+
+		state.UpdateAppState(appState)
 
 		if err != nil {
 			return false
@@ -94,13 +57,13 @@ func FindArt() bool {
 		return true
 	}
 
-	tag := tagRegex.FindStringSubmatch(appState.CurrentSection.LocalDirectory)
+	tag := common.TagRegex.FindStringSubmatch(appState.CurrentSection.LocalDirectory)
 
 	if tag == nil {
 		return false
 	}
 
-	client := clients.NewThumbnailClient()
+	client := common.NewThumbnailClient()
 	section := client.BuildThumbnailSection(tag[1])
 
 	artList, err := client.ListDirectory(section)
@@ -112,12 +75,14 @@ func FindArt() bool {
 
 	noExtension := strings.TrimSuffix(appState.SelectedFile, filepath.Ext(appState.SelectedFile))
 
-	var matched models.Item
+	var matched models.MortarItem
 
 	// naive search first
 	for _, art := range artList {
 		if strings.Contains(strings.ToLower(art.Filename), strings.ToLower(noExtension)) {
-			matched = art
+			matched = models.MortarItem{
+				Item: art,
+			}
 			break
 		}
 	}
@@ -127,12 +92,16 @@ func FindArt() bool {
 	}
 
 	if matched.Filename != "" {
-		err = client.DownloadFileRename(section.HostSubdirectory,
+		LastSavedArtPath, err := client.DownloadFileRename(section.HostSubdirectory,
 			filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), matched.Filename, appState.SelectedFile)
 
 		if err != nil {
 			return false
 		}
+
+		appState.LastSavedArtPath = LastSavedArtPath
+
+		state.UpdateAppState(appState)
 
 		return true
 	}
@@ -144,7 +113,7 @@ func DownloadFile(cancel context.CancelFunc) error {
 	defer cancel()
 
 	logger := common.GetLoggerInstance()
-	appState := common.GetAppState()
+	appState := state.GetAppState()
 
 	client, err := clients.BuildClient(appState.CurrentHost)
 	if err != nil {
@@ -160,8 +129,8 @@ func DownloadFile(cancel context.CancelFunc) error {
 
 	var hostSubdirectory string
 
-	if appState.CurrentHost.HostType == models.HostTypes.ROMM {
-		var selectedItem models.Item
+	if appState.CurrentHost.HostType == sharedModels.HostTypes.ROMM {
+		var selectedItem models.MortarItem
 		for _, item := range appState.CurrentItemsList {
 			if item.Filename == appState.SelectedFile {
 				selectedItem = item

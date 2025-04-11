@@ -5,11 +5,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
-	"mortar/common"
 	"mortar/models"
+	"mortar/state"
 	"mortar/utils"
 	"os"
 	"os/exec"
@@ -21,7 +24,7 @@ import (
 
 var Screens = sum.Int[models.Screen]{}.Sum()
 
-var ScreenFuncs = map[sum.Int[models.Screen]]func() models.Selection{
+var ScreenFuncs = map[sum.Int[models.Screen]]func() shared.Selection{
 	Screens.MainMenu:         mainMenuScreen,
 	Screens.SectionSelection: sectionSelectionScreen,
 	Screens.ItemList:         itemListScreen,
@@ -32,13 +35,13 @@ var ScreenFuncs = map[sum.Int[models.Screen]]func() models.Selection{
 }
 
 func SetScreen(screen sum.Int[models.Screen]) {
-	tempAppState := common.GetAppState()
+	tempAppState := state.GetAppState()
 	tempAppState.CurrentScreen = screen
-	common.UpdateAppState(tempAppState)
+	state.UpdateAppState(tempAppState)
 }
 
-func mainMenuScreen() models.Selection {
-	appState := common.GetAppState()
+func mainMenuScreen() shared.Selection {
+	appState := state.GetAppState()
 
 	menu := ""
 
@@ -52,11 +55,11 @@ func mainMenuScreen() models.Selection {
 	var extraArgs []string
 	extraArgs = append(extraArgs, "--cancel-text", "QUIT")
 
-	return displayMinUiList(menu, "text", "Mortar", extraArgs...)
+	return ui.DisplayMinUiList(menu, "text", "Mortar", extraArgs...)
 }
 
-func sectionSelectionScreen() models.Selection {
-	appState := common.GetAppState()
+func sectionSelectionScreen() shared.Selection {
+	appState := state.GetAppState()
 
 	menu := ""
 
@@ -73,12 +76,12 @@ func sectionSelectionScreen() models.Selection {
 		extraArgs = append(extraArgs, "--cancel-text", "QUIT")
 	}
 
-	return displayMinUiList(menu, "text", appState.CurrentHost.DisplayName, extraArgs...)
+	return ui.DisplayMinUiList(menu, "text", appState.CurrentHost.DisplayName, extraArgs...)
 }
 
-func loadingScreen() models.Selection {
+func loadingScreen() shared.Selection {
 	logger := common.GetLoggerInstance()
-	appState := common.GetAppState()
+	appState := state.GetAppState()
 
 	ctx := context.Background()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
@@ -99,7 +102,7 @@ func loadingScreen() models.Selection {
 	go func() {
 		err := fetchList(cancel)
 		if err != nil {
-			logger.Error("Error downloading Item List", zap.Error(err))
+			logger.Error("Error downloading MortarItem List", zap.Error(err))
 			exitCode = 1
 		}
 		cancel()
@@ -110,10 +113,10 @@ func loadingScreen() models.Selection {
 		logger.Fatal("Error while waiting for miniui-presenter loading message to be killed", zap.Error(err))
 	}
 
-	return models.Selection{Code: exitCode}
+	return shared.Selection{Code: exitCode}
 }
 
-func searchBox() models.Selection {
+func searchBox() shared.Selection {
 	logger := common.GetLoggerInstance()
 
 	args := []string{"--title", "Mortar Search"}
@@ -139,17 +142,17 @@ func searchBox() models.Selection {
 	if err != nil && cmd.ProcessState.ExitCode() == 1 {
 		logger.Error("Error with keyboard", zap.String("error", stderrbuf.String()))
 		ShowMessage("Unable to open keyboard!", "3")
-		return models.Selection{Code: 1}
+		return shared.Selection{Code: 1}
 	}
 
 	outValue := stdoutbuf.String()
 	_ = stderrbuf.String()
 
-	return models.Selection{Value: strings.TrimSpace(outValue), Code: cmd.ProcessState.ExitCode()}
+	return shared.Selection{Value: strings.TrimSpace(outValue), Code: cmd.ProcessState.ExitCode()}
 }
 
-func itemListScreen() models.Selection {
-	appState := common.GetAppState()
+func itemListScreen() shared.Selection {
+	appState := state.GetAppState()
 
 	title := appState.CurrentHost.DisplayName + " | " + appState.CurrentSection.Name
 	itemList := appState.CurrentItemsList
@@ -168,7 +171,7 @@ func itemListScreen() models.Selection {
 	}
 
 	if len(itemList) == 0 {
-		return models.Selection{Code: 404}
+		return shared.Selection{Code: 404}
 	}
 
 	var itemEntries []string
@@ -185,7 +188,7 @@ func itemListScreen() models.Selection {
 		p := message.NewPrinter(language.English)
 		total := p.Sprintf("%d", len(itemEntries))
 
-		itemCountMessage := fmt.Sprintf("%s Items Returned.", total)
+		itemCountMessage := fmt.Sprintf("%s MortarItems Returned.", total)
 
 		if len(itemEntries) > 500 {
 			itemCountMessage = itemCountMessage + " Showing 500."
@@ -194,12 +197,12 @@ func itemListScreen() models.Selection {
 		ShowMessage(itemCountMessage, "3")
 	}
 
-	return displayMinUiListWithAction(strings.Join(itemEntries, "\n"), "text", title, "SEARCH", extraArgs...)
+	return ui.DisplayMinUiListWithAction(strings.Join(itemEntries, "\n"), "text", title, "SEARCH", extraArgs...)
 }
 
-func downloadScreen() models.Selection {
+func downloadScreen() shared.Selection {
 	logger := common.GetLoggerInstance()
-	appState := common.GetAppState()
+	appState := state.GetAppState()
 
 	ctx := context.Background()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
@@ -236,10 +239,10 @@ func downloadScreen() models.Selection {
 		logger.Fatal("Error with minui-presenter display of download message: %s", zap.Error(err))
 	}
 
-	return models.Selection{Code: exitCode}
+	return shared.Selection{Code: exitCode}
 }
 
-func downloadArtScreen() models.Selection {
+func downloadArtScreen() shared.Selection {
 	logger := common.GetLoggerInstance()
 
 	ctx := context.Background()
@@ -273,5 +276,5 @@ func downloadArtScreen() models.Selection {
 		logger.Fatal("Error with minui-presenter display of download message", zap.Error(err))
 	}
 
-	return models.Selection{Code: exitCode}
+	return shared.Selection{Code: exitCode}
 }
