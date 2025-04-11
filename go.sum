@@ -1,5 +1,15 @@
 github.com/PuerkitoBio/goquery v1.9.2 h1:4/wZksC3KgkQw7SQgkKotmKljk0M6V8TUvA8Wb4yPeE=
 github.com/PuerkitoBio/goquery v1.9.2/go.mod h1:GHPCaP0ODyyxqcNoFGYlAprUFH81NuRPd0GX3Zu2Mvk=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250410132551-20dd9935fdd3 h1:4Ke5j44jG4KRb6ZchpdOEOnUnRRUC16GSmK4MAQi34U=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250410132551-20dd9935fdd3/go.mod h1:vSzFBcW5ELwCt8ZTTDNO6NpmnFCTXpHsxnEoKaHUbPM=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411021545-60b1004d23cb h1:qyGpADsceUhJlNO4dcFIyiOqONZkE0l5h8bflAxuem8=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411021545-60b1004d23cb/go.mod h1:61Ho6J0iR23jzlhQMKCBOdk1ZGZzDjWRlVg/G6R/Hl4=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411022348-0a06a8d87921 h1:as3F+QCEX8pXM+y9TBc8VAYXJ4Vr8RPAobvupTaWfrI=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411022348-0a06a8d87921/go.mod h1:61Ho6J0iR23jzlhQMKCBOdk1ZGZzDjWRlVg/G6R/Hl4=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411024323-1474e6099b56 h1:gJZ0KV4ZTBChvau/qrMXbMkE/9dX0EBYJtMY1ksV10I=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411024323-1474e6099b56/go.mod h1:61Ho6J0iR23jzlhQMKCBOdk1ZGZzDjWRlVg/G6R/Hl4=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411024815-3905888b2c7f h1:muiuYfvmONaalsRbX2lZzT1yzqmEbR5MBE4l/oh1FAM=
+github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411024815-3905888b2c7f/go.mod h1:61Ho6J0iR23jzlhQMKCBOdk1ZGZzDjWRlVg/G6R/Hl4=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4 h1:6xQvdHFFMHHW8ubDS+xUW/USUx25kZtC6nfVnY8tZQU=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4/go.mod h1:xStjYiUrfnpo8937cHqbWh4hHGMSpT0sZ+qjvbCTLA0=
 github.com/andybalholm/cascadia v1.3.2 h1:3Xi6Dw5lHF15JtdcmAHD3i1+T8plmv7BQ/nsViSLyss=

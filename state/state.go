@@ -1,4 +1,4 @@
-package common
+package state
 
 import (
 	"fmt"
@@ -56,7 +56,7 @@ func SetConfig(config *models.Config) {
 	UpdateAppState(temp)
 }
 
-func SetSection(section models.Section) {
+func SetSection(section models.MortarSection) {
 	temp := GetAppState()
 	temp.CurrentSection = section
 	UpdateAppState(temp)

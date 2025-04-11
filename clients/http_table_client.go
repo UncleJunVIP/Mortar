@@ -3,6 +3,8 @@ package clients
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	converthtmltabletodata "github.com/activcoding/HTML-Table-to-JSON"
 	"mortar/models"
 	"net/http"
@@ -11,17 +13,15 @@ import (
 	"strings"
 )
 
-type HostType = sum.Int[models.HostType]
-
 type HttpTableClient struct {
 	RootURL            string
-	HostType           HostType
-	TableColumns       models.TableColumns
+	HostType           sum.Int[sharedModels.HostType]
+	TableColumns       sharedModels.TableColumns
 	SourceReplacements map[string]string
 	Filters            []string
 }
 
-func NewHttpTableClient(rootURL string, hostType HostType, tableColumns models.TableColumns,
+func NewHttpTableClient(rootURL string, hostType sum.Int[sharedModels.HostType], tableColumns sharedModels.TableColumns,
 	sourceReplacements map[string]string, filters []string) *HttpTableClient {
 	return &HttpTableClient{
 		RootURL:            rootURL,
@@ -36,11 +36,11 @@ func (c *HttpTableClient) Close() error {
 	return nil
 }
 
-func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, error) {
+func (c *HttpTableClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
 	params := url.Values{}
 
 	switch c.HostType {
-	case models.HostTypes.APACHE:
+	case sharedModels.HostTypes.APACHE:
 		params.Add("F", "2") // To enable table mode for mod_autoindex
 	}
 
@@ -67,13 +67,13 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 	cleaned := rawJson
 
 	switch c.HostType {
-	case models.HostTypes.APACHE:
+	case sharedModels.HostTypes.APACHE:
 		cleaned = strings.ReplaceAll(cleaned, "[[", "[")
 		cleaned = strings.ReplaceAll(cleaned, "]]", "]")
 		cleaned = strings.ReplaceAll(cleaned, "Name", "filename")
 		cleaned = strings.ReplaceAll(cleaned, "Size", "file_size")
 		cleaned = strings.ReplaceAll(cleaned, "Last modified", "date")
-	case models.HostTypes.MEGATHREAD:
+	case sharedModels.HostTypes.MEGATHREAD:
 		{
 			cleaned = strings.ReplaceAll(cleaned, "  ↓", "")
 			cleaned = strings.ReplaceAll(cleaned, "[[", "[")
@@ -82,7 +82,7 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 			cleaned = strings.ReplaceAll(cleaned, "File Size", "file_size")
 			cleaned = strings.ReplaceAll(cleaned, "Date", "date")
 		}
-	case models.HostTypes.CUSTOM:
+	case sharedModels.HostTypes.CUSTOM:
 		{
 			for oldValue, newValue := range c.SourceReplacements {
 				cleaned = strings.ReplaceAll(cleaned, oldValue, newValue)
@@ -95,7 +95,7 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 
 	}
 
-	var items []models.Item
+	var items []models.MortarItem
 	err = json.Unmarshal([]byte(cleaned), &items)
 	if err != nil {
 		return nil, fmt.Errorf("unable to marshal json: %v", err)
@@ -103,8 +103,8 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 
 	// Skip the header row(s)
 	switch c.HostType {
-	case models.HostTypes.APACHE,
-		models.HostTypes.MEGATHREAD:
+	case sharedModels.HostTypes.APACHE,
+		sharedModels.HostTypes.MEGATHREAD:
 		{
 			if len(items) > 1 {
 				return items[1:], nil
@@ -116,9 +116,9 @@ func (c *HttpTableClient) ListDirectory(section models.Section) ([]models.Item, 
 }
 
 func (c *HttpTableClient) DownloadFile(remotePath, localPath, filename string) error {
-	return HttpDownload(c.RootURL, remotePath, localPath, filename)
+	return common.HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
 
-func (c *HttpTableClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+func (c *HttpTableClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
 	panic("not implemented")
 }

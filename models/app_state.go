@@ -11,8 +11,8 @@ type AppState struct {
 
 	CurrentHost      Host
 	CurrentScreen    sum.Int[Screen]
-	CurrentSection   Section
-	CurrentItemsList Items
+	CurrentSection   MortarSection
+	CurrentItemsList MortarItems
 	SearchFilter     string
 	SelectedFile     string
 

@@ -3,6 +3,8 @@ package clients
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 	"net/http"
 	"strconv"
@@ -24,7 +26,7 @@ func (c *NginxJsonClient) Close() error {
 	return nil
 }
 
-func (c *NginxJsonClient) ListDirectory(section models.Section) ([]models.Item, error) {
+func (c *NginxJsonClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
 	resp, err := http.Get(c.RootURL + section.HostSubdirectory)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch json: %v", err)
@@ -37,10 +39,12 @@ func (c *NginxJsonClient) ListDirectory(section models.Section) ([]models.Item, 
 		return nil, fmt.Errorf("unable to decode nginx json: %v", err)
 	}
 
-	var items []models.Item
+	var items []models.MortarItem
 	for _, nginxItem := range nginxItems {
-		items = append(items, models.Item{
-			Filename: nginxItem.Filename,
+		items = append(items, models.MortarItem{
+			Item: sharedModels.Item{
+				Filename: nginxItem.Filename,
+			},
 			FileSize: strconv.FormatInt(nginxItem.Size, 10),
 			Date:     nginxItem.ModifiedTime,
 		})
@@ -50,9 +54,9 @@ func (c *NginxJsonClient) ListDirectory(section models.Section) ([]models.Item, 
 }
 
 func (c *NginxJsonClient) DownloadFile(remotePath, localPath, filename string) error {
-	return HttpDownload(c.RootURL, remotePath, localPath, filename)
+	return common.HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
 
-func (c *NginxJsonClient) DownloadFileRename(remotePath, localPath, filename, rename string) error {
+func (c *NginxJsonClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
 	panic("not implemented")
 }

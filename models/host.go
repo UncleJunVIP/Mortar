@@ -1,6 +1,7 @@
 package models
 
 import (
+	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap/zapcore"
 	"qlova.tech/sum"
 	"strconv"
@@ -8,10 +9,10 @@ import (
 )
 
 type Host struct {
-	DisplayName string            `yaml:"display_name"`
-	HostType    sum.Int[HostType] `yaml:"host_type"`
-	RootURI     string            `yaml:"root_uri"`
-	Port        int               `yaml:"port"`
+	DisplayName string                         `yaml:"display_name"`
+	HostType    sum.Int[sharedModels.HostType] `yaml:"host_type"`
+	RootURI     string                         `yaml:"root_uri"`
+	Port        int                            `yaml:"port"`
 
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
@@ -19,11 +20,11 @@ type Host struct {
 	ShareName        string   `yaml:"share_name"`
 	ExtensionFilters []string `yaml:"extension_filters"`
 
-	Sections Sections `yaml:"sections"`
-	Filters  Filters  `yaml:"filters"`
+	Sections MortarSections `yaml:"sections"`
+	Filters  Filters        `yaml:"filters"`
 
-	TableColumns       TableColumns       `yaml:"table_columns"`
-	SourceReplacements SourceReplacements `yaml:"source_replacements"`
+	TableColumns       sharedModels.TableColumns `yaml:"table_columns"`
+	SourceReplacements SourceReplacements        `yaml:"source_replacements"`
 
 	SectionIndices SectionIndices `yaml:"-"`
 }
@@ -60,17 +61,6 @@ func (s SectionIndices) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	return nil
 }
 
-type HostType struct {
-	APACHE,
-	NGINX,
-	SMB,
-	ROMM,
-	MEGATHREAD,
-	CUSTOM sum.Int[HostType]
-}
-
-var HostTypes = sum.Int[HostType]{}.Sum()
-
 func (h *Host) GetSectionIndices() map[string]int {
 	if h.SectionIndices == nil {
 		h.SectionIndices = map[string]int{}
@@ -97,12 +87,12 @@ func (h *Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("root_uri", h.RootURI)
 	enc.AddString("port", strconv.Itoa(h.Port))
 
-	if h.HostType == HostTypes.ROMM || h.HostType == HostTypes.SMB {
+	if h.HostType == sharedModels.HostTypes.ROMM || h.HostType == sharedModels.HostTypes.SMB {
 		enc.AddString("username", h.Username)
 		enc.AddString("password", h.Password)
 	}
 
-	if h.HostType == HostTypes.SMB {
+	if h.HostType == sharedModels.HostTypes.SMB {
 		enc.AddString("share_name", h.ShareName)
 	}
 
