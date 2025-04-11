@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.2 // indirect
-	github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411035235-2f5ce87e841b // indirect
+	github.com/UncleJunVIP/nextui-pak-shared-functions v0.0.0-20250411203647-7c05248e6845 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
