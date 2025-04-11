@@ -1,4 +1,4 @@
-module github.com/UncleJunVIP/Mortar.pak
+module github.com/UncleJunVIP/mortar
 
 go 1.24.1
 
