@@ -8,6 +8,7 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
+	commonUI "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -141,7 +142,7 @@ func searchBox() shared.Selection {
 	err = cmd.Wait()
 	if err != nil && cmd.ProcessState.ExitCode() == 1 {
 		logger.Error("Error with keyboard", zap.String("error", stderrbuf.String()))
-		ShowMessage("Unable to open keyboard!", "3")
+		_, _ = commonUI.ShowMessage("Unable to open keyboard!", "3")
 		return shared.Selection{Code: 1}
 	}
 
@@ -194,7 +195,7 @@ func itemListScreen() shared.Selection {
 			itemCountMessage = itemCountMessage + " Showing 500."
 		}
 
-		ShowMessage(itemCountMessage, "3")
+		_, _ = commonUI.ShowMessage(itemCountMessage, "3")
 	}
 
 	return ui.DisplayMinUiListWithAction(strings.Join(itemEntries, "\n"), "text", title, "SEARCH", extraArgs...)

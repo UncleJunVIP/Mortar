@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	commonUI "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"mortar/state"
 	"mortar/ui"
@@ -15,7 +16,7 @@ func init() {
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		ui.ShowMessage("Unable to parse config.yml! Quitting!", "3")
+		commonUI.ShowMessage("Unable to parse config.yml! Quitting!", "3")
 		common.LogStandardFatal("Error loading config", err)
 	}
 
@@ -116,11 +117,11 @@ func main() {
 				ui.SetScreen(ui.Screens.SearchBox)
 			case 404:
 				if appState.SearchFilter != "" {
-					ui.ShowMessage("No results found for \""+appState.SearchFilter+"\"", "3")
+					commonUI.ShowMessage("No results found for \""+appState.SearchFilter+"\"", "3")
 					state.SetSearchFilter("")
 					ui.SetScreen(ui.Screens.SearchBox)
 				} else {
-					ui.ShowMessage("This section contains no items", "3")
+					commonUI.ShowMessage("This section contains no items", "3")
 					ui.SetScreen(ui.Screens.SectionSelection)
 				}
 			}
@@ -130,7 +131,7 @@ func main() {
 			case 0:
 				ui.SetScreen(ui.Screens.ItemList)
 			case 1:
-				ui.ShowMessage("Unable to download item listing from source", "3")
+				commonUI.ShowMessage("Unable to download item listing from source", "3")
 				ui.SetScreen(ui.Screens.MainMenu)
 			}
 
@@ -154,7 +155,7 @@ func main() {
 				}
 
 			case 1:
-				ui.ShowMessage("Unable to download "+appState.SelectedFile, "3")
+				commonUI.ShowMessage("Unable to download "+appState.SelectedFile, "3")
 				ui.SetScreen(ui.Screens.ItemList)
 
 			default:
@@ -168,7 +169,7 @@ func main() {
 
 				logger.Info("Art Path", zap.String("lsap", state.GetAppState().LastSavedArtPath))
 
-				code := ui.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
+				code, _ := commonUI.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
 					"--background-image", state.GetAppState().LastSavedArtPath,
 					"--confirm-text", "Use",
 					"--confirm-show", "true",
@@ -181,7 +182,7 @@ func main() {
 					common.DeleteFile(state.GetAppState().LastSavedArtPath)
 				}
 			case 1:
-				ui.ShowMessage("Could not find art :(", "3")
+				commonUI.ShowMessage("Could not find art :(", "3")
 			}
 			ui.SetScreen(ui.Screens.ItemList)
 		}
