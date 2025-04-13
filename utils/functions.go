@@ -103,6 +103,7 @@ func FindArt() bool {
 		src, err := imaging.Open(lastSavedArtPath)
 		if err != nil {
 			logger.Error("Unable to open last saved art", zap.Error(err))
+			return false
 		}
 
 		dst := imaging.Resize(src, 400, 0, imaging.Lanczos)
@@ -110,6 +111,7 @@ func FindArt() bool {
 		err = imaging.Save(dst, lastSavedArtPath)
 		if err != nil {
 			logger.Error("Unable to save resized last saved art", zap.Error(err))
+			return false
 		}
 
 		appState.LastSavedArtPath = lastSavedArtPath
