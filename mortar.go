@@ -7,6 +7,7 @@ import (
 	"mortar/state"
 	"mortar/ui"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -99,8 +100,10 @@ func main() {
 		case ui.Screens.ItemList:
 			switch selection.Code {
 			case 0:
+				selectedItem := strings.TrimSpace(selection.Value)
 				for _, item := range appState.CurrentItemsList {
-					if strings.Contains(item.Filename, strings.TrimSpace(selection.Value)) {
+					itemWithoutExt := strings.ReplaceAll(item.Filename, filepath.Ext(item.Filename), "")
+					if selectedItem == itemWithoutExt {
 						state.SetSelectedFile(item.Filename)
 						break
 					}

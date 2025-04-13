@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"github.com/disintegration/imaging"
 	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
@@ -92,14 +93,26 @@ func FindArt() bool {
 	}
 
 	if matched.Filename != "" {
-		LastSavedArtPath, err := client.DownloadFileRename(section.HostSubdirectory,
+		lastSavedArtPath, err := client.DownloadFileRename(section.HostSubdirectory,
 			filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), matched.Filename, appState.SelectedFile)
 
 		if err != nil {
 			return false
 		}
 
-		appState.LastSavedArtPath = LastSavedArtPath
+		src, err := imaging.Open(lastSavedArtPath)
+		if err != nil {
+			logger.Error("Unable to open last saved art", zap.Error(err))
+		}
+
+		dst := imaging.Resize(src, 400, 0, imaging.Lanczos)
+
+		err = imaging.Save(dst, lastSavedArtPath)
+		if err != nil {
+			logger.Error("Unable to save resized last saved art", zap.Error(err))
+		}
+
+		appState.LastSavedArtPath = lastSavedArtPath
 
 		state.UpdateAppState(appState)
 
