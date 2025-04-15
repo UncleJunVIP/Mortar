@@ -2,10 +2,13 @@ package main
 
 import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	commonUI "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"mortar/state"
 	"mortar/ui"
+	"mortar/utils"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +20,7 @@ func init() {
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		commonUI.ShowMessage("Unable to parse config.yml! Quitting!", "3")
+		_, _ = commonUI.ShowMessage("Unable to parse config.yml! Quitting!", "3")
 		common.LogStandardFatal("Error loading config", err)
 	}
 
@@ -25,21 +28,35 @@ func init() {
 
 	logger := common.GetLoggerInstance()
 
-	romDirectories, err := common.FetchRomDirectoriesByTag()
-	if err != nil {
-		logger.Error("Issue fetching rom directories", zap.Error(err))
+	if config.RawArtDownloadType == "" {
+		config.RawArtDownloadType = "BOX_ART"
+	}
+
+	if val, ok := shared.ArtDownloadTypeFromString[config.RawArtDownloadType]; ok {
+		config.ArtDownloadType = val
 	} else {
-		for hostIdx, host := range config.Hosts {
-			for sectionIdx, section := range host.Sections {
-				if section.SystemTag != "" {
-					config.Hosts[hostIdx].Sections[sectionIdx].LocalDirectory = romDirectories[section.SystemTag]
-				}
+		logger.Info("Invalid art download type provided... defaulting to BOX_ART")
+		config.ArtDownloadType = shared.ArtDownloadTypes.BOX_ART
+	}
+
+	fb := filebrowser.NewFileBrowser(logger)
+	err = fb.CWD(common.RomDirectory)
+	if err != nil {
+		_, _ = commonUI.ShowMessage("Unable to fetch ROM directories! Quitting!", "3")
+		common.LogStandardFatal("Error loading fetching ROM directories", err)
+	}
+
+	romDirectories := utils.MapTagsToDirectories(fb.Items)
+
+	for hostIdx, host := range config.Hosts {
+		for sectionIdx, section := range host.Sections {
+			if section.SystemTag != "" {
+				config.Hosts[hostIdx].Sections[sectionIdx].LocalDirectory = romDirectories[section.SystemTag]
 			}
 		}
 	}
 
-	logger.Debug("Config Loaded",
-		zap.Object("config", config))
+	//logger.Debug("Config Loaded", zap.Object("config", config))
 
 	state.SetConfig(config)
 
@@ -62,10 +79,16 @@ func cleanup() {
 func main() {
 	defer cleanup()
 
+	logger := common.GetLoggerInstance()
+
 	for {
 		appState := state.GetAppState()
 
-		selection := ui.ScreenFuncs[appState.CurrentScreen]()
+		selection, err := ui.ScreenFuncs[appState.CurrentScreen]()
+
+		if err != nil {
+			logger.Error("Error loading screen")
+		}
 
 		// Hacky way to handle bad input on deep sleep
 		if strings.Contains(selection.Value, "SetRawBrightness") ||
@@ -75,7 +98,7 @@ func main() {
 
 		switch appState.CurrentScreen {
 		case ui.Screens.MainMenu:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				ui.SetScreen(ui.Screens.SectionSelection)
 				idx := appState.HostIndices[strings.TrimSpace(selection.Value)]
@@ -85,7 +108,7 @@ func main() {
 			}
 
 		case ui.Screens.SectionSelection:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				ui.SetScreen(ui.Screens.Loading)
 				idx := appState.CurrentHost.GetSectionIndices()[strings.TrimSpace(selection.Value)]
@@ -98,7 +121,7 @@ func main() {
 			}
 
 		case ui.Screens.ItemList:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				selectedItem := strings.TrimSpace(selection.Value)
 				for _, item := range appState.CurrentItemsList {
@@ -120,26 +143,26 @@ func main() {
 				ui.SetScreen(ui.Screens.SearchBox)
 			case 404:
 				if appState.SearchFilter != "" {
-					commonUI.ShowMessage("No results found for \""+appState.SearchFilter+"\"", "3")
+					_, _ = commonUI.ShowMessage("No results found for \""+appState.SearchFilter+"\"", "3")
 					state.SetSearchFilter("")
 					ui.SetScreen(ui.Screens.SearchBox)
 				} else {
-					commonUI.ShowMessage("This section contains no items", "3")
+					_, _ = commonUI.ShowMessage("This section contains no items", "3")
 					ui.SetScreen(ui.Screens.SectionSelection)
 				}
 			}
 
 		case ui.Screens.Loading:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				ui.SetScreen(ui.Screens.ItemList)
 			case 1:
-				commonUI.ShowMessage("Unable to download item listing from source", "3")
+				_, _ = commonUI.ShowMessage("Unable to download item listing from source", "3")
 				ui.SetScreen(ui.Screens.MainMenu)
 			}
 
 		case ui.Screens.SearchBox:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				state.SetSearchFilter(selection.Value)
 			case 1, 2, 3:
@@ -149,7 +172,7 @@ func main() {
 			ui.SetScreen(ui.Screens.ItemList)
 
 		case ui.Screens.Download:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				if appState.Config.DownloadArt {
 					ui.SetScreen(ui.Screens.DownloadArt)
@@ -158,7 +181,7 @@ func main() {
 				}
 
 			case 1:
-				commonUI.ShowMessage("Unable to download "+appState.SelectedFile, "3")
+				_, _ = commonUI.ShowMessage("Unable to download "+appState.SelectedFile, "3")
 				ui.SetScreen(ui.Screens.ItemList)
 
 			default:
@@ -166,7 +189,7 @@ func main() {
 			}
 
 		case ui.Screens.DownloadArt:
-			switch selection.Code {
+			switch selection.ExitCode {
 			case 0:
 				logger := common.GetLoggerInstance()
 
@@ -185,7 +208,7 @@ func main() {
 					common.DeleteFile(state.GetAppState().LastSavedArtPath)
 				}
 			case 1:
-				commonUI.ShowMessage("Could not find art :(", "3")
+				_, _ = commonUI.ShowMessage("Could not find art :(", "3")
 			}
 			ui.SetScreen(ui.Screens.ItemList)
 		}

@@ -25,7 +25,7 @@ import (
 
 var Screens = sum.Int[models.Screen]{}.Sum()
 
-var ScreenFuncs = map[sum.Int[models.Screen]]func() shared.Selection{
+var ScreenFuncs = map[sum.Int[models.Screen]]func() (shared.ListSelection, error){
 	Screens.MainMenu:         mainMenuScreen,
 	Screens.SectionSelection: sectionSelectionScreen,
 	Screens.ItemList:         itemListScreen,
@@ -41,35 +41,31 @@ func SetScreen(screen sum.Int[models.Screen]) {
 	state.UpdateAppState(tempAppState)
 }
 
-func mainMenuScreen() shared.Selection {
+func mainMenuScreen() (shared.ListSelection, error) {
 	appState := state.GetAppState()
 
-	menu := ""
-
-	var hosts []string
+	var hosts shared.Items
 	for _, host := range appState.Config.Hosts {
-		hosts = append(hosts, host.DisplayName)
+		hosts = append(hosts, shared.Item{
+			DisplayName: host.DisplayName,
+		})
 	}
-
-	menu = strings.Join(hosts, "\n")
 
 	var extraArgs []string
 	extraArgs = append(extraArgs, "--cancel-text", "QUIT")
 
-	return ui.DisplayMinUiList(menu, "text", "Mortar", extraArgs...)
+	return commonUI.DisplayList(hosts, "Mortar", "", extraArgs...)
 }
 
-func sectionSelectionScreen() shared.Selection {
+func sectionSelectionScreen() (shared.ListSelection, error) {
 	appState := state.GetAppState()
 
-	menu := ""
-
-	var sections []string
+	var sections shared.Items
 	for _, section := range appState.CurrentHost.Sections {
-		sections = append(sections, section.Name)
+		sections = append(sections, shared.Item{
+			DisplayName: section.Name,
+		})
 	}
-
-	menu = strings.Join(sections, "\n")
 
 	var extraArgs []string
 
@@ -77,10 +73,10 @@ func sectionSelectionScreen() shared.Selection {
 		extraArgs = append(extraArgs, "--cancel-text", "QUIT")
 	}
 
-	return ui.DisplayMinUiList(menu, "text", appState.CurrentHost.DisplayName, extraArgs...)
+	return ui.DisplayList(sections, appState.CurrentHost.DisplayName, "", extraArgs...)
 }
 
-func loadingScreen() shared.Selection {
+func loadingScreen() (shared.ListSelection, error) {
 	logger := common.GetLoggerInstance()
 	appState := state.GetAppState()
 
@@ -103,7 +99,7 @@ func loadingScreen() shared.Selection {
 	go func() {
 		err := fetchList(cancel)
 		if err != nil {
-			logger.Error("Error downloading MortarItem List", zap.Error(err))
+			logger.Error("Error downloading Item List", zap.Error(err))
 			exitCode = 1
 		}
 		cancel()
@@ -114,10 +110,10 @@ func loadingScreen() shared.Selection {
 		logger.Fatal("Error while waiting for miniui-presenter loading message to be killed", zap.Error(err))
 	}
 
-	return shared.Selection{Code: exitCode}
+	return shared.ListSelection{ExitCode: exitCode}, nil
 }
 
-func searchBox() shared.Selection {
+func searchBox() (shared.ListSelection, error) {
 	logger := common.GetLoggerInstance()
 
 	args := []string{"--title", "Mortar Search"}
@@ -143,16 +139,16 @@ func searchBox() shared.Selection {
 	if err != nil && cmd.ProcessState.ExitCode() == 1 {
 		logger.Error("Error with keyboard", zap.String("error", stderrbuf.String()))
 		_, _ = commonUI.ShowMessage("Unable to open keyboard!", "3")
-		return shared.Selection{Code: 1}
+		return shared.ListSelection{ExitCode: 1}, nil
 	}
 
 	outValue := stdoutbuf.String()
 	_ = stderrbuf.String()
 
-	return shared.Selection{Value: strings.TrimSpace(outValue), Code: cmd.ProcessState.ExitCode()}
+	return shared.ListSelection{Value: strings.TrimSpace(outValue), ExitCode: cmd.ProcessState.ExitCode()}, nil
 }
 
-func itemListScreen() shared.Selection {
+func itemListScreen() (shared.ListSelection, error) {
 	appState := state.GetAppState()
 
 	title := appState.CurrentHost.DisplayName + " | " + appState.CurrentSection.Name
@@ -161,24 +157,24 @@ func itemListScreen() shared.Selection {
 	var extraArgs []string
 	extraArgs = append(extraArgs, "--confirm-text", "DOWNLOAD")
 
-	if len(appState.CurrentHost.Filters) > 0 {
-		itemList = filterList(itemList, appState.CurrentHost.Filters...)
+	if len(appState.CurrentHost.Filters.InclusiveFilters) > 0 || len(appState.CurrentHost.Filters.ExclusiveFilters) > 0 {
+		itemList = filterList(itemList, appState.CurrentHost.Filters)
 	}
 
 	if appState.SearchFilter != "" {
 		title = "[Search: \"" + appState.SearchFilter + "\"]"
 		extraArgs = append(extraArgs, "--cancel-text", "CLEAR SEARCH")
-		itemList = filterList(itemList, appState.SearchFilter)
+		itemList = filterList(itemList, models.Filters{InclusiveFilters: []string{appState.SearchFilter}})
 	}
 
 	if len(itemList) == 0 {
-		return shared.Selection{Code: 404}
+		return shared.ListSelection{ExitCode: 404}, nil
 	}
 
-	var itemEntries []string
+	var itemEntries shared.Items
 	for _, item := range itemList {
 		itemName := strings.TrimSuffix(item.Filename, filepath.Ext(item.Filename))
-		itemEntries = append(itemEntries, itemName)
+		itemEntries = append(itemEntries, shared.Item{DisplayName: strings.TrimSpace(itemName)})
 	}
 
 	if len(itemEntries) > 500 {
@@ -198,10 +194,10 @@ func itemListScreen() shared.Selection {
 		_, _ = commonUI.ShowMessage(itemCountMessage, "3")
 	}
 
-	return ui.DisplayMinUiListWithAction(strings.Join(itemEntries, "\n"), "text", title, "SEARCH", extraArgs...)
+	return ui.DisplayList(itemEntries, title, "SEARCH", extraArgs...)
 }
 
-func downloadScreen() shared.Selection {
+func downloadScreen() (shared.ListSelection, error) {
 	logger := common.GetLoggerInstance()
 	appState := state.GetAppState()
 
@@ -222,7 +218,7 @@ func downloadScreen() shared.Selection {
 	exitCode := 0
 
 	go func() {
-		err := utils.DownloadFile(cancel)
+		_, err := utils.DownloadFile(cancel)
 		if err != nil {
 			logger.Error("Error downloading file: %s", zap.Error(err))
 			exitCode = 1
@@ -240,10 +236,10 @@ func downloadScreen() shared.Selection {
 		logger.Fatal("Error with minui-presenter display of download message: %s", zap.Error(err))
 	}
 
-	return shared.Selection{Code: exitCode}
+	return shared.ListSelection{ExitCode: exitCode}, nil
 }
 
-func downloadArtScreen() shared.Selection {
+func downloadArtScreen() (shared.ListSelection, error) {
 	logger := common.GetLoggerInstance()
 
 	ctx := context.Background()
@@ -277,5 +273,5 @@ func downloadArtScreen() shared.Selection {
 		logger.Fatal("Error with minui-presenter display of download message", zap.Error(err))
 	}
 
-	return shared.Selection{Code: exitCode}
+	return shared.ListSelection{ExitCode: exitCode}, nil
 }

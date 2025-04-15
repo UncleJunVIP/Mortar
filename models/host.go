@@ -1,7 +1,7 @@
 package models
 
 import (
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap/zapcore"
 	"qlova.tech/sum"
 	"strconv"
@@ -9,10 +9,10 @@ import (
 )
 
 type Host struct {
-	DisplayName string                         `yaml:"display_name"`
-	HostType    sum.Int[sharedModels.HostType] `yaml:"host_type"`
-	RootURI     string                         `yaml:"root_uri"`
-	Port        int                            `yaml:"port"`
+	DisplayName string                   `yaml:"display_name"`
+	HostType    sum.Int[shared.HostType] `yaml:"host_type"`
+	RootURI     string                   `yaml:"root_uri"`
+	Port        int                      `yaml:"port"`
 
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
@@ -20,25 +20,20 @@ type Host struct {
 	ShareName        string   `yaml:"share_name"`
 	ExtensionFilters []string `yaml:"extension_filters"`
 
-	Sections MortarSections `yaml:"sections"`
-	Filters  Filters        `yaml:"filters"`
+	Sections shared.Sections `yaml:"sections"`
+	Filters  Filters         `yaml:"filters"`
 
-	TableColumns       sharedModels.TableColumns `yaml:"table_columns"`
-	SourceReplacements SourceReplacements        `yaml:"source_replacements"`
+	TableColumns       shared.TableColumns `yaml:"table_columns"`
+	SourceReplacements SourceReplacements  `yaml:"source_replacements"`
 
 	SectionIndices SectionIndices `yaml:"-"`
 }
 
 type Hosts []Host
 
-type Filters []string
-
-func (f Filters) MarshalLogArray(enc zapcore.ArrayEncoder) error {
-	for _, filter := range f {
-		enc.AppendString(filter)
-	}
-
-	return nil
+type Filters struct {
+	InclusiveFilters []string `yaml:"inclusive_filters"`
+	ExclusiveFilters []string `yaml:"exclusive_filters"`
 }
 
 type SourceReplacements map[string]string
@@ -87,19 +82,18 @@ func (h *Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("root_uri", h.RootURI)
 	enc.AddString("port", strconv.Itoa(h.Port))
 
-	if h.HostType == sharedModels.HostTypes.ROMM || h.HostType == sharedModels.HostTypes.SMB {
+	if h.HostType == shared.HostTypes.ROMM || h.HostType == shared.HostTypes.SMB {
 		enc.AddString("username", h.Username)
 		enc.AddString("password", h.Password)
 	}
 
-	if h.HostType == sharedModels.HostTypes.SMB {
+	if h.HostType == shared.HostTypes.SMB {
 		enc.AddString("share_name", h.ShareName)
 	}
 
 	enc.AddString("extension_filters", strings.Join(h.ExtensionFilters, ","))
 
 	_ = enc.AddArray("sections", h.Sections)
-	_ = enc.AddArray("filters", h.Filters)
 
 	_ = enc.AddObject("table_columns", h.TableColumns)
 

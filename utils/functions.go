@@ -3,28 +3,42 @@ package utils
 import (
 	"context"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/disintegration/imaging"
 	"go.uber.org/zap"
 	"mortar/clients"
-	"mortar/models"
 	"mortar/state"
 	"path/filepath"
 	"strings"
 )
 
+func MapTagsToDirectories(items shared.Items) map[string]string {
+	mapping := make(map[string]string)
+
+	for _, entry := range items {
+		if entry.IsDirectory {
+
+			path := filepath.Join(common.RomDirectory, entry.Filename)
+			mapping[entry.Tag] = path
+
+		}
+	}
+
+	return mapping
+}
+
 func FindArt() bool {
 	logger := common.GetLoggerInstance()
 	appState := state.GetAppState()
 
-	if appState.CurrentHost.HostType == sharedModels.HostTypes.ROMM {
+	if appState.CurrentHost.HostType == shared.HostTypes.ROMM {
 		// Skip all this silliness and grab the art from RoMM
 		client, err := clients.BuildClient(appState.CurrentHost)
 		if err != nil {
 			return false
 		}
 
-		var selectedItem models.MortarItem
+		var selectedItem shared.Item
 
 		for _, item := range appState.CurrentItemsList {
 			if item.Filename == appState.SelectedFile {
@@ -64,7 +78,7 @@ func FindArt() bool {
 		return false
 	}
 
-	client := common.NewThumbnailClient()
+	client := common.NewThumbnailClient(appState.Config.ArtDownloadType)
 	section := client.BuildThumbnailSection(tag[1])
 
 	artList, err := client.ListDirectory(section)
@@ -76,14 +90,12 @@ func FindArt() bool {
 
 	noExtension := strings.TrimSuffix(appState.SelectedFile, filepath.Ext(appState.SelectedFile))
 
-	var matched models.MortarItem
+	var matched shared.Item
 
 	// naive search first
 	for _, art := range artList {
 		if strings.Contains(strings.ToLower(art.Filename), strings.ToLower(noExtension)) {
-			matched = models.MortarItem{
-				Item: art,
-			}
+			matched = art
 			break
 		}
 	}
@@ -124,7 +136,7 @@ func FindArt() bool {
 	return false
 }
 
-func DownloadFile(cancel context.CancelFunc) error {
+func DownloadFile(cancel context.CancelFunc) (string, error) {
 	defer cancel()
 
 	logger := common.GetLoggerInstance()
@@ -132,10 +144,10 @@ func DownloadFile(cancel context.CancelFunc) error {
 
 	client, err := clients.BuildClient(appState.CurrentHost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	defer func(client models.Client) {
+	defer func(client shared.Client) {
 		err := client.Close()
 		if err != nil {
 			logger.Error("Unable to close client", zap.Error(err))
@@ -144,8 +156,8 @@ func DownloadFile(cancel context.CancelFunc) error {
 
 	var hostSubdirectory string
 
-	if appState.CurrentHost.HostType == sharedModels.HostTypes.ROMM {
-		var selectedItem models.MortarItem
+	if appState.CurrentHost.HostType == shared.HostTypes.ROMM {
+		var selectedItem shared.Item
 		for _, item := range appState.CurrentItemsList {
 			if item.Filename == appState.SelectedFile {
 				selectedItem = item

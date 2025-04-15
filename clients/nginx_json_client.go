@@ -4,21 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
 type NginxJsonClient struct {
 	RootURL string
-	Filters []string
 }
 
-func NewNginxJsonClient(rootURL string, filters []string) *NginxJsonClient {
+func NewNginxJsonClient(rootURL string) *NginxJsonClient {
 	return &NginxJsonClient{
 		RootURL: rootURL,
-		Filters: filters,
 	}
 }
 
@@ -26,8 +25,15 @@ func (c *NginxJsonClient) Close() error {
 	return nil
 }
 
-func (c *NginxJsonClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
-	resp, err := http.Get(c.RootURL + section.HostSubdirectory)
+func (c *NginxJsonClient) ListDirectory(subdirectory string) (shared.Items, error) {
+	u, err := url.Parse(c.RootURL)
+	if err != nil {
+		return shared.Items{}, fmt.Errorf("error parsing root url: %w", err)
+	}
+
+	u = u.JoinPath(subdirectory)
+
+	resp, err := http.Get(u.String())
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch json: %v", err)
 	}
@@ -39,21 +45,19 @@ func (c *NginxJsonClient) ListDirectory(section models.MortarSection) ([]models.
 		return nil, fmt.Errorf("unable to decode nginx json: %v", err)
 	}
 
-	var items []models.MortarItem
+	var items []shared.Item
 	for _, nginxItem := range nginxItems {
-		items = append(items, models.MortarItem{
-			Item: sharedModels.Item{
-				Filename: nginxItem.Filename,
-			},
-			FileSize: strconv.FormatInt(nginxItem.Size, 10),
-			Date:     nginxItem.ModifiedTime,
+		items = append(items, shared.Item{
+			Filename:     nginxItem.Filename,
+			FileSize:     strconv.FormatInt(nginxItem.Size, 10),
+			LastModified: nginxItem.ModifiedTime,
 		})
 	}
 
 	return items, nil
 }
 
-func (c *NginxJsonClient) DownloadFile(remotePath, localPath, filename string) error {
+func (c *NginxJsonClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
 	return common.HttpDownload(c.RootURL, remotePath, localPath, filename)
 }
 

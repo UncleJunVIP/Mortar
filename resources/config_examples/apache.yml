@@ -12,8 +12,18 @@ hosts:
         host_subdirectory: "/GBC/"
 
     filters:
-      - "USA"
-      - "En,"
+      exclusive_filters:
+        - "(Proto"
+        - "(Demo)"
+        - "(Beta)"
+        - "(Aftermarket"
+        - "4-in-1"
+        - "4 in 1"
+        - "(Europe)"
+        - "(Japan)"
+      inclusive_filters:
+        - "USA"
+        - "En,"
 
 show_item_count: false
 download_art: false

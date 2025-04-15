@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
@@ -16,7 +17,7 @@ func fetchList(cancel context.CancelFunc) error {
 	logger := common.GetLoggerInstance()
 	appState := state.GetAppState()
 
-	logger.Debug("Fetching MortarItem List",
+	logger.Debug("Fetching Item List",
 		zap.Object("AppState", appState))
 
 	client, err := clients.BuildClient(appState.CurrentHost)
@@ -24,14 +25,23 @@ func fetchList(cancel context.CancelFunc) error {
 		return err
 	}
 
-	defer func(client models.Client) {
+	defer func(client shared.Client) {
 		err := client.Close()
 		if err != nil {
 			logger.Error("Unable to close client", zap.Error(err))
 		}
 	}(client)
 
-	items, err := client.ListDirectory(appState.CurrentSection)
+	section := ""
+
+	switch appState.CurrentHost.HostType {
+	case shared.HostTypes.ROMM:
+		section = appState.CurrentSection.RomMPlatformID
+	default:
+		section = appState.CurrentSection.HostSubdirectory
+	}
+
+	items, err := client.ListDirectory(section)
 	if err != nil {
 		return err
 	}
@@ -41,11 +51,24 @@ func fetchList(cancel context.CancelFunc) error {
 	return nil
 }
 
-func filterList(itemList []models.MortarItem, keywords ...string) []models.MortarItem {
-	var filteredItemList []models.MortarItem
+func filterList(itemList []shared.Item, filters models.Filters) []shared.Item {
+	var filteredItemList []shared.Item
 
 	for _, item := range itemList {
-		for _, keyword := range keywords {
+		contains := false
+		for _, keyword := range filters.ExclusiveFilters {
+			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(keyword)) {
+				contains = true
+				break
+			}
+		}
+		if !contains {
+			filteredItemList = append(filteredItemList, item)
+		}
+	}
+
+	for _, item := range itemList {
+		for _, keyword := range filters.InclusiveFilters {
 			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(keyword)) {
 				filteredItemList = append(filteredItemList, item)
 				break

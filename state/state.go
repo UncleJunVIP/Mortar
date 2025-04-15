@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/atomic"
 	"gopkg.in/yaml.v3"
 	"mortar/models"
@@ -56,7 +57,7 @@ func SetConfig(config *models.Config) {
 	UpdateAppState(temp)
 }
 
-func SetSection(section models.MortarSection) {
+func SetSection(section shared.Section) {
 	temp := GetAppState()
 	temp.CurrentSection = section
 	UpdateAppState(temp)
