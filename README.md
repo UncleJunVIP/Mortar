@@ -68,7 +68,10 @@ hosts:
         # Define more sections if desired
 
     filters:
-      exclusive_filters: # Exclusive filters are applied first. i.e. If ROM filename contains any of these it will be excluded
+      inclusive_filters: # Inclusive filters are applied first. If ROM filename contains any of these it will be included
+        - "USA"
+        - "En,"
+      exclusive_filters: # Exclusive filters are applied second. i.e. If ROM filename contains any of these it will be excluded
         - "(Proto"
         - "(Demo)"
         - "(Beta)"
@@ -77,9 +80,6 @@ hosts:
         - "4 in 1"
         - "(Europe)"
         - "(Japan)"
-      inclusive_filters: # Inclusive filters are applied second. If ROM filename contains any of these it will be included
-        - "USA"
-        - "En,"
 
     table_columns: # Used by CUSTOM hosts. Match each value with the exact text used in the HTML Table
       filename_header: "File Name"

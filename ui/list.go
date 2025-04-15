@@ -52,29 +52,31 @@ func fetchList(cancel context.CancelFunc) error {
 }
 
 func filterList(itemList []shared.Item, filters models.Filters) []shared.Item {
-	var filteredItemList []shared.Item
+	var filteredItemListInclusive []shared.Item
 
 	for _, item := range itemList {
+		for _, filter := range filters.InclusiveFilters {
+			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(filter)) {
+				filteredItemListInclusive = append(filteredItemListInclusive, item)
+				break
+			}
+		}
+	}
+
+	var filteredItemListExclusive []shared.Item
+
+	for _, item := range filteredItemListInclusive {
 		contains := false
-		for _, keyword := range filters.ExclusiveFilters {
-			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(keyword)) {
+		for _, filter := range filters.ExclusiveFilters {
+			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(filter)) {
 				contains = true
 				break
 			}
 		}
 		if !contains {
-			filteredItemList = append(filteredItemList, item)
+			filteredItemListExclusive = append(filteredItemListExclusive, item)
 		}
 	}
 
-	for _, item := range itemList {
-		for _, keyword := range filters.InclusiveFilters {
-			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(keyword)) {
-				filteredItemList = append(filteredItemList, item)
-				break
-			}
-		}
-	}
-
-	return filteredItemList
+	return filteredItemListExclusive
 }
