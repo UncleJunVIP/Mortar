@@ -94,7 +94,7 @@ hosts:
 
 show_item_count: false # Shows file count before displaying list
 download_art: true # If true, Mortar will attempt to find box art. If found it will display it and let you indicate if you want it
-art_download_type: "BOX_ART" # Optional, defaults to BOX_ART. Valid Choices: BOX_ART | TITLE_SCREEN | LOGOS | SCREENSHOTS
+art_download_type: "BOX_ART" # Optional, defaults to BOX_ART. Does not impact art downloads from RoMM. Valid Choices: BOX_ART | TITLE_SCREEN | LOGOS | SCREENSHOTS
 log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
 ```
 
