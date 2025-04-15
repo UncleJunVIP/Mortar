@@ -67,9 +67,19 @@ hosts:
 
         # Define more sections if desired
 
-    filters: # Filter out files that do not contain the filter string
-      - "USA"
-      - "En,"
+    filters:
+      exclusive_filters: # Exclusive filters are applied first. i.e. If ROM filename contains any of these it will be excluded
+        - "(Proto"
+        - "(Demo)"
+        - "(Beta)"
+        - "(Aftermarket"
+        - "4-in-1"
+        - "4 in 1"
+        - "(Europe)"
+        - "(Japan)"
+      inclusive_filters: # Inclusive filters are applied second. If ROM filename contains any of these it will be included
+        - "USA"
+        - "En,"
 
     table_columns: # Used by CUSTOM hosts. Match each value with the exact text used in the HTML Table
       filename_header: "File Name"
@@ -84,6 +94,7 @@ hosts:
 
 show_item_count: false # Shows file count before displaying list
 download_art: true # If true, Mortar will attempt to find box art. If found it will display it and let you indicate if you want it
+art_download_type: "BOX_ART" # Optional, defaults to BOX_ART. Valid Choices: BOX_ART | TITLE_SCREEN | LOGOS | SCREENSHOTS
 log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
 ```
 

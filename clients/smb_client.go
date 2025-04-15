@@ -3,9 +3,8 @@ package clients
 import (
 	"errors"
 	"fmt"
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/hirochachacha/go-smb2"
-	"mortar/models"
 	"net"
 	"os"
 	"path/filepath"
@@ -72,55 +71,52 @@ func (c *SMBClient) Close() error {
 	return nil
 }
 
-func (c *SMBClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
-	ls, err := c.Mount.ReadDir(section.HostSubdirectory)
+func (c *SMBClient) ListDirectory(subdirectory string) (shared.Items, error) {
+	ls, err := c.Mount.ReadDir(subdirectory)
 	if err != nil {
 		return nil, err
 	}
 
-	filenames := make([]models.MortarItem, 0, len(ls))
+	filenames := make([]shared.Item, 0, len(ls))
 
 	if len(c.ExtensionFilters) > 0 {
 		for _, l := range ls {
 			for _, f := range c.ExtensionFilters {
 				if !strings.Contains(l.Name(), f) {
-					filenames = append(filenames, models.MortarItem{
-						Item: sharedModels.Item{
-							Filename: l.Name(),
-						}})
+					filenames = append(filenames, shared.Item{
+						Filename: l.Name(),
+					})
 				}
 			}
 		}
 	} else {
 		for _, l := range ls {
-			filenames = append(filenames, models.MortarItem{Item: sharedModels.Item{
-				Filename: l.Name(),
-			}})
+			filenames = append(filenames, shared.Item{Filename: l.Name()})
 		}
 	}
 
 	return filenames, nil
 }
 
-func (c *SMBClient) DownloadFile(remotePath, localPath, filename string) error {
+func (c *SMBClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
 	bytes, err := c.Mount.ReadFile(filepath.Join(remotePath, filename))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	f, err := os.OpenFile(filepath.Join(localPath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	defer f.Close()
 
 	_, err = f.Write(bytes)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return "", nil
 }
 
 func (c *SMBClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {

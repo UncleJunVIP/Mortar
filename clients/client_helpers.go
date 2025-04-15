@@ -1,25 +1,24 @@
 package clients
 
 import (
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 )
 
-func BuildClient(host models.Host) (models.Client, error) {
+func BuildClient(host models.Host) (shared.Client, error) {
 	switch host.HostType {
-	case sharedModels.HostTypes.APACHE,
-		sharedModels.HostTypes.MEGATHREAD,
-		sharedModels.HostTypes.CUSTOM:
+	case shared.HostTypes.APACHE,
+		shared.HostTypes.MEGATHREAD,
+		shared.HostTypes.CUSTOM:
 		return NewHttpTableClient(
 			host.RootURI,
 			host.HostType,
 			host.TableColumns,
 			host.SourceReplacements,
-			host.Filters,
 		), nil
-	case sharedModels.HostTypes.NGINX:
-		return NewNginxJsonClient(host.RootURI, host.Filters), nil
-	case sharedModels.HostTypes.SMB:
+	case shared.HostTypes.NGINX:
+		return NewNginxJsonClient(host.RootURI), nil
+	case shared.HostTypes.SMB:
 		{
 			return NewSMBClient(
 				host.RootURI,
@@ -30,7 +29,7 @@ func BuildClient(host models.Host) (models.Client, error) {
 				host.ExtensionFilters,
 			)
 		}
-	case sharedModels.HostTypes.ROMM:
+	case shared.HostTypes.ROMM:
 		{
 			return NewRomMClient(
 				host.RootURI,

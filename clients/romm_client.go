@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	sharedModels "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"io"
-	"mortar/models"
 	"net/http"
 	"net/url"
 	"os"
@@ -202,17 +201,19 @@ func (c *RomMClient) buildRootURL() string {
 	return c.Hostname
 }
 
-func (c *RomMClient) ListDirectory(section models.MortarSection) ([]models.MortarItem, error) {
+func (c *RomMClient) ListDirectory(platformID string) (shared.Items, error) {
 	auth := c.Username + ":" + c.Password
 	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 
-	u, err := url.Parse(c.buildRootURL() + RomsEndpoint)
+	u, err := url.Parse(c.buildRootURL())
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse rom endpoint URL for listing: %v", err)
 	}
 
+	u = u.JoinPath(RomsEndpoint)
+
 	params := url.Values{}
-	params.Add("platform_id", section.RomMPlatformID)
+	params.Add("platform_id", platformID)
 
 	u.RawQuery = params.Encode()
 
@@ -236,34 +237,32 @@ func (c *RomMClient) ListDirectory(section models.MortarSection) ([]models.Morta
 		return nil, fmt.Errorf("failed to decode roms list JSON: %w", err)
 	}
 
-	var items []models.MortarItem
+	var items []shared.Item
 	for _, rawItem := range rawItems {
-		items = append(items, models.MortarItem{
-			Item: sharedModels.Item{
-				Filename: rawItem.FsName,
-			},
-			FileSize: strconv.Itoa(rawItem.FsSizeBytes),
-			Date:     rawItem.UpdatedAt.String(),
-			RomID:    strconv.Itoa(rawItem.ID),
-			ArtURL:   rawItem.PathCoverSmall,
+		items = append(items, shared.Item{
+			Filename:     rawItem.FsName,
+			FileSize:     strconv.Itoa(rawItem.FsSizeBytes),
+			LastModified: rawItem.UpdatedAt.String(),
+			RomID:        strconv.Itoa(rawItem.ID),
+			ArtURL:       rawItem.PathCoverSmall,
 		})
 	}
 
 	return items, nil
 }
 
-func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) error {
+func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
 	auth := c.Username + ":" + c.Password
 	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 
 	sourceURL, err := url.JoinPath(c.buildRootURL(), RomsEndpoint, remotePath, "content", filename)
 	if err != nil {
-		return fmt.Errorf("unable to build url for rom download: %v", err)
+		return "", fmt.Errorf("unable to build url for rom download: %v", err)
 	}
 
 	u, err := url.Parse(sourceURL)
 	if err != nil {
-		return fmt.Errorf("unable to parse url for rom download: %v", err)
+		return "", fmt.Errorf("unable to parse url for rom download: %v", err)
 	}
 
 	params := url.Values{}
@@ -273,7 +272,7 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) error 
 
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return fmt.Errorf("unable to build rom download request: %v", err)
+		return "", fmt.Errorf("unable to build rom download request: %v", err)
 	}
 
 	req.Header.Add("Authorization", authHeader)
@@ -281,22 +280,22 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) error 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("unable to call rom download endpoint: %v", err)
+		return "", fmt.Errorf("unable to call rom download endpoint: %v", err)
 	}
 	defer resp.Body.Close()
 
 	f, err := os.OpenFile(filepath.Join(localPath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
+		return "", fmt.Errorf("failed to create file: %w", err)
 	}
 	defer f.Close()
 
 	_, err = io.Copy(f, resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to save file: %w", err)
+		return "", fmt.Errorf("failed to save file: %w", err)
 	}
 
-	return nil
+	return "", nil
 }
 
 func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {

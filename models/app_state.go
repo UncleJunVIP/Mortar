@@ -1,6 +1,7 @@
 package models
 
 import (
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap/zapcore"
 	"qlova.tech/sum"
 )
@@ -11,8 +12,8 @@ type AppState struct {
 
 	CurrentHost      Host
 	CurrentScreen    sum.Int[Screen]
-	CurrentSection   MortarSection
-	CurrentItemsList MortarItems
+	CurrentSection   shared.Section
+	CurrentItemsList shared.Items
 	SearchFilter     string
 	SelectedFile     string
 
