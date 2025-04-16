@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	commonUI "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"golang.org/x/text/language"
@@ -73,7 +72,7 @@ func sectionSelectionScreen() (shared.ListSelection, error) {
 		extraArgs = append(extraArgs, "--cancel-text", "QUIT")
 	}
 
-	return ui.DisplayList(sections, appState.CurrentHost.DisplayName, "", extraArgs...)
+	return commonUI.DisplayList(sections, appState.CurrentHost.DisplayName, "", extraArgs...)
 }
 
 func loadingScreen() (shared.ListSelection, error) {
@@ -194,7 +193,7 @@ func itemListScreen() (shared.ListSelection, error) {
 		_, _ = commonUI.ShowMessage(itemCountMessage, "3")
 	}
 
-	return ui.DisplayList(itemEntries, title, "SEARCH", extraArgs...)
+	return commonUI.DisplayList(itemEntries, title, "SEARCH", extraArgs...)
 }
 
 func downloadScreen() (shared.ListSelection, error) {
