@@ -2,7 +2,7 @@ name: Package Mortar
 
 on:
   release:
-    types: [published]
+    types: [ published ]
   workflow_dispatch:
 
 jobs:
@@ -23,7 +23,12 @@ jobs:
       - name: Build Package Folder
         run: |
           mkdir Mortar.pak
-          cp -R mortar launch.sh README.md LICENSE resources/config.json resources/bin resources/certs resources/data Mortar.pak
+          cp -R mortar launch.sh README.md LICENSE resources/config.json Mortar.pak
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2.1.0
+        with:
+          subject-path: "${{ steps.binary.outputs.filename }}"
 
       - uses: actions/upload-artifact@v4
         with:

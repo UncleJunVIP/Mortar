@@ -2,13 +2,16 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/disintegration/imaging"
 	"go.uber.org/zap"
 	"mortar/clients"
-	"mortar/state"
+	"mortar/models"
+	"os"
 	"path/filepath"
+	"qlova.tech/sum"
 	"strings"
 )
 
@@ -27,68 +30,56 @@ func MapTagsToDirectories(items shared.Items) map[string]string {
 	return mapping
 }
 
-func FindArt() bool {
+func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[shared.ArtDownloadType]) string {
 	logger := common.GetLoggerInstance()
-	appState := state.GetAppState()
 
-	if appState.CurrentHost.HostType == shared.HostTypes.ROMM {
+	host := platform.Host
+
+	if host.HostType == shared.HostTypes.ROMM {
 		// Skip all this silliness and grab the art from RoMM
-		client, err := clients.BuildClient(appState.CurrentHost)
+		client, err := clients.BuildClient(host)
 		if err != nil {
-			return false
+			return ""
 		}
 
-		var selectedItem shared.Item
-
-		for _, item := range appState.CurrentItemsList {
-			if item.Filename == appState.SelectedFile {
-				selectedItem = item
-				break
-			}
+		if game.ArtURL == "" {
+			return ""
 		}
 
-		if selectedItem.ArtURL == "" {
-			return false
-		}
-
-		slashIdx := strings.LastIndex(selectedItem.ArtURL, "/")
-		artSubdirectory, artFilename := selectedItem.ArtURL[:slashIdx], selectedItem.ArtURL[slashIdx+1:]
+		slashIdx := strings.LastIndex(game.ArtURL, "/")
+		artSubdirectory, artFilename := game.ArtURL[:slashIdx], game.ArtURL[slashIdx+1:]
 
 		artFilename = strings.Split(artFilename, "?")[0] // For the query string caching stuff
 
-		mediaPath := filepath.Join(appState.CurrentSection.LocalDirectory, ".media")
+		mediaPath := filepath.Join(platform.LocalDirectory, ".media")
 
 		LastSavedArtPath, err := client.DownloadFileRename(artSubdirectory,
-			mediaPath, artFilename, appState.SelectedFile)
-
-		appState.LastSavedArtPath = LastSavedArtPath
-
-		state.UpdateAppState(appState)
+			mediaPath, artFilename, game.Filename)
 
 		if err != nil {
-			return false
+			return ""
 		}
 
-		return true
+		return LastSavedArtPath
 	}
 
-	tag := common.TagRegex.FindStringSubmatch(appState.CurrentSection.LocalDirectory)
+	tag := common.TagRegex.FindStringSubmatch(platform.LocalDirectory)
 
 	if tag == nil {
-		return false
+		return ""
 	}
 
-	client := common.NewThumbnailClient(appState.Config.ArtDownloadType)
+	client := common.NewThumbnailClient(downloadType)
 	section := client.BuildThumbnailSection(tag[1])
 
 	artList, err := client.ListDirectory(section)
 
 	if err != nil {
 		logger.Info("Unable to fetch artlist", zap.Error(err))
-		return false
+		return ""
 	}
 
-	noExtension := strings.TrimSuffix(appState.SelectedFile, filepath.Ext(appState.SelectedFile))
+	noExtension := strings.TrimSuffix(game.Filename, filepath.Ext(game.Filename))
 
 	var matched shared.Item
 
@@ -106,16 +97,16 @@ func FindArt() bool {
 
 	if matched.Filename != "" {
 		lastSavedArtPath, err := client.DownloadFileRename(section.HostSubdirectory,
-			filepath.Join(appState.CurrentSection.LocalDirectory, ".media"), matched.Filename, appState.SelectedFile)
+			filepath.Join(platform.LocalDirectory, ".media"), matched.Filename, game.Filename)
 
 		if err != nil {
-			return false
+			return ""
 		}
 
 		src, err := imaging.Open(lastSavedArtPath)
 		if err != nil {
 			logger.Error("Unable to open last saved art", zap.Error(err))
-			return false
+			return ""
 		}
 
 		dst := imaging.Resize(src, 400, 0, imaging.Lanczos)
@@ -123,26 +114,21 @@ func FindArt() bool {
 		err = imaging.Save(dst, lastSavedArtPath)
 		if err != nil {
 			logger.Error("Unable to save resized last saved art", zap.Error(err))
-			return false
+			return ""
 		}
 
-		appState.LastSavedArtPath = lastSavedArtPath
-
-		state.UpdateAppState(appState)
-
-		return true
+		return lastSavedArtPath
 	}
 
-	return false
+	return ""
 }
 
-func DownloadFile(cancel context.CancelFunc) (string, error) {
+func DownloadFile(platform models.Platform, games shared.Items, game shared.Item, cancel context.CancelFunc) (string, error) {
 	defer cancel()
 
 	logger := common.GetLoggerInstance()
-	appState := state.GetAppState()
 
-	client, err := clients.BuildClient(appState.CurrentHost)
+	client, err := clients.BuildClient(platform.Host)
 	if err != nil {
 		return "", err
 	}
@@ -156,19 +142,54 @@ func DownloadFile(cancel context.CancelFunc) (string, error) {
 
 	var hostSubdirectory string
 
-	if appState.CurrentHost.HostType == shared.HostTypes.ROMM {
+	if platform.Host.HostType == shared.HostTypes.ROMM {
 		var selectedItem shared.Item
-		for _, item := range appState.CurrentItemsList {
-			if item.Filename == appState.SelectedFile {
+		for _, item := range games {
+			if item.Filename == game.Filename {
 				selectedItem = item
 				break
 			}
 		}
 		hostSubdirectory = selectedItem.RomID
 	} else {
-		hostSubdirectory = appState.CurrentSection.HostSubdirectory
+		hostSubdirectory = platform.HostSubdirectory
 	}
 
 	return client.DownloadFile(hostSubdirectory,
-		appState.CurrentSection.LocalDirectory, appState.SelectedFile)
+		platform.LocalDirectory, game.Filename)
+}
+
+func CachedMegaThreadJsonFilename(hostName, platformName string) string {
+	return strings.ReplaceAll(fmt.Sprintf("%s_%s_%s.json",
+		hostName, platformName, "megathread"), " ", "")
+}
+
+func CacheFolderExists() bool {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return false
+	}
+
+	cachePath := filepath.Join(cwd, ".cache")
+	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
+func DeleteCache() error {
+	logger := common.GetLoggerInstance()
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(filepath.Join(cwd, ".cache"))
+	if err != nil {
+		logger.Error("Unable to delete cache", zap.Error(err))
+		return err
+	}
+
+	logger.Info("Cache deleted")
+	return nil
 }

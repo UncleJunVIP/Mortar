@@ -5,18 +5,15 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	commonUI "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
-	"go.uber.org/zap"
+	"mortar/models"
 	"mortar/state"
 	"mortar/ui"
 	"mortar/utils"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 func init() {
 	common.SetLogLevel("ERROR")
-	common.ConfigureEnvironment()
 
 	config, err := state.LoadConfig()
 	if err != nil {
@@ -49,27 +46,14 @@ func init() {
 	romDirectories := utils.MapTagsToDirectories(fb.Items)
 
 	for hostIdx, host := range config.Hosts {
-		for sectionIdx, section := range host.Sections {
+		for sectionIdx, section := range host.Platforms {
 			if section.SystemTag != "" {
-				config.Hosts[hostIdx].Sections[sectionIdx].LocalDirectory = romDirectories[section.SystemTag]
+				config.Hosts[hostIdx].Platforms[sectionIdx].LocalDirectory = romDirectories[section.SystemTag]
 			}
 		}
 	}
 
-	//logger.Debug("Config Loaded", zap.Object("config", config))
-
 	state.SetConfig(config)
-
-	appState := state.GetAppState()
-
-	if len(appState.Config.Hosts) == 1 {
-		appState.CurrentScreen = ui.Screens.SectionSelection
-		appState.CurrentHost = appState.Config.Hosts[0]
-	} else {
-		appState.CurrentScreen = ui.Screens.MainMenu
-	}
-
-	state.UpdateAppState(appState)
 }
 
 func cleanup() {
@@ -80,137 +64,114 @@ func main() {
 	defer cleanup()
 
 	logger := common.GetLoggerInstance()
+	appState := state.GetAppState()
+
+	logger.Info("Starting Mortar")
+
+	var screen models.Screen
+
+	if len(appState.Config.Hosts) == 1 {
+		screen = ui.InitPlatformSelection(appState.Config.Hosts[0], true)
+	} else {
+		screen = ui.InitMainMenu(appState.Config.Hosts)
+	}
 
 	for {
-		appState := state.GetAppState()
+		res, code, _ := screen.Draw() // TODO figure out error handling
 
-		selection, err := ui.ScreenFuncs[appState.CurrentScreen]()
-
-		if err != nil {
-			logger.Error("Error loading screen")
-		}
-
-		// Hacky way to handle bad input on deep sleep
-		if strings.Contains(selection.Value, "SetRawBrightness") ||
-			strings.Contains(selection.Value, "nSetRawVolume") {
-			continue
-		}
-
-		switch appState.CurrentScreen {
+		switch screen.Name() {
 		case ui.Screens.MainMenu:
-			switch selection.ExitCode {
+			switch code {
 			case 0:
-				ui.SetScreen(ui.Screens.SectionSelection)
-				idx := appState.HostIndices[strings.TrimSpace(selection.Value)]
-				state.SetHost(appState.Config.Hosts[idx])
+				host := res.Value().(models.Host)
+				screen = ui.InitPlatformSelection(host, false)
 			case 1, 2:
 				os.Exit(0)
 			}
-
-		case ui.Screens.SectionSelection:
-			switch selection.ExitCode {
+		case ui.Screens.PlatformSelection:
+			platform := res.Value().(models.Platform)
+			switch code {
 			case 0:
-				ui.SetScreen(ui.Screens.Loading)
-				idx := appState.CurrentHost.GetSectionIndices()[strings.TrimSpace(selection.Value)]
-				state.SetSection(appState.CurrentHost.Sections[idx])
+				screen = ui.InitGamesList(platform, shared.Items{}, "")
 			case 1, 2:
-				if len(appState.Config.Hosts) == 1 {
+				if screen.(ui.PlatformSelection).QuitOnBack {
 					os.Exit(0)
 				}
-				ui.SetScreen(ui.Screens.MainMenu)
-			}
-
-		case ui.Screens.ItemList:
-			switch selection.ExitCode {
-			case 0:
-				selectedItem := strings.TrimSpace(selection.Value)
-				for _, item := range appState.CurrentItemsList {
-					itemWithoutExt := strings.ReplaceAll(item.Filename, filepath.Ext(item.Filename), "")
-					if selectedItem == itemWithoutExt {
-						state.SetSelectedFile(item.Filename)
-						break
-					}
-				}
-
-				ui.SetScreen(ui.Screens.Download)
-			case 2:
-				if appState.SearchFilter != "" {
-					state.SetSearchFilter("")
-				} else {
-					ui.SetScreen(ui.Screens.SectionSelection)
-				}
+				screen = ui.InitMainMenu(appState.Config.Hosts)
 			case 4:
-				ui.SetScreen(ui.Screens.SearchBox)
+				err := utils.DeleteCache()
+				if err != nil {
+					_, _ = commonUI.ShowMessage("Unable to delete cache!", "3")
+				} else {
+					_, _ = commonUI.ShowMessage("Cache deleted!", "3")
+				}
+				screen = ui.InitPlatformSelection(platform.Host, len(appState.Config.Hosts) == 0)
 			case 404:
-				if appState.SearchFilter != "" {
-					_, _ = commonUI.ShowMessage("No results found for \""+appState.SearchFilter+"\"", "3")
-					state.SetSearchFilter("")
-					ui.SetScreen(ui.Screens.SearchBox)
+				_, _ = commonUI.ShowMessage("No platforms configured for \""+platform.Host.DisplayName+"\"", "3")
+				screen = ui.InitMainMenu(appState.Config.Hosts)
+			case -1:
+				_, _ = commonUI.ShowMessage("Unable to display platforms for \""+platform.Host.DisplayName+"\"", "3")
+				screen = ui.InitMainMenu(appState.Config.Hosts)
+			}
+		case ui.Screens.GameList:
+			gl := screen.(ui.GameList)
+
+			switch code {
+			case 0:
+				game := res.Value().(shared.Item)
+				screen = ui.InitDownloadScreen(gl.Platform, gl.Games, game, gl.SearchFilter)
+
+			case 2:
+				if gl.SearchFilter != "" {
+					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "") // Clear search filter
+				} else {
+					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)
+				}
+
+			case 4:
+				screen = ui.InitSearch(gl.Platform)
+
+			case 404:
+				if gl.SearchFilter != "" {
+					_, _ = commonUI.ShowMessage("No results found for \""+gl.SearchFilter+"\"", "3")
+					screen = ui.InitGamesList(gl.Platform, shared.Items{}, gl.SearchFilter)
 				} else {
 					_, _ = commonUI.ShowMessage("This section contains no items", "3")
-					ui.SetScreen(ui.Screens.SectionSelection)
+					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)
 				}
 			}
-
-		case ui.Screens.Loading:
-			switch selection.ExitCode {
-			case 0:
-				ui.SetScreen(ui.Screens.ItemList)
-			case 1:
-				_, _ = commonUI.ShowMessage("Unable to download item listing from source", "3")
-				ui.SetScreen(ui.Screens.MainMenu)
-			}
-
 		case ui.Screens.SearchBox:
-			switch selection.ExitCode {
+			sb := screen.(ui.Search)
+			switch code {
 			case 0:
-				state.SetSearchFilter(selection.Value)
-			case 1, 2, 3:
-				state.SetSearchFilter("")
+				query := res.Value().(string)
+				screen = ui.InitGamesList(sb.Platform, shared.Items{}, query)
+			default:
+				screen = ui.InitGamesList(sb.Platform, shared.Items{}, "")
 			}
-
-			ui.SetScreen(ui.Screens.ItemList)
-
 		case ui.Screens.Download:
-			switch selection.ExitCode {
+			ds := screen.(ui.DownloadScreen)
+			switch code {
 			case 0:
 				if appState.Config.DownloadArt {
-					ui.SetScreen(ui.Screens.DownloadArt)
+					screen = ui.InitDownloadArtScreen(ds.Platform, ds.Game, appState.Config.ArtDownloadType, ds.SearchFilter)
 				} else {
-					ui.SetScreen(ui.Screens.ItemList)
+					screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
 				}
-
 			case 1:
-				_, _ = commonUI.ShowMessage("Unable to download "+appState.SelectedFile, "3")
-				ui.SetScreen(ui.Screens.ItemList)
-
+				_, _ = commonUI.ShowMessage("Unable to download "+ds.Game.DisplayName, "3")
+				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
 			default:
-				ui.SetScreen(ui.Screens.ItemList)
+				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
 			}
-
 		case ui.Screens.DownloadArt:
-			switch selection.ExitCode {
-			case 0:
-				logger := common.GetLoggerInstance()
-
-				logger.Info("Art Path", zap.String("lsap", state.GetAppState().LastSavedArtPath))
-
-				code, _ := commonUI.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
-					"--background-image", state.GetAppState().LastSavedArtPath,
-					"--confirm-text", "Use",
-					"--confirm-show", "true",
-					"--action-button", "X",
-					"--action-text", "I'll Find My Own",
-					"--action-show", "true",
-					"--message-alignment", "bottom")
-
-				if code == 2 || code == 4 {
-					common.DeleteFile(state.GetAppState().LastSavedArtPath)
-				}
-			case 1:
+			da := screen.(ui.DownloadArtScreen)
+			switch code {
+			case 404:
 				_, _ = commonUI.ShowMessage("Could not find art :(", "3")
 			}
-			ui.SetScreen(ui.Screens.ItemList)
+
+			screen = ui.InitGamesList(da.Platform, shared.Items{}, da.SearchFilter)
 		}
 	}
 }

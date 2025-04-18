@@ -20,13 +20,17 @@ type Host struct {
 	ShareName        string   `yaml:"share_name"`
 	ExtensionFilters []string `yaml:"extension_filters"`
 
-	Sections shared.Sections `yaml:"sections"`
-	Filters  Filters         `yaml:"filters"`
+	Platforms Platforms `yaml:"platforms"`
+	Filters   Filters   `yaml:"filters"`
 
 	TableColumns       shared.TableColumns `yaml:"table_columns"`
 	SourceReplacements SourceReplacements  `yaml:"source_replacements"`
 
-	SectionIndices SectionIndices `yaml:"-"`
+	PlatformIndices PlatformIndices `yaml:"-"`
+}
+
+func (h Host) Value() interface{} {
+	return h
 }
 
 type Hosts []Host
@@ -46,37 +50,21 @@ func (s SourceReplacements) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	return nil
 }
 
-type SectionIndices map[string]int
+type PlatformIndices map[string]int
 
-func (s SectionIndices) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	for k, v := range s {
-		enc.AddInt(k, v)
-	}
+func (h Host) GetPlatformIndices() PlatformIndices {
+	if h.PlatformIndices == nil {
+		h.PlatformIndices = map[string]int{}
 
-	return nil
-}
-
-func (h *Host) GetSectionIndices() map[string]int {
-	if h.SectionIndices == nil {
-		h.SectionIndices = map[string]int{}
-
-		for idx, section := range h.Sections {
-			h.SectionIndices[section.Name] = idx
+		for idx, section := range h.Platforms {
+			h.PlatformIndices[section.Name] = idx
 		}
 	}
 
-	return h.SectionIndices
+	return h.PlatformIndices
 }
 
-func (h *Hosts) MarshalLogArray(enc zapcore.ArrayEncoder) error {
-	for _, host := range *h {
-		_ = enc.AppendObject(&host)
-	}
-
-	return nil
-}
-
-func (h *Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+func (h Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("display_name", h.DisplayName)
 	enc.AddString("host_type", h.HostType.String())
 	enc.AddString("root_uri", h.RootURI)
@@ -93,13 +81,27 @@ func (h *Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 
 	enc.AddString("extension_filters", strings.Join(h.ExtensionFilters, ","))
 
-	_ = enc.AddArray("sections", h.Sections)
+	_ = enc.AddArray("platforms", h.Platforms)
 
 	_ = enc.AddObject("table_columns", h.TableColumns)
 
 	_ = enc.AddObject("source_replacements", h.SourceReplacements)
 
-	_ = enc.AddObject("section_indices", h.SectionIndices)
+	return nil
+}
+
+func (h Hosts) Values() []string {
+	var list []string
+	for _, host := range h {
+		list = append(list, host.DisplayName)
+	}
+	return list
+}
+
+func (h Hosts) MarshalLogArray(enc zapcore.ArrayEncoder) error {
+	for _, host := range h {
+		_ = enc.AppendObject(&host)
+	}
 
 	return nil
 }

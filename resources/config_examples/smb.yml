@@ -10,8 +10,8 @@ hosts:
     extension_filters:
       - ".DS_Store"
 
-    sections:
-      - section_name: "Game Boy Advance"
+    platforms:
+      - platform_name: "Game Boy Advance"
         system_tag: "GBA"
         host_subdirectory: "GBA/"
 

@@ -8,7 +8,6 @@ import (
 
 type Config struct {
 	Hosts              Hosts                           `yaml:"hosts"`
-	ShowItemCount      bool                            `yaml:"show_item_count"`
 	DownloadArt        bool                            `yaml:"download_art"`
 	RawArtDownloadType string                          `yaml:"art_download_type"`
 	ArtDownloadType    sum.Int[shared.ArtDownloadType] `yaml:"-"`
@@ -17,7 +16,6 @@ type Config struct {
 
 func (c *Config) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	_ = enc.AddArray("hosts", &c.Hosts)
-	enc.AddBool("show_item_count", c.ShowItemCount)
 	enc.AddBool("download_art", c.DownloadArt)
 	enc.AddString("art_download_type", c.ArtDownloadType.String())
 	enc.AddString("log_level", c.LogLevel)
