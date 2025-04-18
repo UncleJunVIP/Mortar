@@ -2,7 +2,6 @@ package state
 
 import (
 	"fmt"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/atomic"
 	"gopkg.in/yaml.v3"
 	"mortar/models"
@@ -39,12 +38,6 @@ func UpdateAppState(newAppState *models.AppState) {
 	appState.Store(newAppState)
 }
 
-func SetHost(host models.Host) {
-	temp := GetAppState()
-	temp.CurrentHost = host
-	UpdateAppState(temp)
-}
-
 func SetConfig(config *models.Config) {
 	temp := GetAppState()
 	temp.Config = config
@@ -54,23 +47,5 @@ func SetConfig(config *models.Config) {
 		temp.HostIndices[host.DisplayName] = idx
 	}
 
-	UpdateAppState(temp)
-}
-
-func SetSection(section shared.Section) {
-	temp := GetAppState()
-	temp.CurrentSection = section
-	UpdateAppState(temp)
-}
-
-func SetSearchFilter(filter string) {
-	temp := GetAppState()
-	temp.SearchFilter = filter
-	UpdateAppState(temp)
-}
-
-func SetSelectedFile(file string) {
-	temp := GetAppState()
-	temp.SelectedFile = file
 	UpdateAppState(temp)
 }

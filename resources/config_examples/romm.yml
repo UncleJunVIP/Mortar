@@ -6,8 +6,8 @@ hosts:
     username: ""
     password: ""
 
-    sections:
-      - section_name: "Game Boy Color"
+    platforms:
+      - platform_name: "Game Boy Color"
         system_tag: "GBA"
         romm_platform_id: "3"
 

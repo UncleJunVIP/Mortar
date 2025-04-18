@@ -58,8 +58,8 @@ hosts:
     extension_filters: # Used by SMB to hide files with given extensions
       - ".DS_Store"
 
-    sections: # One or more mappings of host directory to the local filesystem
-      - section_name: "Game Boy" # Name it whatever you want
+    platforms: # One or more mappings of host directory to the local filesystem
+      - platform_name: "Game Boy" # Name it whatever you want
         system_tag: "GB" # Must match the tag in the `SDCARD_ROOT/Roms` directories
         local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Explicitly set the path. This will be overwritten if `system_tag` is set
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/" # The subdirectory on the host, not used by RomM

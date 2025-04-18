@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 )
@@ -10,11 +11,12 @@ func BuildClient(host models.Host) (shared.Client, error) {
 	case shared.HostTypes.APACHE,
 		shared.HostTypes.MEGATHREAD,
 		shared.HostTypes.CUSTOM:
-		return NewHttpTableClient(
+		return common.NewHttpTableClient(
 			host.RootURI,
 			host.HostType,
 			host.TableColumns,
 			host.SourceReplacements,
+			nil,
 		), nil
 	case shared.HostTypes.NGINX:
 		return NewNginxJsonClient(host.RootURI), nil

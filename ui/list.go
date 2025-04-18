@@ -2,27 +2,29 @@ package ui
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
-	"mortar/state"
+	"mortar/utils"
+	"os"
+	"path"
 	"strings"
 )
 
-func fetchList(cancel context.CancelFunc) error {
+func FetchListStateless(platform models.Platform, cancel context.CancelFunc) (shared.Items, error) {
 	defer cancel()
 
 	logger := common.GetLoggerInstance()
-	appState := state.GetAppState()
 
 	logger.Debug("Fetching Item List",
-		zap.Object("AppState", appState))
+		zap.Object("host", platform.Host))
 
-	client, err := clients.BuildClient(appState.CurrentHost)
+	client, err := clients.BuildClient(platform.Host)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer func(client shared.Client) {
@@ -32,23 +34,39 @@ func fetchList(cancel context.CancelFunc) error {
 		}
 	}(client)
 
-	section := ""
+	subdirectory := ""
 
-	switch appState.CurrentHost.HostType {
+	switch platform.Host.HostType {
 	case shared.HostTypes.ROMM:
-		section = appState.CurrentSection.RomMPlatformID
+		subdirectory = platform.RomMPlatformID
 	default:
-		section = appState.CurrentSection.HostSubdirectory
+		subdirectory = platform.HostSubdirectory
 	}
 
-	items, err := client.ListDirectory(section)
+	items, err := client.ListDirectory(subdirectory)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	appState.CurrentItemsList = items
+	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
+		jsonData, err := json.Marshal(items)
+		if err != nil {
+			logger.Debug("Unable to get marshal JSON for Megathread", zap.Error(err))
 
-	return nil
+			cwd, err := os.Getwd()
+			if err != nil {
+				logger.Debug("Unable to get current working directory for caching Megathread", zap.Error(err))
+			}
+
+			filePath := path.Join(cwd, ".cache", utils.CachedMegaThreadJsonFilename("", ""))
+			err = os.WriteFile(filePath, jsonData, 0644)
+			if err != nil {
+				logger.Debug("Unable to write JSON to file for Megathread", zap.Error(err))
+			}
+		}
+	}
+
+	return items, nil
 }
 
 func filterList(itemList []shared.Item, filters models.Filters) []shared.Item {
