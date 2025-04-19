@@ -4,7 +4,8 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	commonUI "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
+	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
+	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/state"
 	"mortar/ui"
@@ -17,11 +18,13 @@ func init() {
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		_, _ = commonUI.ShowMessage("Unable to parse config.yml! Quitting!", "3")
+		_, _ = cui.ShowMessage("Unable to parse config.yml! Quitting!", "3")
 		common.LogStandardFatal("Error loading config", err)
 	}
 
-	common.SetLogLevel(config.LogLevel)
+	if config.LogLevel != "" {
+		common.SetLogLevel(config.LogLevel)
+	}
 
 	logger := common.GetLoggerInstance()
 
@@ -39,8 +42,8 @@ func init() {
 	fb := filebrowser.NewFileBrowser(logger)
 	err = fb.CWD(common.RomDirectory)
 	if err != nil {
-		_, _ = commonUI.ShowMessage("Unable to fetch ROM directories! Quitting!", "3")
-		common.LogStandardFatal("Error loading fetching ROM directories", err)
+		_, _ = cui.ShowMessage("Unable to fetch ROM directories! Quitting!", "3")
+		logger.Fatal("Error loading fetching ROM directories", zap.Error(err))
 	}
 
 	romDirectories := utils.MapTagsToDirectories(fb.Items)
@@ -101,16 +104,16 @@ func main() {
 			case 4:
 				err := utils.DeleteCache()
 				if err != nil {
-					_, _ = commonUI.ShowMessage("Unable to delete cache!", "3")
+					_, _ = cui.ShowMessage("Unable to delete cache!", "3")
 				} else {
-					_, _ = commonUI.ShowMessage("Cache deleted!", "3")
+					_, _ = cui.ShowMessage("Cache deleted!", "3")
 				}
 				screen = ui.InitPlatformSelection(platform.Host, len(appState.Config.Hosts) == 0)
 			case 404:
-				_, _ = commonUI.ShowMessage("No platforms configured for \""+platform.Host.DisplayName+"\"", "3")
+				_, _ = cui.ShowMessage("No platforms configured for \""+platform.Host.DisplayName+"\"", "3")
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			case -1:
-				_, _ = commonUI.ShowMessage("Unable to display platforms for \""+platform.Host.DisplayName+"\"", "3")
+				_, _ = cui.ShowMessage("Unable to display platforms for \""+platform.Host.DisplayName+"\"", "3")
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			}
 		case ui.Screens.GameList:
@@ -133,10 +136,10 @@ func main() {
 
 			case 404:
 				if gl.SearchFilter != "" {
-					_, _ = commonUI.ShowMessage("No results found for \""+gl.SearchFilter+"\"", "3")
+					_, _ = cui.ShowMessage("No results found for \""+gl.SearchFilter+"\"", "3")
 					screen = ui.InitGamesList(gl.Platform, shared.Items{}, gl.SearchFilter)
 				} else {
-					_, _ = commonUI.ShowMessage("This section contains no items", "3")
+					_, _ = cui.ShowMessage("This section contains no items", "3")
 					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)
 				}
 			}
@@ -159,7 +162,7 @@ func main() {
 					screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
 				}
 			case 1:
-				_, _ = commonUI.ShowMessage("Unable to download "+ds.Game.DisplayName, "3")
+				_, _ = cui.ShowMessage("Unable to download "+ds.Game.DisplayName, "3")
 				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
 			default:
 				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
@@ -168,7 +171,7 @@ func main() {
 			da := screen.(ui.DownloadArtScreen)
 			switch code {
 			case 404:
-				_, _ = commonUI.ShowMessage("Could not find art :(", "3")
+				_, _ = cui.ShowMessage("Could not find art :(", "3")
 			}
 
 			screen = ui.InitGamesList(da.Platform, shared.Items{}, da.SearchFilter)

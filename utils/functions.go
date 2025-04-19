@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
@@ -123,9 +122,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 	return ""
 }
 
-func DownloadFile(platform models.Platform, games shared.Items, game shared.Item, cancel context.CancelFunc) (string, error) {
-	defer cancel()
-
+func DownloadFile(platform models.Platform, games shared.Items, game shared.Item) (string, error) {
 	logger := common.GetLoggerInstance()
 
 	client, err := clients.BuildClient(platform.Host)
