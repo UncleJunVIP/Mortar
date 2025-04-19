@@ -25,11 +25,6 @@ jobs:
           mkdir Mortar.pak
           cp -R mortar launch.sh README.md LICENSE resources/config.json Mortar.pak
 
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v2.1.0
-        with:
-          subject-path: "${{ steps.binary.outputs.filename }}"
-
       - uses: actions/upload-artifact@v4
         with:
           name: Mortar.pak
