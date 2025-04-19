@@ -10,6 +10,7 @@ import (
 	"mortar/utils"
 	"os/exec"
 	"qlova.tech/sum"
+	"time"
 )
 
 type DownloadArtScreen struct {
@@ -47,6 +48,8 @@ func (a DownloadArtScreen) Draw() (value models.ScreenReturn, exitCode int, e er
 	if err != nil && cmd.ProcessState.ExitCode() > 6 {
 		logger.Fatal("Error with starting miniui-presenter download art message", zap.Error(err))
 	}
+
+	time.Sleep(1250 * time.Millisecond)
 
 	artPath := utils.FindArt(a.Platform, a.Game, a.DownloadType)
 

@@ -97,10 +97,6 @@ func loadGamesList(platform models.Platform) (games shared.Items, e error) {
 	ctxWithCancel, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	exitCodeChan := make(chan int, 1)
-	itemsChan := make(chan shared.Items, 1)
-	errChan := make(chan error, 1)
-
 	args := []string{"--message", "Loading " + platform.Name + "...", "--timeout", "-1"}
 	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
 
@@ -109,39 +105,24 @@ func loadGamesList(platform models.Platform) (games shared.Items, e error) {
 		logger.Fatal("Error with starting miniui-presenter loading message", zap.Error(err))
 	}
 
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(1250 * time.Millisecond)
 
-	go func() {
-		items, err := FetchListStateless(platform, cancel)
-		if err != nil {
-			logger.Error("Error downloading Item List", zap.Error(err))
-			exitCodeChan <- 1
-			errChan <- err
-		} else {
-			itemsChan <- items
-			exitCodeChan <- 0
-		}
-		cancel()
-	}()
+	items, err := FetchListStateless(platform, cancel)
+	if err != nil {
+		logger.Error("Error downloading Item List", zap.Error(err))
+	}
+	cancel()
 
 	err = cmd.Wait()
 	if err != nil && cmd.ProcessState.ExitCode() != -1 {
 		logger.Fatal("Error while waiting for miniui-presenter loading message to be killed", zap.Error(err))
 	}
 
-	select {
-	case err := <-errChan:
-		return nil, err
-	default:
-	}
-
-	select {
-	case items := <-itemsChan:
-		cache(platform, items)
-		return items, nil
-	default:
+	if len(items) == 0 {
 		return nil, nil
 	}
+	cache(platform, items)
+	return items, nil
 
 }
 
