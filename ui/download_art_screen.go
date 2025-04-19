@@ -10,7 +10,6 @@ import (
 	"mortar/utils"
 	"os/exec"
 	"qlova.tech/sum"
-	"time"
 )
 
 type DownloadArtScreen struct {
@@ -41,9 +40,6 @@ func (a DownloadArtScreen) Draw() (value models.ScreenReturn, exitCode int, e er
 	ctxWithCancel, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	exitCodeChan := make(chan int, 1)
-	artChan := make(chan string, 1)
-
 	args := []string{"--message", "Attempting to download art...", "--timeout", "-1"}
 	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
 
@@ -52,48 +48,29 @@ func (a DownloadArtScreen) Draw() (value models.ScreenReturn, exitCode int, e er
 		logger.Fatal("Error with starting miniui-presenter download art message", zap.Error(err))
 	}
 
-	time.Sleep(1000 * time.Millisecond)
+	artPath := utils.FindArt(a.Platform, a.Game, a.DownloadType)
 
-	go func() {
-		art := utils.FindArt(a.Platform, a.Game, a.DownloadType)
-		if art == "" {
-			logger.Error("Could not find art!")
-			exitCodeChan <- 404
-		} else {
-			artChan <- art
-			exitCodeChan <- 0
-		}
+	cancel()
 
-		cancel()
-	}()
-
-	err = cmd.Wait()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		logger.Fatal("Error with minui-presenter display of download message", zap.Error(err))
-	}
-
-	artPath := <-artChan
-	exitCode = <-exitCodeChan
-
-	switch exitCode {
-	case 404:
+	if artPath == "" {
+		logger.Info("Could not find art!")
 		return shared.Item{}, 404, nil
-	default:
-		code, _ := cui.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
-			"--background-image", artPath,
-			"--confirm-text", "Use",
-			"--confirm-show", "true",
-			"--action-button", "X",
-			"--action-text", "I'll Find My Own",
-			"--action-show", "true",
-			"--message-alignment", "bottom")
-
-		if code == 2 || code == 4 {
-			common.DeleteFile(artPath)
-		}
-		return shared.Item{
-			Path: artPath,
-		}, 0, nil
 	}
+
+	code, _ := cui.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
+		"--background-image", artPath,
+		"--confirm-text", "Use",
+		"--confirm-show", "true",
+		"--action-button", "X",
+		"--action-text", "I'll Find My Own",
+		"--action-show", "true",
+		"--message-alignment", "bottom")
+
+	if code == 2 || code == 4 {
+		common.DeleteFile(artPath)
+	}
+	return shared.Item{
+		Path: artPath,
+	}, 0, nil
 
 }
