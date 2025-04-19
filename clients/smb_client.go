@@ -3,8 +3,10 @@ package clients
 import (
 	"errors"
 	"fmt"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/hirochachacha/go-smb2"
+	"go.uber.org/zap"
 	"net"
 	"os"
 	"path/filepath"
@@ -99,13 +101,17 @@ func (c *SMBClient) ListDirectory(subdirectory string) (shared.Items, error) {
 }
 
 func (c *SMBClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
+	logger := common.GetLoggerInstance()
+
 	bytes, err := c.Mount.ReadFile(filepath.Join(remotePath, filename))
 	if err != nil {
+		logger.Error("Unable to read file", zap.Error(err))
 		return "", err
 	}
 
 	f, err := os.OpenFile(filepath.Join(localPath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
+		logger.Error("Unable to open file", zap.Error(err))
 		return "", err
 	}
 
@@ -113,12 +119,13 @@ func (c *SMBClient) DownloadFile(remotePath, localPath, filename string) (string
 
 	_, err = f.Write(bytes)
 	if err != nil {
+		logger.Error("Unable to write file", zap.Error(err))
 		return "", err
 	}
 
-	return "", nil
+	return filename, nil
 }
 
-func (c *SMBClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
+func (c *SMBClient) DownloadFileRename(_, _, _, _ string) (string, error) {
 	panic("not implemented")
 }

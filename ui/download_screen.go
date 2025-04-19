@@ -9,6 +9,7 @@ import (
 	"mortar/utils"
 	"os/exec"
 	"qlova.tech/sum"
+	"time"
 )
 
 type DownloadScreen struct {
@@ -46,6 +47,8 @@ func (d DownloadScreen) Draw() (value models.ScreenReturn, exitCode int, e error
 	if err != nil && cmd.ProcessState.ExitCode() != -1 {
 		logger.Fatal("Error with starting miniui-presenter download message", zap.Error(err))
 	}
+
+	time.Sleep(1250 * time.Millisecond)
 
 	filepath, err := utils.DownloadFile(d.Platform, d.Games, d.Game)
 

@@ -177,7 +177,6 @@ type RomMRom struct {
 	SortComparator string `json:"sort_comparator"`
 }
 
-const PlatformEndpoint = "/api/platforms/"
 const RomsEndpoint = "/api/roms/"
 
 func NewRomMClient(hostname string, port int, username string, password string) *RomMClient {
@@ -295,7 +294,7 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) (strin
 		return "", fmt.Errorf("failed to save file: %w", err)
 	}
 
-	return "", nil
+	return filename, nil
 }
 
 func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {

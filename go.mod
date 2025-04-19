@@ -2,10 +2,8 @@ module mortar
 
 go 1.24.1
 
-replace github.com/UncleJunVIP/nextui-pak-shared-functions => /Users/btk/Developer/nextui-pak-shared-functions
-
 require (
-	github.com/UncleJunVIP/nextui-pak-shared-functions v1.1.0
+	github.com/UncleJunVIP/nextui-pak-shared-functions v1.2.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/hirochachacha/go-smb2 v1.1.0
 	go.uber.org/atomic v1.11.0
