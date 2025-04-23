@@ -37,7 +37,7 @@ func (m MainMenu) Draw() (host models.ScreenReturn, exitCode int, e error) {
 	}
 
 	if selection.ExitCode == 0 {
-		hostIdx := m.HostIndices[selection.Value]
+		hostIdx := m.HostIndices[selection.SelectedValue]
 		return m.Hosts[hostIdx], selection.ExitCode, nil
 	}
 

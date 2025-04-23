@@ -137,7 +137,7 @@ func main() {
 			case 404:
 				if gl.SearchFilter != "" {
 					_, _ = cui.ShowMessage("No results found for \""+gl.SearchFilter+"\"", "3")
-					screen = ui.InitGamesList(gl.Platform, shared.Items{}, gl.SearchFilter)
+					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "")
 				} else {
 					_, _ = cui.ShowMessage("This section contains no items", "3")
 					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)

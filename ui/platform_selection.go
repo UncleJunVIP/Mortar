@@ -45,7 +45,7 @@ func (ps PlatformSelection) Draw() (p models.ScreenReturn, exitCode int, e error
 	}
 
 	if selection.ExitCode == 0 {
-		idx := ps.Host.GetPlatformIndices()[selection.Value]
+		idx := ps.Host.GetPlatformIndices()[selection.SelectedValue]
 		platform := ps.Host.Platforms[idx]
 		platform.Host = ps.Host
 
