@@ -81,7 +81,7 @@ func (gl GameList) Draw() (game models.ScreenReturn, exitCode int, e error) {
 		return shared.Item{}, 1, err
 	}
 
-	selectedGame := itemEntriesMap[selection.Value]
+	selectedGame := itemEntriesMap[selection.SelectedValue]
 	return selectedGame, selection.ExitCode, nil
 }
 
