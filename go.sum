@@ -2,10 +2,8 @@ github.com/PuerkitoBio/goquery v1.10.3 h1:pFYcNSqHxBD06Fpj/KsbStFRsgRATgnf3LeXiU
 github.com/PuerkitoBio/goquery v1.10.3/go.mod h1:tMUX0zDMHXYlAQk6p35XxQMqMweEKB7iK7iLNd4RH4Y=
 github.com/UncleJunVIP/certifiable v1.0.0 h1:g8SMZrGW74qLvli9j0CYO5BvpVcGhqxfvAUnTeSjyfc=
 github.com/UncleJunVIP/certifiable v1.0.0/go.mod h1:paPhCSE8DKzYvBcFcr5NVAYJmmvADq8e5fvkvs95np4=
-github.com/UncleJunVIP/nextui-pak-shared-functions v1.2.0 h1:uSMXscHgBskbghI6dDsU6OY3iLd1QxtedcrU30Kcsm8=
-github.com/UncleJunVIP/nextui-pak-shared-functions v1.2.0/go.mod h1:YEvuabyjM99f6fX2MnzTIgfHljjy0iqy5Tvm8NFvvcc=
-github.com/UncleJunVIP/nextui-pak-shared-functions v1.2.1 h1:kc9cZHqfZ/vJ0C/cOuBLiXfz+T+wDyO/7+7VU247T0c=
-github.com/UncleJunVIP/nextui-pak-shared-functions v1.2.1/go.mod h1:YEvuabyjM99f6fX2MnzTIgfHljjy0iqy5Tvm8NFvvcc=
+github.com/UncleJunVIP/nextui-pak-shared-functions v1.3.0 h1:Ow8F+4AbcdlVHuHwVl68oalKG51GMITCDX2/SsN2IQg=
+github.com/UncleJunVIP/nextui-pak-shared-functions v1.3.0/go.mod h1:YEvuabyjM99f6fX2MnzTIgfHljjy0iqy5Tvm8NFvvcc=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4 h1:6xQvdHFFMHHW8ubDS+xUW/USUx25kZtC6nfVnY8tZQU=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4/go.mod h1:xStjYiUrfnpo8937cHqbWh4hHGMSpT0sZ+qjvbCTLA0=
 github.com/andybalholm/cascadia v1.3.3 h1:AG2YHrzJIm4BZ19iwJ/DAua6Btl3IwJX+VI4kktS1LM=
