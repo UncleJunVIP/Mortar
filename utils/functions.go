@@ -19,10 +19,10 @@ func MapTagsToDirectories(items shared.Items) map[string]string {
 
 	for _, entry := range items {
 		if entry.IsDirectory {
-
+			tag := strings.ReplaceAll(entry.Tag, "(", "")
+			tag = strings.ReplaceAll(tag, ")", "")
 			path := filepath.Join(common.RomDirectory, entry.Filename)
-			mapping[entry.Tag] = path
-
+			mapping[tag] = path
 		}
 	}
 

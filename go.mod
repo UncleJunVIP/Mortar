@@ -3,6 +3,7 @@ module mortar
 go 1.24.1
 
 require (
+	github.com/UncleJunVIP/nextui-pak-shared-functions v1.3.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/hirochachacha/go-smb2 v1.1.0
 	go.uber.org/atomic v1.11.0
@@ -14,7 +15,6 @@ require (
 require (
 	github.com/PuerkitoBio/goquery v1.10.3 // indirect
 	github.com/UncleJunVIP/certifiable v1.0.0 // indirect
-	github.com/UncleJunVIP/nextui-pak-shared-functions v1.2.1 // indirect
 	github.com/activcoding/HTML-Table-to-JSON v0.0.4 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
