@@ -1,8 +1,0 @@
-{
-  "label": "Mortar",
-  "launch": "launch.sh",
-  "description": "Download content from RomM, SMB, Megathread, Apache / nginx mod_autoindex and more",
-  "platforms": [
-    "tg5040"
-  ]
-}

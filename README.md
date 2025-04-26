@@ -2,7 +2,7 @@
 
 <img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
 <h3 style="font-size: 25px;">
-    A download client for your TrimUI Brick running NextUI.
+    A ROM download client for <a href="https://nextui.loveretro.games" target="_blank">NextUI</a>.
 </h3>
 
 <h4 style="font-size: 18px;">
@@ -29,15 +29,15 @@ Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
 
 ## How do I setup Mortar?
 
-1. Own a TrimUI Brick and have a SD Card with NextUI configured.
-2. Connect your Brick to a Wi-Fi network.
+1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI configured.
+2. Connect your device to a Wi-Fi network.
 3. Download the latest Mortar release from this repo.
 4. Unzip the release download.
 5. Edit one of the templates in the [`config_examples`](https://github.com/UncleJunVIP/Mortar.pak/tree/main/resources/config_examples) directory. Once done save it as `config.yml` inside the
    `Mortar.pak` directory.
-6. With your Brick powered off, eject the SD Card and connect it to your computer.
+6. With your device powered off, eject the SD Card and connect it to your computer.
 7. Copy the entire Mortar.pak file to `SD_ROOT/Tools/tg5040`.
-8. Reinsert your SD Card into your Brick.
+8. Reinsert your SD Card into your device.
 9. Launch `Mortar` from the `Tools` menu and enjoy!
 
 ## Configuration Reference
