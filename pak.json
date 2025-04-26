@@ -5,7 +5,9 @@
   "description": "Download content from RomM, SMB, Megathread and more",
   "author": "K-Wall",
   "repo_url": "https://github.com/UncleJunVIP/Mortar",
-  "banner": ".github/resources/mortar_preview.webp",
+  "banners": {
+    "BRICK": ".github/resources/mortar_preview.webp"
+  },
   "platforms": [
     "tg5040"
   ],
