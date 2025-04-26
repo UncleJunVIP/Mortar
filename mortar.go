@@ -18,8 +18,14 @@ func init() {
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		_, _ = cui.ShowMessage("Unable to parse config.yml! Quitting!", "3")
-		common.LogStandardFatal("Error loading config", err)
+		options := []string{
+			"--background-image", "setup-qr.png",
+			"--confirm-text", "EXIT",
+			"--confirm-show", "true",
+			"--message-alignment", "bottom"}
+
+		_, err = cui.ShowMessageWithOptions("Setup Required!", "0", options...)
+		common.LogStandardFatal("Setup Required", err)
 	}
 
 	if config.LogLevel != "" {
