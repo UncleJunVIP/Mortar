@@ -29,7 +29,7 @@ Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
 
 ## How do I setup Mortar?
 
-1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI configured.
+1. Own a TrimUI Brick and have a SD Card with NextUI configured.
 2. Connect your device to a Wi-Fi network.
 3. Download the latest Mortar release from this repo.
 4. Unzip the release download.
