@@ -47,6 +47,14 @@ type RomMPlatform struct {
 	DisplayName string        `json:"display_name"`
 }
 
+type RomMList struct {
+	CharIndex map[string]int `json:"char_index"`
+	Items     []RomMRom      `json:"items"`
+	Limit     int            `json:"limit"`
+	Offset    int            `json:"offset"`
+	Total     int            `json:"total"`
+}
+
 type RomMRom struct {
 	ID                  int         `json:"id"`
 	IgdbID              int         `json:"igdb_id"`
@@ -213,6 +221,7 @@ func (c *RomMClient) ListDirectory(platformID string) (shared.Items, error) {
 
 	params := url.Values{}
 	params.Add("platform_id", platformID)
+	params.Add("limit", "10000")
 
 	u.RawQuery = params.Encode()
 
@@ -230,14 +239,14 @@ func (c *RomMClient) ListDirectory(platformID string) (shared.Items, error) {
 	}
 	defer resp.Body.Close()
 
-	var rawItems []RomMRom
-	err = json.NewDecoder(resp.Body).Decode(&rawItems)
+	var rawItemsList RomMList
+	err = json.NewDecoder(resp.Body).Decode(&rawItemsList)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode roms list JSON: %w", err)
 	}
 
 	var items []shared.Item
-	for _, rawItem := range rawItems {
+	for _, rawItem := range rawItemsList.Items {
 		items = append(items, shared.Item{
 			Filename:     rawItem.FsName,
 			FileSize:     strconv.Itoa(rawItem.FsSizeBytes),

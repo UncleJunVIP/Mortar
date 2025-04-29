@@ -1,13 +1,13 @@
 {
   "name": "Mortar",
-  "version": "v1.7.0",
+  "version": "v1.8.0",
   "type": "TOOL",
   "description": "Download content from RomM, SMB, Megathread and more",
   "author": "K-Wall",
   "repo_url": "https://github.com/UncleJunVIP/Mortar",
   "release_filename": "Mortar.pak.zip",
   "banners": {
-    "BRICK": ".github/resources/mortar_preview.webp"
+    "BRICK": ".github/resources/banner.png"
   },
   "platforms": [
     "tg5040"
