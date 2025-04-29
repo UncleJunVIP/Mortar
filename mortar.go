@@ -46,7 +46,7 @@ func init() {
 	}
 
 	fb := filebrowser.NewFileBrowser(logger)
-	err = fb.CWD(common.RomDirectory)
+	err = fb.CWD(common.RomDirectory, false)
 	if err != nil {
 		_, _ = cui.ShowMessage("Unable to fetch ROM directories! Quitting!", "3")
 		logger.Fatal("Error loading fetching ROM directories", zap.Error(err))
