@@ -4,3 +4,5 @@
 /mortar.log
 /mortar
 /.device_logs/
+.DS_Store
+**/.DS_Store
