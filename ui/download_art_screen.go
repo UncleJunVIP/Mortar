@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"github.com/UncleJunVIP/gabagool/ui"
+	gaba "github.com/UncleJunVIP/gabagool/ui"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 	"mortar/utils"
@@ -29,15 +29,17 @@ func (a DownloadArtScreen) Name() sum.Int[models.ScreenName] {
 }
 
 func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
-	footerHelpItems := []ui.FooterHelpItem{
-		{ButtonName: "B", HelpText: "No"},
-		{ButtonName: "A", HelpText: "Yes"},
+	footerHelpItems := []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: "I'll Find My Own"},
+		{ButtonName: "A", HelpText: "Use It!"},
 	}
 
 	for _, game := range a.Games {
-		artPath := utils.FindArt(a.Platform, game, a.DownloadType)
+		artPath := gaba.WithProcessMessage("Downloading Art", func() interface{} {
+			return utils.FindArt(a.Platform, game, a.DownloadType)
+		})
 
-		result, err := ui.NewBlockingMessage("Confirmation", "Are you sure you want to proceed?", footerHelpItems, artPath)
+		result, err := gaba.NewBlockingMessage(game.DisplayName, "Found This Art!", footerHelpItems, artPath.(string))
 		if err != nil {
 			return nil, -1, err
 		}

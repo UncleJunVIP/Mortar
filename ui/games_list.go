@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
 	gabamod "github.com/UncleJunVIP/gabagool/models"
 	gaba "github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
@@ -11,12 +11,10 @@ import (
 	"mortar/models"
 	"mortar/utils"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"qlova.tech/sum"
 	"strings"
-	"time"
 )
 
 type GameList struct {
@@ -31,7 +29,9 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	if len(games) > 0 {
 		g = games
 	} else {
+		cancelMsg := gaba.ShowProcessMessage(fmt.Sprintf("Loading %s...", platform.Name))
 		g, _ = loadGamesList(platform)
+		cancelMsg()
 	}
 
 	return GameList{
@@ -109,29 +109,9 @@ func loadGamesList(platform models.Platform) (games shared.Items, e error) {
 		return cacheResults, nil
 	}
 
-	ctx := context.Background()
-	ctxWithCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	args := []string{"--message", "Loading " + platform.Name + "...", "--timeout", "-1"}
-	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
-
-	err := cmd.Start()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		logger.Fatal("Error with starting miniui-presenter loading message", zap.Error(err))
-	}
-
-	time.Sleep(1250 * time.Millisecond)
-
-	items, err := FetchListStateless(platform, cancel)
+	items, err := FetchListStateless(platform)
 	if err != nil {
 		logger.Error("Error downloading Item List", zap.Error(err))
-	}
-	cancel()
-
-	err = cmd.Wait()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		logger.Fatal("Error while waiting for miniui-presenter loading message to be killed", zap.Error(err))
 	}
 
 	if len(items) == 0 {
