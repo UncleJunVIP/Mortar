@@ -20,17 +20,6 @@ func BuildClient(host models.Host) (shared.Client, error) {
 		), nil
 	case shared.HostTypes.NGINX:
 		return NewNginxJsonClient(host.RootURI), nil
-	case shared.HostTypes.SMB:
-		{
-			return NewSMBClient(
-				host.RootURI,
-				host.Port,
-				host.Username,
-				host.Password,
-				host.ShareName,
-				host.ExtensionFilters,
-			)
-		}
 	case shared.HostTypes.ROMM:
 		{
 			return NewRomMClient(

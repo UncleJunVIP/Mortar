@@ -1,16 +1,10 @@
 package ui
 
 import (
-	"context"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	"github.com/UncleJunVIP/gabagool/ui"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
-	"go.uber.org/zap"
 	"mortar/models"
-	"mortar/utils"
-	"os/exec"
 	"qlova.tech/sum"
-	"time"
 )
 
 type DownloadArtScreen struct {
@@ -34,46 +28,20 @@ func (a DownloadArtScreen) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.DownloadArt
 }
 
-func (a DownloadArtScreen) Draw() (value models.ScreenReturn, exitCode int, e error) {
-	logger := common.GetLoggerInstance()
-
-	ctx := context.Background()
-	ctxWithCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	args := []string{"--message", "Attempting to download art...", "--timeout", "-1"}
-	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
-
-	err := cmd.Start()
-	if err != nil && cmd.ProcessState.ExitCode() > 6 {
-		logger.Fatal("Error with starting miniui-presenter download art message", zap.Error(err))
+func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
+	footerHelpItems := []ui.FooterHelpItem{
+		{ButtonName: "B", HelpText: "No"},
+		{ButtonName: "A", HelpText: "Yes"},
 	}
 
-	time.Sleep(1250 * time.Millisecond)
-
-	artPath := utils.FindArt(a.Platform, a.Game, a.DownloadType)
-
-	cancel()
-
-	if artPath == "" {
-		logger.Info("Could not find art!")
-		return shared.Item{}, 404, nil
+	result, err := ui.NewBlockingMessage("Confirmation", "Are you sure you want to proceed?", footerHelpItems, "path/to/image.bmp")
+	if err != nil {
+		return nil, -1, err
 	}
 
-	code, _ := cui.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
-		"--background-image", artPath,
-		"--confirm-text", "Use",
-		"--confirm-show", "true",
-		"--action-button", "X",
-		"--action-text", "I'll Find My Own",
-		"--action-show", "true",
-		"--message-alignment", "bottom")
-
-	if code == 2 || code == 4 {
-		common.DeleteFile(artPath)
+	if result.IsSome() && result.Unwrap().ButtonName == "Yes" {
+		return a.Game, 0, nil
 	}
-	return shared.Item{
-		Path: artPath,
-	}, 0, nil
 
+	return nil, 2, nil
 }

@@ -3,9 +3,10 @@ package ui
 import (
 	"context"
 	"encoding/json"
+	gabamod "github.com/UncleJunVIP/gabagool/models"
+	gaba "github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/utils"
@@ -44,12 +45,9 @@ func (gl GameList) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.GameList
 }
 
-func (gl GameList) Draw() (game models.ScreenReturn, exitCode int, e error) {
+func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	host := gl.Platform.Host
-	title := host.DisplayName + " | " + gl.Platform.Name
-
-	var extraArgs []string
-	extraArgs = append(extraArgs, "--confirm-text", "DOWNLOAD")
+	title := gl.Platform.Name
 
 	itemList := gl.Games
 
@@ -59,30 +57,48 @@ func (gl GameList) Draw() (game models.ScreenReturn, exitCode int, e error) {
 
 	if gl.SearchFilter != "" {
 		title = "[Search: \"" + gl.SearchFilter + "\"]"
-		extraArgs = append(extraArgs, "--cancel-text", "CLEAR SEARCH")
 		itemList = filterList(itemList, models.Filters{InclusiveFilters: []string{gl.SearchFilter}})
 	}
 
 	if len(itemList) == 0 {
-		return shared.Item{}, 404, nil
+		return nil, 404, nil
 	}
 
-	var itemEntries shared.Items
-	itemEntriesMap := make(map[string]shared.Item)
-
-	for _, item := range itemList {
-		itemName := strings.TrimSuffix(item.Filename, filepath.Ext(item.Filename))
-		itemEntries = append(itemEntries, shared.Item{DisplayName: strings.TrimSpace(itemName)})
-		itemEntriesMap[itemName] = item
+	var itemEntries []gabamod.MenuItem
+	for _, game := range itemList {
+		itemEntries = append(itemEntries, gabamod.MenuItem{
+			Text:     strings.ReplaceAll(game.Filename, filepath.Ext(game.Filename), ""),
+			Selected: false,
+			Focused:  false,
+			Metadata: game,
+		})
 	}
 
-	selection, err := cui.DisplayList(itemEntries, title, "SEARCH", extraArgs...)
+	fhi := []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: "Back"},
+		{ButtonName: "X", HelpText: "Search"},
+		{ButtonName: "SELECT", HelpText: "Multi-Select"},
+		{ButtonName: "A", HelpText: "Select"},
+	}
+
+	selection, err := gaba.NewBlockingList(title, itemEntries, "", fhi, true, true, false)
 	if err != nil {
-		return shared.Item{}, 1, err
+		return nil, -1, err
 	}
 
-	selectedGame := itemEntriesMap[selection.SelectedValue]
-	return selectedGame, selection.ExitCode, nil
+	if selection.IsSome() && !selection.Unwrap().Cancelled && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
+
+		var selections shared.Items
+		for _, item := range selection.Unwrap().SelectedItems {
+			selections = append(selections, item.Metadata.(shared.Item))
+		}
+
+		return selections, 0, nil
+	} else if selection.IsSome() && selection.Unwrap().ActionTriggered {
+		return nil, 4, nil
+	}
+
+	return nil, 2, err
 }
 
 func loadGamesList(platform models.Platform) (games shared.Items, e error) {

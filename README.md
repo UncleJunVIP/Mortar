@@ -6,7 +6,7 @@
 </h3>
 
 <h4 style="font-size: 18px;">
-Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
+Supports RomM, Megathread, Apache / nginx autoindex & HTML tables.
 
 **Now with Thumbnail Support! _(Powered by the Libretro Thumbnail Project)_**
 </h4>
@@ -45,10 +45,10 @@ Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
 ```yaml
 hosts:
   - display_name: "Display Name"
-    host_type: ROMM # Valid Choices: ROMM | MEGATHREAD | SMB | APACHE | NGINX | CUSTOM
+    host_type: ROMM # Valid Choices: ROMM | MEGATHREAD | APACHE | NGINX | CUSTOM
     root_uri: "https://domain.tld" # This can be the start of a URL with protocol (e.g. https://), a host name or an IP Address
 
-    port: 445 # Needed by SMB, optional otherwise unless using non-standard ports
+    port: 445 # optional otherwise unless using non-standard ports
 
     username: "GUEST" # Used by RomM and SMB
     password: "hunter2" # Used by RomM and SMB
@@ -137,19 +137,6 @@ location / {
     autoindex_localtime on;
 }
 ```
+---
 
-## 🌸 Flower Giving Time! 🌸
-
-Just want to give a huge shoutout
-to [@ro8inmorgan](https://github.com/ro8inmorgan), [@frysee](https://github.com/frysee) and the rest of the NextUI
-contributors for making the TrimUI
-Brick an amazing experience. Also huge props to the work [@shauninman](https://github.com/shauninman) put into MinUI of
-which NextUI is based.
-
-I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their
-awesome [minui-list](https://github.com/josegonzalez/minui-list), [miniui-presenter](https://github.com/josegonzalez/minui-presenter)
-and [minui-keyboard](https://github.com/josegonzalez/minui-keyboard) projects.
-
-Without these phenomenal pieces of software I likely would not have built Mortar.
-
-✌️
+Enjoy! ✌️

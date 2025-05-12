@@ -6,3 +6,11 @@
 /.device_logs/
 .DS_Store
 **/.DS_Store
+/*.log
+/.cache/Megathread_GameBoy_megathread.json
+/.cache/Megathread_GameBoyAdvance_megathread.json
+/.cache/Megathread_NintendoEntertainmentSystem_megathread.json
+/.cache/Megathread_PlayStation_megathread.json
+/.cache/Megathread_SuperNintendoEntertainmentSystem_megathread.json
+/certs/certificates.crt
+/data/systems-mapping.json
