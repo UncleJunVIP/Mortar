@@ -153,7 +153,7 @@ func main() {
 			switch code {
 			case 0:
 				if appState.Config.DownloadArt {
-					screen = ui.InitDownloadArtScreen(ds.Platform, shared.Item{}, appState.Config.ArtDownloadType, ds.SearchFilter) // TODO Fix
+					screen = ui.InitDownloadArtScreen(ds.Platform, ds.SelectedGames, appState.Config.ArtDownloadType, ds.SearchFilter)
 				} else {
 					screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
 				}
