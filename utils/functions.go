@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"github.com/disintegration/imaging"
 	"go.uber.org/zap"
+	"mortar/models"
 	"os"
 	"path/filepath"
+	"qlova.tech/sum"
 	"strings"
 )
 
@@ -16,6 +19,105 @@ func GetRomDirectory() string {
 	}
 
 	return common.RomDirectory
+}
+
+func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[shared.ArtDownloadType]) string {
+	logger := common.GetLoggerInstance()
+
+	//host := platform.Host
+
+	//if host.HostType == shared.HostTypes.ROMM {
+	//	// Skip all this silliness and grab the art from RoMM
+	//	client, err := clients.BuildClient(host)
+	//	if err != nil {
+	//		return ""
+	//	}
+	//
+	//	if game.ArtURL == "" {
+	//		return ""
+	//	}
+	//
+	//	slashIdx := strings.LastIndex(game.ArtURL, "/")
+	//	artSubdirectory, artFilename := game.ArtURL[:slashIdx], game.ArtURL[slashIdx+1:]
+	//
+	//	artFilename = strings.Split(artFilename, "?")[0] // For the query string caching stuff
+	//
+	//	mediaPath := filepath.Join(platform.LocalDirectory, ".media")
+	//
+	//	LastSavedArtPath, err := client.DownloadFileRename(artSubdirectory,
+	//		mediaPath, artFilename, game.Filename)
+	//
+	//	if err != nil {
+	//		return ""
+	//	}
+	//
+	//	return LastSavedArtPath
+	//}
+
+	// TODO Fix RomM
+
+	tag := common.TagRegex.FindStringSubmatch(platform.LocalDirectory)
+
+	if tag == nil {
+		return ""
+	}
+
+	client := common.NewThumbnailClient(downloadType)
+	section := client.BuildThumbnailSection(tag[1])
+
+	artList, err := client.ListDirectory(section.HostSubdirectory)
+
+	if err != nil {
+		logger.Info("Unable to fetch artlist", zap.Error(err))
+		return ""
+	}
+
+	noExtension := strings.TrimSuffix(game.Filename, filepath.Ext(game.Filename))
+
+	var matched shared.Item
+
+	// naive search first
+	for _, art := range artList {
+		if strings.Contains(strings.ToLower(art.Filename), strings.ToLower(noExtension)) {
+			matched = art
+			break
+		}
+	}
+
+	if matched.Filename != "" {
+
+		artDirectory := ""
+
+		if os.Getenv("DEVELOPMENT") == "true" {
+			romDirectory := strings.ReplaceAll(platform.LocalDirectory, common.RomDirectory, GetRomDirectory())
+			artDirectory = filepath.Join(romDirectory, ".media")
+		} else {
+			artDirectory = filepath.Join(platform.LocalDirectory, ".media")
+		}
+
+		lastSavedArtPath, err := client.DownloadArt(section.HostSubdirectory, artDirectory, matched.Filename, game.Filename)
+		if err != nil {
+			return ""
+		}
+
+		src, err := imaging.Open(lastSavedArtPath)
+		if err != nil {
+			logger.Error("Unable to open last saved art", zap.Error(err))
+			return ""
+		}
+
+		dst := imaging.Resize(src, 500, 0, imaging.Lanczos)
+
+		err = imaging.Save(dst, lastSavedArtPath)
+		if err != nil {
+			logger.Error("Unable to save resized last saved art", zap.Error(err))
+			return ""
+		}
+
+		return lastSavedArtPath
+	}
+
+	return ""
 }
 
 func MapTagsToDirectories(items shared.Items) map[string]string {
