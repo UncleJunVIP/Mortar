@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
@@ -14,9 +13,7 @@ import (
 	"strings"
 )
 
-func FetchListStateless(platform models.Platform, cancel context.CancelFunc) (shared.Items, error) {
-	defer cancel()
-
+func FetchListStateless(platform models.Platform) (shared.Items, error) {
 	logger := common.GetLoggerInstance()
 
 	logger.Debug("Fetching Item List",
