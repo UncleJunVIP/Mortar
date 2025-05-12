@@ -3,7 +3,6 @@ package clients
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 	"net/http"
@@ -57,10 +56,7 @@ func (c *NginxJsonClient) ListDirectory(subdirectory string) (shared.Items, erro
 	return items, nil
 }
 
-func (c *NginxJsonClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
-	return common.HttpDownload(c.RootURL, remotePath, localPath, filename)
-}
-
-func (c *NginxJsonClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
-	panic("not implemented")
+func (c *NginxJsonClient) BuildDownloadHeaders() map[string]string {
+	headers := make(map[string]string)
+	return headers
 }

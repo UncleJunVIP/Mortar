@@ -1,31 +1,35 @@
 package ui
 
 import (
-	"context"
+	"encoding/base64"
+	gabamod "github.com/UncleJunVIP/gabagool/models"
+	"github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/utils"
-	"os/exec"
+	"net/url"
+	"os"
+	"path/filepath"
 	"qlova.tech/sum"
-	"time"
+	"strconv"
+	"strings"
 )
 
 type DownloadScreen struct {
-	Platform     models.Platform
-	Games        shared.Items
-	Game         shared.Item
-	SearchFilter string
+	Platform      models.Platform
+	Games         shared.Items
+	SelectedGames shared.Items
+	SearchFilter  string
 }
 
-func InitDownloadScreen(platform models.Platform, games shared.Items,
-	game shared.Item, searchFilter string) DownloadScreen {
+func InitDownloadScreen(platform models.Platform, games shared.Items, selectedGames shared.Items, searchFilter string) DownloadScreen {
 	return DownloadScreen{
-		Platform:     platform,
-		Games:        games,
-		Game:         game,
-		SearchFilter: searchFilter,
+		Platform:      platform,
+		Games:         games,
+		SelectedGames: selectedGames,
+		SearchFilter:  searchFilter,
 	}
 }
 
@@ -33,39 +37,55 @@ func (d DownloadScreen) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.Download
 }
 
-func (d DownloadScreen) Draw() (value models.ScreenReturn, exitCode int, e error) {
+func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 	logger := common.GetLoggerInstance()
 
-	ctx := context.Background()
-	ctxWithCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
+	downloads := BuildDownload(d.Platform, d.SelectedGames)
 
-	args := []string{"--message", "Downloading " + d.Game.Filename + "...", "--timeout", "-1"}
-	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
+	headers := make(map[string]string)
 
-	err := cmd.Start()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		logger.Fatal("Error with starting miniui-presenter download message", zap.Error(err))
+	if d.Platform.Host.HostType == shared.HostTypes.ROMM {
+		auth := d.Platform.Host.Username + ":" + d.Platform.Host.Password
+		authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+		headers["Authorization"] = authHeader
 	}
 
-	time.Sleep(1250 * time.Millisecond)
-
-	filepath, err := utils.DownloadFile(d.Platform, d.Games, d.Game)
-
+	_, err := ui.NewBlockingDownload(downloads, headers)
 	if err != nil {
-		logger.Error("Error downloading file: %s", zap.Error(err))
+		logger.Error("Error downloading", zap.Error(err))
+		return shared.Item{}, -1, err
 	}
 
-	cancel()
+	// TODO finish this
 
-	if filepath != "" {
-		return shared.Item{
-			DisplayName: d.Game.DisplayName,
-			Filename:    d.Game.Filename,
-			Path:        filepath,
-			IsDirectory: false,
-		}, 0, nil
+	return nil, 0, err
+}
+
+func BuildDownload(platform models.Platform, games shared.Items) []gabamod.Download {
+	var downloads []gabamod.Download
+	for _, g := range games {
+
+		var downloadLocation string
+		if os.Getenv("DEVELOPMENT") == "true" {
+			romDirectory := strings.ReplaceAll(platform.LocalDirectory, common.RomDirectory, utils.GetRomDirectory())
+			downloadLocation = filepath.Join(romDirectory, g.Filename)
+		} else {
+			downloadLocation = filepath.Join(platform.LocalDirectory, g.Filename)
+		}
+
+		root := platform.Host.RootURI
+
+		if platform.Host.Port != 0 {
+			root = root + ":" + strconv.Itoa(platform.Host.Port)
+		}
+
+		sourceURL, _ := url.JoinPath(root, platform.HostSubdirectory, g.Filename)
+		downloads = append(downloads, gabamod.Download{
+			URL:         sourceURL,
+			Location:    downloadLocation,
+			DisplayName: g.DisplayName,
+		})
 	}
 
-	return nil, 1, err
+	return downloads
 }

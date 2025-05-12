@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"io"
 	"net/http"
@@ -306,6 +305,7 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) (strin
 	return filename, nil
 }
 
-func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
-	return common.HttpDownloadRename(c.buildRootURL(), remotePath, localPath, filename, rename)
+func (c *RomMClient) BuildDownloadHeaders() map[string]string {
+	headers := make(map[string]string)
+	return headers
 }
