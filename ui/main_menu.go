@@ -42,15 +42,18 @@ func (m MainMenu) Draw() (host interface{}, exitCode int, e error) {
 
 	fhi := []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Quit"},
+		{ButtonName: "X", HelpText: "Settings"},
 		{ButtonName: "A", HelpText: "Select"},
 	}
 
-	selection, err := gaba.NewBlockingList("Mortar", menuItems, "", fhi, false, false, false)
+	selection, err := gaba.NewBlockingList("Mortar", menuItems, "", fhi, true, false, false)
 	if err != nil {
 		return models.Host{}, -1, err
 	}
 
-	if selection.IsSome() {
+	if selection.IsSome() && selection.Unwrap().ActionTriggered {
+		return models.Host{}, 4, nil
+	} else if selection.IsSome() && !selection.Unwrap().Cancelled && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
 		return selection.Unwrap().SelectedItem.Metadata.(models.Host), 0, nil
 	}
 

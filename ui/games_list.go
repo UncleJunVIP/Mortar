@@ -15,6 +15,7 @@ import (
 	"path"
 	"path/filepath"
 	"qlova.tech/sum"
+	"slices"
 	"strings"
 )
 
@@ -127,6 +128,11 @@ func loadGamesList(platform models.Platform) (games shared.Items, e error) {
 	if len(items) == 0 {
 		return nil, nil
 	}
+
+	slices.SortFunc(items, func(a, b shared.Item) int {
+		return strings.Compare(strings.ToLower(a.Filename), strings.ToLower(b.Filename))
+	})
+
 	cache(platform, items)
 	return items, nil
 
