@@ -9,6 +9,7 @@ import (
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
 	"mortar/models"
+	"mortar/state"
 	"mortar/utils"
 	"os"
 	"path"
@@ -29,10 +30,19 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	if len(games) > 0 {
 		g = games
 	} else {
-		cancelMsg := gaba.ShowProcessMessage(fmt.Sprintf("Loading %s...", platform.Name))
-		g, _ = loadGamesList(platform)
-		cancelMsg()
+		process, err := gaba.NewBlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), func() (interface{}, error) {
+			var err error
+			g, err = loadGamesList(platform)
+			return g, err
+		})
+		if err != nil {
+			return GameList{}
+		}
+
+		g = process.Result.(shared.Items)
 	}
+
+	state.SetCurrentFullGamesList(g)
 
 	return GameList{
 		Platform:     platform,

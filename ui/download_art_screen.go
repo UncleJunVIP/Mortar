@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	gaba "github.com/UncleJunVIP/gabagool/ui"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
@@ -35,11 +36,14 @@ func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
 	}
 
 	for _, game := range a.Games {
-		artPath := gaba.WithProcessMessage("Downloading Art", func() interface{} {
-			return utils.FindArt(a.Platform, game, a.DownloadType)
+		process, _ := gaba.NewBlockingProcess(fmt.Sprintf("Downloading Art for %s...", game.DisplayName), func() (interface{}, error) {
+			artPath := utils.FindArt(a.Platform, game, a.DownloadType)
+			return artPath, nil
 		})
 
-		result, err := gaba.NewBlockingMessage(game.DisplayName, "Found This Art!", footerHelpItems, artPath.(string))
+		artPath := process.Result.(string)
+
+		result, err := gaba.NewBlockingMessage("", "Found This Art!", footerHelpItems, artPath)
 		if err != nil {
 			return nil, -1, err
 		}

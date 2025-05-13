@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/atomic"
 	"gopkg.in/yaml.v3"
 	"mortar/models"
@@ -47,5 +48,11 @@ func SetConfig(config *models.Config) {
 		temp.HostIndices[host.DisplayName] = idx
 	}
 
+	UpdateAppState(temp)
+}
+
+func SetCurrentFullGamesList(games shared.Items) {
+	temp := GetAppState()
+	temp.CurrentFullGamesList = games
 	UpdateAppState(temp)
 }
