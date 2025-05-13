@@ -90,9 +90,13 @@ func main() {
 			case 0:
 				host := res.(models.Host)
 				screen = ui.InitPlatformSelection(host, false)
+			case 4:
+				screen = ui.InitSettingsScreen()
 			case 1, 2:
 				os.Exit(0)
 			}
+		case ui.Screens.Settings:
+			screen = ui.InitMainMenu(appState.Config.Hosts)
 		case ui.Screens.PlatformSelection:
 			platform := res.(models.Platform)
 			switch code {
