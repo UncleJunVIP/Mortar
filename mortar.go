@@ -124,7 +124,7 @@ func main() {
 
 			case 2:
 				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "") // Clear search filter
+					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "") // Clear search filter
 				} else {
 					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)
 				}
@@ -144,9 +144,9 @@ func main() {
 			switch code {
 			case 0:
 				query := res.(string)
-				screen = ui.InitGamesList(sb.Platform, shared.Items{}, query)
+				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query)
 			default:
-				screen = ui.InitGamesList(sb.Platform, shared.Items{}, "")
+				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "")
 			}
 		case ui.Screens.Download:
 			ds := screen.(ui.DownloadScreen)
@@ -155,12 +155,12 @@ func main() {
 				if appState.Config.DownloadArt {
 					screen = ui.InitDownloadArtScreen(ds.Platform, ds.SelectedGames, appState.Config.ArtDownloadType, ds.SearchFilter)
 				} else {
-					screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
+					screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 				}
 			case 1:
-				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
+				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 			default:
-				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
+				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 			}
 		case ui.Screens.DownloadArt:
 			da := screen.(ui.DownloadArtScreen)
@@ -168,7 +168,7 @@ func main() {
 			case 404:
 			}
 
-			screen = ui.InitGamesList(da.Platform, shared.Items{}, da.SearchFilter)
+			screen = ui.InitGamesList(da.Platform, state.GetAppState().CurrentFullGamesList, da.SearchFilter)
 		}
 	}
 }

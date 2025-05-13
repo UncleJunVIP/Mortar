@@ -10,6 +10,7 @@ import (
 	"mortar/utils"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -43,6 +44,10 @@ func FetchListStateless(platform models.Platform) (shared.Items, error) {
 	items, err := client.ListDirectory(subdirectory)
 	if err != nil {
 		return nil, err
+	}
+
+	for i, item := range items {
+		items[i].DisplayName = strings.ReplaceAll(item.Filename, filepath.Ext(item.Filename), "")
 	}
 
 	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
