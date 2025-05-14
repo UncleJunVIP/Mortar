@@ -12,37 +12,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.24.1'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Install ARM64 SDL2 dependencies
+      - name: Build Docker image
         run: |
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update
-          sudo apt-get install -y \
-            libsdl2-dev:arm64 \
-            libsdl2-ttf-dev:arm64 \
-            libsdl2-image-dev:arm64 \
-            gcc-aarch64-linux-gnu \
-            g++-aarch64-linux-gnu \
-            libc6-dev-arm64-cross
+          docker buildx build --platform linux/arm64 -t retro-console-arm64 -f Dockerfile .
 
-      - name: Set up cross-compilation environment
+      - name: Extract binary from Docker image
         run: |
-          echo 'export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig' >> $GITHUB_ENV
-          echo 'export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig' >> $GITHUB_ENV
-
-      - name: Build
-        env:
-          CGO_ENABLED: 1
-          CC: aarch64-linux-gnu-gcc
-          CXX: aarch64-linux-gnu-g++
-          GOOS: linux
-          GOARCH: arm64
-          CGO_CFLAGS: -I/usr/include/SDL2
-        run: go build -o mortar .
+          docker create --name extract retro-console-arm64
+          docker cp extract:/build/mortar mortar
+          docker rm extract
 
       - name: Build Package Folder
         run: |
