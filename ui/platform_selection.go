@@ -25,8 +25,6 @@ func (ps PlatformSelection) Name() sum.Int[models.ScreenName] {
 }
 
 func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
-	// TODO add clear cache back here
-
 	if len(ps.Host.Platforms) == 0 {
 		return models.Platform{}, 404, nil
 	}
