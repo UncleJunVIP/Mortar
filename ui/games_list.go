@@ -100,7 +100,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 			EnableAction:      true,
 			EnableMultiSelect: true,
 			EnableReordering:  false,
-			SelectedIndex:     0,
+			SelectedIndex:     gl.SelectedIndex,
 		})
 	if err != nil {
 		return nil, -1, err

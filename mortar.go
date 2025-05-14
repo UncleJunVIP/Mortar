@@ -102,10 +102,12 @@ func main() {
 				os.Exit(0)
 			}
 		case ui.Screens.Settings:
-			if len(appState.Config.Hosts) == 1 {
-				screen = ui.InitPlatformSelection(appState.Config.Hosts[0], quitOnBack)
-			} else {
-				screen = ui.InitMainMenu(appState.Config.Hosts)
+			if code != 404 {
+				if len(appState.Config.Hosts) == 1 {
+					screen = ui.InitPlatformSelection(appState.Config.Hosts[0], quitOnBack)
+				} else {
+					screen = ui.InitMainMenu(appState.Config.Hosts)
+				}
 			}
 		case ui.Screens.PlatformSelection:
 			switch code {

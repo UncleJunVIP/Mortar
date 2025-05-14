@@ -2,7 +2,8 @@ package ui
 
 import (
 	"fmt"
-	gaba "github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
 	"mortar/utils"
@@ -31,35 +32,33 @@ func (a DownloadArtScreen) Name() sum.Int[models.ScreenName] {
 }
 
 func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
-	footerHelpItems := []gaba.FooterHelpItem{
+	footerHelpItems := []ui.FooterHelpItem{
 		{ButtonName: "B", HelpText: "I'll Find My Own"},
 		{ButtonName: "A", HelpText: "Use It!"},
 	}
 
 	for _, game := range a.Games {
-		process, _ := gaba.BlockingProcess(fmt.Sprintf("Downloading Art for %s...", game.DisplayName), func() (interface{}, error) {
+		process, _ := ui.BlockingProcess(fmt.Sprintf("Finding art for %s...", game.DisplayName), func() (interface{}, error) {
 			artPath := utils.FindArt(a.Platform, game, a.DownloadType)
 			return artPath, nil
 		})
 
 		artPath := process.Result.(string)
 		if artPath == "" {
-			_, _ = gaba.BlockingProcess(fmt.Sprintf("No Art Found for %s!", game.DisplayName), func() (interface{}, error) {
+			_, _ = ui.BlockingProcess(fmt.Sprintf("No art found for %s!", game.DisplayName), func() (interface{}, error) {
 				time.Sleep(time.Millisecond * 1500)
 				return nil, nil
 			})
 			continue
 		}
 
-		result, err := gaba.Message("", "Found This Art!", footerHelpItems, artPath)
+		result, err := ui.Message("", "Found This Art!", footerHelpItems, artPath)
 		if err != nil {
 			return nil, -1, err
 		}
 
-		if result.IsSome() && result.Unwrap().ButtonName == "Yes" {
-			// TODO keep art
-		} else {
-			// TODO delete art
+		if result.IsNone() {
+			common.DeleteFile(artPath)
 		}
 	}
 
