@@ -7,6 +7,7 @@ import (
 	"mortar/models"
 	"mortar/utils"
 	"qlova.tech/sum"
+	"time"
 )
 
 type DownloadArtScreen struct {
@@ -36,14 +37,21 @@ func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
 	}
 
 	for _, game := range a.Games {
-		process, _ := gaba.NewBlockingProcess(fmt.Sprintf("Downloading Art for %s...", game.DisplayName), func() (interface{}, error) {
+		process, _ := gaba.BlockingProcess(fmt.Sprintf("Downloading Art for %s...", game.DisplayName), func() (interface{}, error) {
 			artPath := utils.FindArt(a.Platform, game, a.DownloadType)
 			return artPath, nil
 		})
 
 		artPath := process.Result.(string)
+		if artPath == "" {
+			_, _ = gaba.BlockingProcess(fmt.Sprintf("No Art Found for %s!", game.DisplayName), func() (interface{}, error) {
+				time.Sleep(time.Millisecond * 1500)
+				return nil, nil
+			})
+			continue
+		}
 
-		result, err := gaba.NewBlockingMessage("", "Found This Art!", footerHelpItems, artPath)
+		result, err := gaba.Message("", "Found This Art!", footerHelpItems, artPath)
 		if err != nil {
 			return nil, -1, err
 		}

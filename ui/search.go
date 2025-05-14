@@ -25,7 +25,7 @@ func (s Search) Name() sum.Int[models.ScreenName] {
 func (s Search) Draw() (value interface{}, exitCode int, e error) {
 	logger := common.GetLoggerInstance()
 
-	res, err := ui.NewBlockingKeyboard("")
+	res, err := ui.Keyboard("")
 	if err != nil {
 		logger.Error("Error with blocking keyboard", zap.Error(err))
 		return nil, -1, err

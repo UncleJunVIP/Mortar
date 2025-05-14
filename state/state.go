@@ -56,3 +56,9 @@ func SetCurrentFullGamesList(games shared.Items) {
 	temp.CurrentFullGamesList = games
 	UpdateAppState(temp)
 }
+
+func SetLastSelectedIndex(index int) {
+	temp := GetAppState()
+	temp.LastSelectedIndex = index
+	UpdateAppState(temp)
+}

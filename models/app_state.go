@@ -10,6 +10,7 @@ type AppState struct {
 	HostIndices map[string]int
 
 	CurrentFullGamesList shared.Items
+	LastSelectedIndex    int
 }
 
 func (a AppState) MarshalLogObject(enc zapcore.ObjectEncoder) error {

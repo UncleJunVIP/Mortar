@@ -261,51 +261,8 @@ func (c *RomMClient) ListDirectory(platformID string) (shared.Items, error) {
 	return items, nil
 }
 
-func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
-	auth := c.Username + ":" + c.Password
-	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-
-	sourceURL, err := url.JoinPath(c.buildRootURL(), RomsEndpoint, remotePath, "content", filename)
-	if err != nil {
-		return "", fmt.Errorf("unable to build url for rom download: %v", err)
-	}
-
-	u, err := url.Parse(sourceURL)
-	if err != nil {
-		return "", fmt.Errorf("unable to parse url for rom download: %v", err)
-	}
-
-	params := url.Values{}
-	params.Add("path", remotePath)
-
-	u.RawQuery = params.Encode()
-
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		return "", fmt.Errorf("unable to build rom download request: %v", err)
-	}
-
-	req.Header.Add("Authorization", authHeader)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("unable to call rom download endpoint: %v", err)
-	}
-	defer resp.Body.Close()
-
-	f, err := os.OpenFile(filepath.Join(localPath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		return "", fmt.Errorf("failed to create file: %w", err)
-	}
-	defer f.Close()
-
-	_, err = io.Copy(f, resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to save file: %w", err)
-	}
-
-	return filename, nil
+func (c *RomMClient) BuildDownloadURL(remotePath, filename string) (string, error) {
+	return url.JoinPath(c.buildRootURL(), RomsEndpoint, remotePath, "content", filename)
 }
 
 func (c *RomMClient) BuildDownloadHeaders() map[string]string {
