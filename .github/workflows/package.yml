@@ -8,7 +8,7 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-22.04-arm
     steps:
       - uses: actions/checkout@v4
 
@@ -17,20 +17,17 @@ jobs:
         with:
           go-version: '1.24.1'
 
-      - name: Install dependencies
+      - name: Build with Dockerfile (matching bullseye environment)
         run: |
-          sudo apt-get update && sudo apt-get install -y \
-            libsdl2-dev \
-            libsdl2-ttf-dev \
-            libsdl2-image-dev
-
-      - name: Build
-        run: go build -o mortar .
+          docker buildx build --platform linux/arm64 -t retro-console-arm64 -f Dockerfile .
+          docker create --name extract retro-console-arm64
+          docker cp extract:/build/mortar mortar
+          docker rm extract
 
       - name: Build Package Folder
         run: |
           mkdir Mortar.pak
-          cp -R mortar launch.sh README.md LICENSE pak.json resources/setup-qr.png Mortar.pak
+          cp -R mortar launch.sh README.md LICENSE pak.json resources/setup-qr.png fonts Mortar.pak
 
       - uses: actions/upload-artifact@v4
         with:
