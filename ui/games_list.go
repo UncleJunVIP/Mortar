@@ -20,18 +20,19 @@ import (
 )
 
 type GameList struct {
-	Platform     models.Platform
-	Games        shared.Items
-	SearchFilter string
+	Platform      models.Platform
+	Games         shared.Items
+	SearchFilter  string
+	SelectedIndex int
 }
 
-func InitGamesList(platform models.Platform, games shared.Items, searchFilter string) GameList {
+func InitGamesList(platform models.Platform, games shared.Items, searchFilter string, selectedIndex int) GameList {
 	var g shared.Items
 
 	if len(games) > 0 {
 		g = games
 	} else {
-		process, err := gaba.NewBlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), func() (interface{}, error) {
+		process, err := gaba.BlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), func() (interface{}, error) {
 			var err error
 			g, err = loadGamesList(platform)
 			return g, err
@@ -46,9 +47,10 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	state.SetCurrentFullGamesList(g)
 
 	return GameList{
-		Platform:     platform,
-		Games:        g,
-		SearchFilter: searchFilter,
+		Platform:      platform,
+		Games:         g,
+		SearchFilter:  searchFilter,
+		SelectedIndex: selectedIndex,
 	}
 }
 
@@ -92,7 +94,14 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		{ButtonName: "A", HelpText: "Select"},
 	}
 
-	selection, err := gaba.NewBlockingList(title, itemEntries, "", fhi, true, true, false)
+	selection, err := gaba.List(title, itemEntries,
+		gaba.ListOptions{
+			FooterHelpItems:   fhi,
+			EnableAction:      true,
+			EnableMultiSelect: true,
+			EnableReordering:  false,
+			SelectedIndex:     0,
+		})
 	if err != nil {
 		return nil, -1, err
 	}
@@ -103,6 +112,8 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		for _, item := range selection.Unwrap().SelectedItems {
 			selections = append(selections, item.Metadata.(shared.Item))
 		}
+
+		state.SetLastSelectedIndex(selection.Unwrap().SelectedIndex)
 
 		return selections, 0, nil
 	} else if selection.IsSome() && selection.Unwrap().ActionTriggered {

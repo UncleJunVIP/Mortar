@@ -46,7 +46,14 @@ func (m MainMenu) Draw() (host interface{}, exitCode int, e error) {
 		{ButtonName: "A", HelpText: "Select"},
 	}
 
-	selection, err := gaba.NewBlockingList("Mortar", menuItems, "", fhi, true, false, false)
+	selection, err := gaba.List("Mortar", menuItems,
+		gaba.ListOptions{
+			FooterHelpItems:   fhi,
+			EnableAction:      true,
+			EnableMultiSelect: false,
+			EnableReordering:  false,
+			SelectedIndex:     0,
+		})
 	if err != nil {
 		return models.Host{}, -1, err
 	}

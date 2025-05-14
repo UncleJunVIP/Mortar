@@ -50,7 +50,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		{ButtonName: "A", HelpText: "Confirm"},
 	}
 
-	result, err := ui.NewBlockingOptionsList(
+	result, err := ui.OptionsList(
 		"Settings",
 		items,
 		footerHelpItems,
