@@ -1,42 +1,56 @@
 package ui
 
 import (
-	"context"
 	"encoding/json"
+	"fmt"
+	gabamod "github.com/UncleJunVIP/gabagool/models"
+	gaba "github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"mortar/models"
+	"mortar/state"
 	"mortar/utils"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"qlova.tech/sum"
+	"slices"
 	"strings"
-	"time"
 )
 
 type GameList struct {
-	Platform     models.Platform
-	Games        shared.Items
-	SearchFilter string
+	Platform      models.Platform
+	Games         shared.Items
+	SearchFilter  string
+	SelectedIndex int
 }
 
-func InitGamesList(platform models.Platform, games shared.Items, searchFilter string) GameList {
+func InitGamesList(platform models.Platform, games shared.Items, searchFilter string, selectedIndex int) GameList {
 	var g shared.Items
 
 	if len(games) > 0 {
 		g = games
 	} else {
-		g, _ = loadGamesList(platform)
+		process, err := gaba.BlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), func() (interface{}, error) {
+			var err error
+			g, err = loadGamesList(platform)
+			return g, err
+		})
+		if err != nil {
+			return GameList{}
+		}
+
+		g = process.Result.(shared.Items)
 	}
 
+	state.SetCurrentFullGamesList(g)
+
 	return GameList{
-		Platform:     platform,
-		Games:        g,
-		SearchFilter: searchFilter,
+		Platform:      platform,
+		Games:         g,
+		SearchFilter:  searchFilter,
+		SelectedIndex: selectedIndex,
 	}
 }
 
@@ -44,12 +58,9 @@ func (gl GameList) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.GameList
 }
 
-func (gl GameList) Draw() (game models.ScreenReturn, exitCode int, e error) {
+func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	host := gl.Platform.Host
-	title := host.DisplayName + " | " + gl.Platform.Name
-
-	var extraArgs []string
-	extraArgs = append(extraArgs, "--confirm-text", "DOWNLOAD")
+	title := gl.Platform.Name
 
 	itemList := gl.Games
 
@@ -59,30 +70,63 @@ func (gl GameList) Draw() (game models.ScreenReturn, exitCode int, e error) {
 
 	if gl.SearchFilter != "" {
 		title = "[Search: \"" + gl.SearchFilter + "\"]"
-		extraArgs = append(extraArgs, "--cancel-text", "CLEAR SEARCH")
 		itemList = filterList(itemList, models.Filters{InclusiveFilters: []string{gl.SearchFilter}})
 	}
 
 	if len(itemList) == 0 {
-		return shared.Item{}, 404, nil
+		return nil, 404, nil
 	}
 
-	var itemEntries shared.Items
-	itemEntriesMap := make(map[string]shared.Item)
-
-	for _, item := range itemList {
-		itemName := strings.TrimSuffix(item.Filename, filepath.Ext(item.Filename))
-		itemEntries = append(itemEntries, shared.Item{DisplayName: strings.TrimSpace(itemName)})
-		itemEntriesMap[itemName] = item
+	var itemEntries []gabamod.MenuItem
+	for _, game := range itemList {
+		itemEntries = append(itemEntries, gabamod.MenuItem{
+			Text:     strings.ReplaceAll(game.Filename, filepath.Ext(game.Filename), ""),
+			Selected: false,
+			Focused:  false,
+			Metadata: game,
+		})
 	}
 
-	selection, err := cui.DisplayList(itemEntries, title, "SEARCH", extraArgs...)
+	fhi := []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: "Back"},
+		{ButtonName: "X", HelpText: "Search"},
+		{ButtonName: "SELECT", HelpText: "Multi-Select"},
+		{ButtonName: "A", HelpText: "Select"},
+	}
+
+	selectedIndex := gl.SelectedIndex
+
+	if selectedIndex < 9 {
+		selectedIndex = 0
+	}
+
+	selection, err := gaba.List(title, itemEntries,
+		gaba.ListOptions{
+			FooterHelpItems:   fhi,
+			EnableAction:      true,
+			EnableMultiSelect: true,
+			EnableReordering:  false,
+			SelectedIndex:     selectedIndex,
+		})
 	if err != nil {
-		return shared.Item{}, 1, err
+		return nil, -1, err
 	}
 
-	selectedGame := itemEntriesMap[selection.SelectedValue]
-	return selectedGame, selection.ExitCode, nil
+	if selection.IsSome() && !selection.Unwrap().Cancelled && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
+
+		var selections shared.Items
+		for _, item := range selection.Unwrap().SelectedItems {
+			selections = append(selections, item.Metadata.(shared.Item))
+		}
+
+		state.SetLastSelectedIndex(selection.Unwrap().SelectedIndex)
+
+		return selections, 0, nil
+	} else if selection.IsSome() && selection.Unwrap().ActionTriggered {
+		return nil, 4, nil
+	}
+
+	return nil, 2, err
 }
 
 func loadGamesList(platform models.Platform) (games shared.Items, e error) {
@@ -93,34 +137,19 @@ func loadGamesList(platform models.Platform) (games shared.Items, e error) {
 		return cacheResults, nil
 	}
 
-	ctx := context.Background()
-	ctxWithCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	args := []string{"--message", "Loading " + platform.Name + "...", "--timeout", "-1"}
-	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
-
-	err := cmd.Start()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		logger.Fatal("Error with starting miniui-presenter loading message", zap.Error(err))
-	}
-
-	time.Sleep(1250 * time.Millisecond)
-
-	items, err := FetchListStateless(platform, cancel)
+	items, err := FetchListStateless(platform)
 	if err != nil {
 		logger.Error("Error downloading Item List", zap.Error(err))
-	}
-	cancel()
-
-	err = cmd.Wait()
-	if err != nil && cmd.ProcessState.ExitCode() != -1 {
-		logger.Fatal("Error while waiting for miniui-presenter loading message to be killed", zap.Error(err))
 	}
 
 	if len(items) == 0 {
 		return nil, nil
 	}
+
+	slices.SortFunc(items, func(a, b shared.Item) int {
+		return strings.Compare(strings.ToLower(a.Filename), strings.ToLower(b.Filename))
+	})
+
 	cache(platform, items)
 	return items, nil
 

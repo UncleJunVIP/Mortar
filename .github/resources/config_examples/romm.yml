@@ -11,6 +11,5 @@ hosts:
         system_tag: "GBA"
         romm_platform_id: "3"
 
-show_item_count: false
 download_art: false
 log_level: "ERROR"

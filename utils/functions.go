@@ -8,29 +8,33 @@ import (
 	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
+	"net"
 	"os"
 	"path/filepath"
 	"qlova.tech/sum"
 	"strings"
+	"time"
 )
 
-func MapTagsToDirectories(items shared.Items) map[string]string {
-	mapping := make(map[string]string)
-
-	for _, entry := range items {
-		if entry.IsDirectory {
-			tag := strings.ReplaceAll(entry.Tag, "(", "")
-			tag = strings.ReplaceAll(tag, ")", "")
-			path := filepath.Join(common.RomDirectory, entry.Filename)
-			mapping[tag] = path
-		}
+func GetRomDirectory() string {
+	if os.Getenv("DEVELOPMENT") == "true" {
+		return "/Users/btk/Desktop/Roms"
 	}
 
-	return mapping
+	return common.RomDirectory
 }
 
 func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[shared.ArtDownloadType]) string {
 	logger := common.GetLoggerInstance()
+
+	artDirectory := ""
+
+	if os.Getenv("DEVELOPMENT") == "true" {
+		romDirectory := strings.ReplaceAll(platform.LocalDirectory, common.RomDirectory, GetRomDirectory())
+		artDirectory = filepath.Join(romDirectory, ".media")
+	} else {
+		artDirectory = filepath.Join(platform.LocalDirectory, ".media")
+	}
 
 	host := platform.Host
 
@@ -41,6 +45,8 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 			return ""
 		}
 
+		rommClient := client.(*clients.RomMClient)
+
 		if game.ArtURL == "" {
 			return ""
 		}
@@ -50,10 +56,8 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 
 		artFilename = strings.Split(artFilename, "?")[0] // For the query string caching stuff
 
-		mediaPath := filepath.Join(platform.LocalDirectory, ".media")
-
-		LastSavedArtPath, err := client.DownloadFileRename(artSubdirectory,
-			mediaPath, artFilename, game.Filename)
+		LastSavedArtPath, err := rommClient.DownloadArt(artSubdirectory,
+			artDirectory, artFilename, game.Filename)
 
 		if err != nil {
 			return ""
@@ -71,7 +75,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 	client := common.NewThumbnailClient(downloadType)
 	section := client.BuildThumbnailSection(tag[1])
 
-	artList, err := client.ListDirectory(section)
+	artList, err := client.ListDirectory(section.HostSubdirectory)
 
 	if err != nil {
 		logger.Info("Unable to fetch artlist", zap.Error(err))
@@ -90,14 +94,8 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 		}
 	}
 
-	if matched.Filename == "" {
-		// TODO Levenshtein Distance support at some point
-	}
-
 	if matched.Filename != "" {
-		lastSavedArtPath, err := client.DownloadFileRename(section.HostSubdirectory,
-			filepath.Join(platform.LocalDirectory, ".media"), matched.Filename, game.Filename)
-
+		lastSavedArtPath, err := client.DownloadArt(section.HostSubdirectory, artDirectory, matched.Filename, game.Filename)
 		if err != nil {
 			return ""
 		}
@@ -108,7 +106,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 			return ""
 		}
 
-		dst := imaging.Resize(src, 400, 0, imaging.Lanczos)
+		dst := imaging.Resize(src, 500, 0, imaging.Lanczos)
 
 		err = imaging.Save(dst, lastSavedArtPath)
 		if err != nil {
@@ -122,38 +120,19 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 	return ""
 }
 
-func DownloadFile(platform models.Platform, games shared.Items, game shared.Item) (string, error) {
-	logger := common.GetLoggerInstance()
+func MapTagsToDirectories(items shared.Items) map[string]string {
+	mapping := make(map[string]string)
 
-	client, err := clients.BuildClient(platform.Host)
-	if err != nil {
-		return "", err
+	for _, entry := range items {
+		if entry.IsDirectory {
+			tag := strings.ReplaceAll(entry.Tag, "(", "")
+			tag = strings.ReplaceAll(tag, ")", "")
+			path := filepath.Join(common.RomDirectory, entry.Filename)
+			mapping[tag] = path
+		}
 	}
 
-	defer func(client shared.Client) {
-		err := client.Close()
-		if err != nil {
-			logger.Error("Unable to close client", zap.Error(err))
-		}
-	}(client)
-
-	var hostSubdirectory string
-
-	if platform.Host.HostType == shared.HostTypes.ROMM {
-		var selectedItem shared.Item
-		for _, item := range games {
-			if item.Filename == game.Filename {
-				selectedItem = item
-				break
-			}
-		}
-		hostSubdirectory = selectedItem.RomID
-	} else {
-		hostSubdirectory = platform.HostSubdirectory
-	}
-
-	return client.DownloadFile(hostSubdirectory,
-		platform.LocalDirectory, game.Filename)
+	return mapping
 }
 
 func CachedMegaThreadJsonFilename(hostName, platformName string) string {
@@ -189,4 +168,10 @@ func DeleteCache() error {
 
 	logger.Info("Cache deleted")
 	return nil
+}
+
+func IsConnectedToInternet() bool {
+	timeout := 5 * time.Second
+	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
+	return err == nil
 }

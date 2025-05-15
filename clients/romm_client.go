@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -259,40 +261,53 @@ func (c *RomMClient) ListDirectory(platformID string) (shared.Items, error) {
 	return items, nil
 }
 
-func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) (string, error) {
-	auth := c.Username + ":" + c.Password
-	authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+func (c *RomMClient) BuildDownloadURL(remotePath, filename string) (string, error) {
+	return url.JoinPath(c.buildRootURL(), RomsEndpoint, remotePath, "content", filename)
+}
 
-	sourceURL, err := url.JoinPath(c.buildRootURL(), RomsEndpoint, remotePath, "content", filename)
+func (c *RomMClient) BuildDownloadHeaders() map[string]string {
+	headers := make(map[string]string)
+	return headers
+}
+
+func (c *RomMClient) DownloadArt(remotePath, localPath, filename, rename string) (savedPath string, error error) {
+	logger := common.GetLoggerInstance()
+
+	logger.Debug("Downloading file...",
+		zap.String("remotePath", remotePath),
+		zap.String("localPath", localPath),
+		zap.String("filename", filename),
+		zap.String("rename", rename))
+
+	sourceURL, err := url.JoinPath(c.buildRootURL(), remotePath, filename)
 	if err != nil {
-		return "", fmt.Errorf("unable to build url for rom download: %v", err)
+		return "", fmt.Errorf("unable to build download url: %w", err)
 	}
 
-	u, err := url.Parse(sourceURL)
-	if err != nil {
-		return "", fmt.Errorf("unable to parse url for rom download: %v", err)
+	httpClient := &http.Client{
+		Timeout: 60 * time.Second,
 	}
 
-	params := url.Values{}
-	params.Add("path", remotePath)
-
-	u.RawQuery = params.Encode()
-
-	req, err := http.NewRequest("GET", u.String(), nil)
+	resp, err := httpClient.Get(sourceURL)
 	if err != nil {
-		return "", fmt.Errorf("unable to build rom download request: %v", err)
-	}
-
-	req.Header.Add("Authorization", authHeader)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("unable to call rom download endpoint: %v", err)
+		return "", fmt.Errorf("failed to download file: %w", err)
 	}
 	defer resp.Body.Close()
 
-	f, err := os.OpenFile(filepath.Join(localPath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	err = os.MkdirAll(localPath, os.ModePerm)
+	if err != nil {
+		return "", fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	fn := filename
+
+	if rename != "" {
+		imageExt := filepath.Ext(filename)
+		fn = strings.ReplaceAll(rename, filepath.Ext(rename), "")
+		fn = fn + imageExt
+	}
+
+	f, err := os.Create(filepath.Join(localPath, fn))
 	if err != nil {
 		return "", fmt.Errorf("failed to create file: %w", err)
 	}
@@ -303,9 +318,5 @@ func (c *RomMClient) DownloadFile(remotePath, localPath, filename string) (strin
 		return "", fmt.Errorf("failed to save file: %w", err)
 	}
 
-	return filename, nil
-}
-
-func (c *RomMClient) DownloadFileRename(remotePath, localPath, filename, rename string) (string, error) {
-	return common.HttpDownloadRename(c.buildRootURL(), remotePath, localPath, filename, rename)
+	return filepath.Join(localPath, fn), nil
 }

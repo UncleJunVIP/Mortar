@@ -1,30 +1,38 @@
 package main
 
 import (
+	gaba "github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
 	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/state"
 	"mortar/ui"
 	"mortar/utils"
 	"os"
+	"time"
 )
 
 func init() {
+	gaba.InitSDL("Mortar")
 	common.SetLogLevel("ERROR")
+
+	if !utils.IsConnectedToInternet() {
+		gaba.NewBlockingAnimation("resources/tiny_violin.png", gaba.WithLooping(true), gaba.WithMaxDisplayTime(time.Millisecond*2500))
+		_, err := gaba.Message("No Internet Connection!", "Make sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: "Quit"},
+		}, "")
+		cleanup()
+		common.LogStandardFatal("No Internet Connection", err)
+	}
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		options := []string{
-			"--background-image", "setup-qr.png",
-			"--confirm-text", "EXIT",
-			"--confirm-show", "true",
-			"--message-alignment", "bottom"}
-
-		_, err = cui.ShowMessageWithOptions("Setup Required!", "0", options...)
+		_, err := gaba.Message("Setup Required!", "Scan the QR Code for Instructions", []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: "Quit"},
+		}, "resources/setup-qr.png")
+		cleanup()
 		common.LogStandardFatal("Setup Required", err)
 	}
 
@@ -46,9 +54,9 @@ func init() {
 	}
 
 	fb := filebrowser.NewFileBrowser(logger)
-	err = fb.CWD(common.RomDirectory, false)
+	err = fb.CWD(utils.GetRomDirectory(), false)
 	if err != nil {
-		_, _ = cui.ShowMessage("Unable to fetch ROM directories! Quitting!", "3")
+		cleanup()
 		logger.Fatal("Error loading fetching ROM directories", zap.Error(err))
 	}
 
@@ -70,6 +78,8 @@ func cleanup() {
 }
 
 func main() {
+
+	defer gaba.CloseSDL()
 	defer cleanup()
 
 	logger := common.GetLoggerInstance()
@@ -79,47 +89,51 @@ func main() {
 
 	var screen models.Screen
 
-	if len(appState.Config.Hosts) == 1 {
-		screen = ui.InitPlatformSelection(appState.Config.Hosts[0], true)
+	quitOnBack := len(appState.Config.Hosts) == 1
+
+	if quitOnBack {
+		screen = ui.InitPlatformSelection(appState.Config.Hosts[0], quitOnBack)
 	} else {
 		screen = ui.InitMainMenu(appState.Config.Hosts)
 	}
 
 	for {
-		res, code, _ := screen.Draw() // TODO figure out error handling
+		res, code, _ := screen.Draw()
 
 		switch screen.Name() {
 		case ui.Screens.MainMenu:
 			switch code {
 			case 0:
-				host := res.Value().(models.Host)
-				screen = ui.InitPlatformSelection(host, false)
+				host := res.(models.Host)
+				screen = ui.InitPlatformSelection(host, quitOnBack)
+			case 4:
+				screen = ui.InitSettingsScreen()
 			case 1, 2:
 				os.Exit(0)
 			}
+		case ui.Screens.Settings:
+			if code != 404 {
+				if len(appState.Config.Hosts) == 1 {
+					screen = ui.InitPlatformSelection(appState.Config.Hosts[0], quitOnBack)
+				} else {
+					screen = ui.InitMainMenu(appState.Config.Hosts)
+				}
+			}
 		case ui.Screens.PlatformSelection:
-			platform := res.Value().(models.Platform)
 			switch code {
 			case 0:
-				screen = ui.InitGamesList(platform, shared.Items{}, "")
+				platform := res.(models.Platform)
+				screen = ui.InitGamesList(platform, shared.Items{}, "", 0)
 			case 1, 2:
-				if screen.(ui.PlatformSelection).QuitOnBack {
+				if quitOnBack {
 					os.Exit(0)
 				}
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			case 4:
-				err := utils.DeleteCache()
-				if err != nil {
-					_, _ = cui.ShowMessage("Unable to delete cache!", "3")
-				} else {
-					_, _ = cui.ShowMessage("Cache deleted!", "3")
-				}
-				screen = ui.InitPlatformSelection(platform.Host, len(appState.Config.Hosts) == 0)
+				screen = ui.InitSettingsScreen()
 			case 404:
-				_, _ = cui.ShowMessage("No platforms configured for \""+platform.Host.DisplayName+"\"", "3")
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			case -1:
-				_, _ = cui.ShowMessage("Unable to display platforms for \""+platform.Host.DisplayName+"\"", "3")
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			}
 		case ui.Screens.GameList:
@@ -127,14 +141,13 @@ func main() {
 
 			switch code {
 			case 0:
-				game := res.Value().(shared.Item)
-				screen = ui.InitDownloadScreen(gl.Platform, gl.Games, game, gl.SearchFilter)
-
+				games := res.(shared.Items)
+				screen = ui.InitDownloadScreen(gl.Platform, gl.Games, games, gl.SearchFilter)
 			case 2:
 				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "") // Clear search filter
+					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "", 0) // Clear search filter
 				} else {
-					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)
+					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
 
 			case 4:
@@ -142,45 +155,42 @@ func main() {
 
 			case 404:
 				if gl.SearchFilter != "" {
-					_, _ = cui.ShowMessage("No results found for \""+gl.SearchFilter+"\"", "3")
-					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "")
+					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "", 0)
 				} else {
-					_, _ = cui.ShowMessage("This section contains no items", "3")
-					screen = ui.InitPlatformSelection(gl.Platform.Host, len(appState.Config.Hosts) == 0)
+					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
 			}
 		case ui.Screens.SearchBox:
 			sb := screen.(ui.Search)
 			switch code {
 			case 0:
-				query := res.Value().(string)
-				screen = ui.InitGamesList(sb.Platform, shared.Items{}, query)
+				query := res.(string)
+				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query, 0)
 			default:
-				screen = ui.InitGamesList(sb.Platform, shared.Items{}, "")
+				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "", 0)
 			}
 		case ui.Screens.Download:
 			ds := screen.(ui.DownloadScreen)
 			switch code {
 			case 0:
 				if appState.Config.DownloadArt {
-					screen = ui.InitDownloadArtScreen(ds.Platform, ds.Game, appState.Config.ArtDownloadType, ds.SearchFilter)
+					downloadedGames := res.([]shared.Item)
+					screen = ui.InitDownloadArtScreen(ds.Platform, downloadedGames, appState.Config.ArtDownloadType, ds.SearchFilter)
 				} else {
-					screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
+					screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter, state.GetAppState().LastSelectedIndex)
 				}
 			case 1:
-				_, _ = cui.ShowMessage("Unable to download "+ds.Game.DisplayName, "3")
-				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
+				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter, state.GetAppState().LastSelectedIndex)
 			default:
-				screen = ui.InitGamesList(ds.Platform, shared.Items{}, "")
+				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter, state.GetAppState().LastSelectedIndex)
 			}
 		case ui.Screens.DownloadArt:
 			da := screen.(ui.DownloadArtScreen)
 			switch code {
 			case 404:
-				_, _ = cui.ShowMessage("Could not find art :(", "3")
 			}
 
-			screen = ui.InitGamesList(da.Platform, shared.Items{}, da.SearchFilter)
+			screen = ui.InitGamesList(da.Platform, state.GetAppState().CurrentFullGamesList, da.SearchFilter, state.GetAppState().LastSelectedIndex)
 		}
 	}
 }

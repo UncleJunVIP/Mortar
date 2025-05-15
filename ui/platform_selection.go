@@ -1,10 +1,10 @@
 package ui
 
 import (
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
+	"fmt"
+	gabamod "github.com/UncleJunVIP/gabagool/models"
+	gaba "github.com/UncleJunVIP/gabagool/ui"
 	"mortar/models"
-	"mortar/utils"
 	"qlova.tech/sum"
 )
 
@@ -24,39 +24,62 @@ func (ps PlatformSelection) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.PlatformSelection
 }
 
-func (ps PlatformSelection) Draw() (p models.ScreenReturn, exitCode int, e error) {
-	var extraArgs []string
-	if ps.QuitOnBack {
-		extraArgs = append(extraArgs, "--cancel-text", "QUIT")
-	}
-
-	actionText := ""
-	if ps.Host.HostType == shared.HostTypes.MEGATHREAD && utils.CacheFolderExists() {
-		actionText = "CLEAR CACHE"
-	}
-
+func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 	if len(ps.Host.Platforms) == 0 {
 		return models.Platform{}, 404, nil
 	}
 
-	selection, err := cui.DisplayList(ps.Host.Platforms, ps.Host.DisplayName, actionText, extraArgs...)
+	var menuItems []gabamod.MenuItem
+	for _, platform := range ps.Host.Platforms {
+		platform.Host = ps.Host
+		menuItems = append(menuItems, gabamod.MenuItem{
+			Text:     platform.Name,
+			Selected: false,
+			Focused:  false,
+			Metadata: platform,
+		})
+	}
+
+	var fhi []gaba.FooterHelpItem
+
+	if ps.QuitOnBack {
+		fhi = []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: "Quit"},
+			{ButtonName: "X", HelpText: "Settings"},
+			{ButtonName: "A", HelpText: "Select"},
+		}
+	} else {
+		fhi = []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: "Back"},
+			{ButtonName: "A", HelpText: "Select"},
+		}
+	}
+
+	title := ps.Host.DisplayName
+
+	if ps.QuitOnBack {
+		title = fmt.Sprintf("Mortar | %s", ps.Host.DisplayName)
+	}
+
+	selection, err := gaba.List(title, menuItems,
+		gaba.ListOptions{
+			FooterHelpItems:   fhi,
+			EnableAction:      ps.QuitOnBack,
+			EnableMultiSelect: false,
+			EnableReordering:  false,
+			SelectedIndex:     0,
+		})
+
 	if err != nil {
 		return models.Platform{}, -1, err
 	}
 
-	if selection.ExitCode == 0 {
-		idx := ps.Host.GetPlatformIndices()[selection.SelectedValue]
-		platform := ps.Host.Platforms[idx]
-		platform.Host = ps.Host
-
-		return platform, selection.ExitCode, nil
+	if selection.IsSome() && selection.Unwrap().ActionTriggered && ps.QuitOnBack {
+		return nil, 4, nil
+	} else if selection.IsSome() {
+		return selection.Unwrap().SelectedItem.Metadata.(models.Platform), 0, nil
 	}
 
-	backExitCode := selection.ExitCode
-	if ps.QuitOnBack {
-		backExitCode = 2
-	}
-
-	return models.Platform{Host: ps.Host}, backExitCode, nil
+	return nil, 2, nil
 
 }
