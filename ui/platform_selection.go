@@ -64,7 +64,7 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 	selection, err := gaba.List(title, menuItems,
 		gaba.ListOptions{
 			FooterHelpItems:   fhi,
-			EnableAction:      false,
+			EnableAction:      ps.QuitOnBack,
 			EnableMultiSelect: false,
 			EnableReordering:  false,
 			SelectedIndex:     0,
