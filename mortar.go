@@ -11,17 +11,27 @@ import (
 	"mortar/ui"
 	"mortar/utils"
 	"os"
+	"time"
 )
 
 func init() {
 	gaba.InitSDL("Mortar")
 	common.SetLogLevel("ERROR")
 
+	if !utils.IsConnectedToInternet() {
+		gaba.NewBlockingAnimation("resources/tiny_violin.png", gaba.WithLooping(true), gaba.WithMaxDisplayTime(time.Millisecond*2500))
+		_, err := gaba.Message("No Internet Connection!", "Make sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: "Quit"},
+		}, "")
+		cleanup()
+		common.LogStandardFatal("No Internet Connection", err)
+	}
+
 	config, err := state.LoadConfig()
 	if err != nil {
 		_, err := gaba.Message("Setup Required!", "Scan the QR Code for Instructions", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, "setup-qr.png")
+		}, "resources/setup-qr.png")
 		cleanup()
 		common.LogStandardFatal("Setup Required", err)
 	}

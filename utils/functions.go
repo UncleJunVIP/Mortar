@@ -8,10 +8,12 @@ import (
 	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
+	"net"
 	"os"
 	"path/filepath"
 	"qlova.tech/sum"
 	"strings"
+	"time"
 )
 
 func GetRomDirectory() string {
@@ -166,4 +168,10 @@ func DeleteCache() error {
 
 	logger.Info("Cache deleted")
 	return nil
+}
+
+func IsConnectedToInternet() bool {
+	timeout := 5 * time.Second
+	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
+	return err == nil
 }
