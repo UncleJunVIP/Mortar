@@ -82,7 +82,7 @@ art_download_type: "BOX_ART" # Optional, defaults to BOX_ART. Does not impact ar
 log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
 ```
 
-Sample configuration files can be [found here](/resources/config_examples).
+Sample configuration files can be [found here](/.github/resources/config_examples).
 
 ---
 

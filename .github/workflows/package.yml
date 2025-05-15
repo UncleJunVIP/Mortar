@@ -22,7 +22,7 @@ jobs:
       - name: Build Package Folder
         run: |
           mkdir Mortar.pak
-          cp -R mortar launch.sh README.md LICENSE pak.json resources/setup-qr.png fonts data Mortar.pak
+          cp -R mortar launch.sh README.md LICENSE pak.json resources fonts data Mortar.pak
 
       - uses: actions/upload-artifact@v4
         with:

@@ -94,13 +94,19 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		{ButtonName: "A", HelpText: "Select"},
 	}
 
+	selectedIndex := gl.SelectedIndex
+
+	if selectedIndex < 9 {
+		selectedIndex = 0
+	}
+
 	selection, err := gaba.List(title, itemEntries,
 		gaba.ListOptions{
 			FooterHelpItems:   fhi,
 			EnableAction:      true,
 			EnableMultiSelect: true,
 			EnableReordering:  false,
-			SelectedIndex:     gl.SelectedIndex,
+			SelectedIndex:     selectedIndex,
 		})
 	if err != nil {
 		return nil, -1, err
