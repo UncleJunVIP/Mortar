@@ -22,7 +22,9 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 ---
 
 <div align="center">
-    <img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar Preview Animation">
+<video autoplay loop muted>
+  <source src=".github/resources/mortar_preview.webm" type="video/webm" />
+</video>
 </div>
 
 ---
@@ -94,3 +96,12 @@ You might be interested in my other NextUI Paks!
 
 [Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) - manage your ROM library right on device
 
+---
+
+## Be a friend, tell a friend something nice; it might change their life!
+
+I've spent a good chunk of time building Mortar.
+
+If you feel inclined to pay it forward, go do something nice for someone! ❤️
+
+✌🏻
