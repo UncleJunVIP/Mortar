@@ -1,7 +1,7 @@
 hosts:
-  - display_name: "Fight Club"
+  - display_name: "Megathread"
     host_type: MEGATHREAD
-    root_uri: "https://firstruleoffight.club"
+    root_uri: "https://myrient.erista.me"
 
     platforms:
       - platform_name: "Game Boy"
