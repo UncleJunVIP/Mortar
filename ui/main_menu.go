@@ -1,7 +1,8 @@
 package ui
 
 import (
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
+	gabamod "github.com/UncleJunVIP/gabagool/models"
+	gaba "github.com/UncleJunVIP/gabagool/ui"
 	"mortar/models"
 	"qlova.tech/sum"
 )
@@ -27,19 +28,41 @@ func (m MainMenu) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.MainMenu
 }
 
-func (m MainMenu) Draw() (host models.ScreenReturn, exitCode int, e error) {
-	var extraArgs []string
-	extraArgs = append(extraArgs, "--cancel-text", "QUIT")
+func (m MainMenu) Draw() (host interface{}, exitCode int, e error) {
 
-	selection, err := cui.DisplayList(m.Hosts, "Mortar", "", extraArgs...)
+	var menuItems []gabamod.MenuItem
+	for _, host := range m.Hosts {
+		menuItems = append(menuItems, gabamod.MenuItem{
+			Text:     host.DisplayName,
+			Selected: false,
+			Focused:  false,
+			Metadata: host,
+		})
+	}
+
+	fhi := []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: "Quit"},
+		{ButtonName: "X", HelpText: "Settings"},
+		{ButtonName: "A", HelpText: "Select"},
+	}
+
+	selection, err := gaba.List("Mortar", menuItems,
+		gaba.ListOptions{
+			FooterHelpItems:   fhi,
+			EnableAction:      true,
+			EnableMultiSelect: false,
+			EnableReordering:  false,
+			SelectedIndex:     0,
+		})
 	if err != nil {
 		return models.Host{}, -1, err
 	}
 
-	if selection.ExitCode == 0 {
-		hostIdx := m.HostIndices[selection.SelectedValue]
-		return m.Hosts[hostIdx], selection.ExitCode, nil
+	if selection.IsSome() && selection.Unwrap().ActionTriggered {
+		return models.Host{}, 4, nil
+	} else if selection.IsSome() && !selection.Unwrap().Cancelled && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
+		return selection.Unwrap().SelectedItem.Metadata.(models.Host), 0, nil
 	}
 
-	return models.Host{}, selection.ExitCode, nil
+	return models.Host{}, 2, nil
 }

@@ -17,7 +17,6 @@ type Host struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 
-	ShareName        string   `yaml:"share_name"`
 	ExtensionFilters []string `yaml:"extension_filters"`
 
 	Platforms Platforms `yaml:"platforms"`
@@ -70,13 +69,9 @@ func (h Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("root_uri", h.RootURI)
 	enc.AddString("port", strconv.Itoa(h.Port))
 
-	if h.HostType == shared.HostTypes.ROMM || h.HostType == shared.HostTypes.SMB {
+	if h.HostType == shared.HostTypes.ROMM {
 		enc.AddString("username", h.Username)
 		enc.AddString("password", h.Password)
-	}
-
-	if h.HostType == shared.HostTypes.SMB {
-		enc.AddString("share_name", h.ShareName)
 	}
 
 	enc.AddString("extension_filters", strings.Join(h.ExtensionFilters, ","))

@@ -1,30 +1,27 @@
 package ui
 
 import (
-	"context"
+	"fmt"
+	"github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	cui "github.com/UncleJunVIP/nextui-pak-shared-functions/ui"
-	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/utils"
-	"os/exec"
 	"qlova.tech/sum"
 	"time"
 )
 
 type DownloadArtScreen struct {
 	Platform     models.Platform
-	Game         shared.Item
+	Games        shared.Items
 	DownloadType sum.Int[shared.ArtDownloadType]
 	SearchFilter string
 }
 
-func InitDownloadArtScreen(platform models.Platform, game shared.Item,
-	downloadType sum.Int[shared.ArtDownloadType], searchFilter string) DownloadArtScreen {
+func InitDownloadArtScreen(platform models.Platform, games shared.Items, downloadType sum.Int[shared.ArtDownloadType], searchFilter string) models.Screen {
 	return DownloadArtScreen{
 		Platform:     platform,
-		Game:         game,
+		Games:        games,
 		DownloadType: downloadType,
 		SearchFilter: searchFilter,
 	}
@@ -34,46 +31,36 @@ func (a DownloadArtScreen) Name() sum.Int[models.ScreenName] {
 	return models.ScreenNames.DownloadArt
 }
 
-func (a DownloadArtScreen) Draw() (value models.ScreenReturn, exitCode int, e error) {
-	logger := common.GetLoggerInstance()
-
-	ctx := context.Background()
-	ctxWithCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	args := []string{"--message", "Attempting to download art...", "--timeout", "-1"}
-	cmd := exec.CommandContext(ctxWithCancel, "minui-presenter", args...)
-
-	err := cmd.Start()
-	if err != nil && cmd.ProcessState.ExitCode() > 6 {
-		logger.Fatal("Error with starting miniui-presenter download art message", zap.Error(err))
+func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
+	footerHelpItems := []ui.FooterHelpItem{
+		{ButtonName: "B", HelpText: "I'll Find My Own"},
+		{ButtonName: "A", HelpText: "Use It!"},
 	}
 
-	time.Sleep(1250 * time.Millisecond)
+	for _, game := range a.Games {
+		process, _ := ui.BlockingProcess(fmt.Sprintf("Finding art for %s...", game.DisplayName), func() (interface{}, error) {
+			artPath := utils.FindArt(a.Platform, game, a.DownloadType)
+			return artPath, nil
+		})
 
-	artPath := utils.FindArt(a.Platform, a.Game, a.DownloadType)
+		artPath := process.Result.(string)
+		if artPath == "" {
+			_, _ = ui.BlockingProcess(fmt.Sprintf("No art found for %s!", game.DisplayName), func() (interface{}, error) {
+				time.Sleep(time.Millisecond * 1500)
+				return nil, nil
+			})
+			continue
+		}
 
-	cancel()
+		result, err := ui.Message("", "Found This Art!", footerHelpItems, artPath)
+		if err != nil {
+			return nil, -1, err
+		}
 
-	if artPath == "" {
-		logger.Info("Could not find art!")
-		return shared.Item{}, 404, nil
+		if result.IsNone() {
+			common.DeleteFile(artPath)
+		}
 	}
 
-	code, _ := cui.ShowMessageWithOptions("　　　　　　　　　　　　　　　　　　　　　　　　　", "0",
-		"--background-image", artPath,
-		"--confirm-text", "Use",
-		"--confirm-show", "true",
-		"--action-button", "X",
-		"--action-text", "I'll Find My Own",
-		"--action-show", "true",
-		"--message-alignment", "bottom")
-
-	if code == 2 || code == 4 {
-		common.DeleteFile(artPath)
-	}
-	return shared.Item{
-		Path: artPath,
-	}, 0, nil
-
+	return nil, 2, nil
 }

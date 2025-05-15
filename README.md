@@ -2,13 +2,13 @@
 
 <img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
 <h3 style="font-size: 25px;">
-    A ROM download client for <a href="https://nextui.loveretro.games" target="_blank">NextUI</a>.
+    A ROM download client for <a href="https://nextui.loveretro.games" target="_blank">NextUI</a>
 </h3>
 
 <h4 style="font-size: 18px;">
-Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
+Supports RomM and Megathread
 
-**Now with Thumbnail Support! _(Powered by the Libretro Thumbnail Project)_**
+Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
 
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar.pak?style=for-the-badge)
@@ -22,43 +22,37 @@ Supports RomM, SMB, Megathread, Apache / nginx autoindex & HTML tables.
 ---
 
 <div align="center">
-    <img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar Preview Animation">
+  <video src="https://github.com/user-attachments/assets/99679ca0-873f-43f9-af5c-9b2284e60c11" width="400" />
 </div>
 
 ---
 
 ## How do I setup Mortar?
 
-1. Own a TrimUI Brick and have a SD Card with NextUI configured.
+1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI.
 2. Connect your device to a Wi-Fi network.
-3. Download the latest Mortar release from this repo.
-4. Unzip the release download.
-5. Edit one of the templates in the [`config_examples`](https://github.com/UncleJunVIP/Mortar.pak/tree/main/resources/config_examples) directory. Once done save it as `config.yml` inside the
-   `Mortar.pak` directory.
-6. With your device powered off, eject the SD Card and connect it to your computer.
-7. Copy the entire Mortar.pak file to `SD_ROOT/Tools/tg5040`.
-8. Reinsert your SD Card into your device.
-9. Launch `Mortar` from the `Tools` menu and enjoy!
+3. Download the latest Mortar release from this repo or install it using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
+   - If downloading manually, unzip the release before continuing.
+4. Edit one of the templates [found here](https://github.com/UncleJunVIP/Mortar.pak/tree/main/resources/config_examples).
+5. Save the edited template as `config.yml`.
+    - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
+    - Manual Installers: upload the `Mortar.pak` directory that came in the releases zip and place `config.yml` inside.
+6. Launch `Mortar` from the `Tools` menu and enjoy!
 
 ## Configuration Reference
 
 ```yaml
 hosts:
   - display_name: "Display Name"
-    host_type: ROMM # Valid Choices: ROMM | MEGATHREAD | SMB | APACHE | NGINX | CUSTOM
+    host_type: ROMM # Valid Choices: ROMM | MEGATHREAD
     root_uri: "https://domain.tld" # This can be the start of a URL with protocol (e.g. https://), a host name or an IP Address
 
-    port: 445 # Needed by SMB, optional otherwise unless using non-standard ports
+    port: 445 # Optional otherwise unless using non-standard ports
 
-    username: "GUEST" # Used by RomM and SMB
-    password: "hunter2" # Used by RomM and SMB
+    username: "GUEST" # Used by RomM
+    password: "hunter2" # Used by RomM
 
-    share_name: "guest" # Used by SMB
-
-    extension_filters: # Used by SMB to hide files with given extensions
-      - ".DS_Store"
-
-    platforms: # One or more mappings of host directory to the local filesystem
+    platforms: # One or more mappings of the host directory to the local filesystem
       - platform_name: "Game Boy" # Name it whatever you want
         system_tag: "GB" # Must match the tag in the `SDCARD_ROOT/Roms` directories
         local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Explicitly set the path. This will be overwritten if `system_tag` is set
@@ -68,10 +62,10 @@ hosts:
         # Define more sections if desired
 
     filters:
-      inclusive_filters: # Inclusive filters are applied first. If ROM filename contains any of these it will be included
+      inclusive_filters: # Inclusive filters are applied first. If the ROM filename contains any of these, it will be included
         - "USA"
         - "En,"
-      exclusive_filters: # Exclusive filters are applied second. i.e. If ROM filename contains any of these it will be excluded
+      exclusive_filters: # Exclusive filters are applied second. If the ROM filename contains any of these, it will be excluded
         - "(Proto"
         - "(Demo)"
         - "(Beta)"
@@ -81,75 +75,31 @@ hosts:
         - "(Europe)"
         - "(Japan)"
 
-    table_columns: # Used by CUSTOM hosts. Match each value with the exact text used in the HTML Table
-      filename_header: "File Name"
-      file_size_header: "File Size"
-      date_header: "Date"
-
-    source_replacements: # Used by CUSTOM hosts. If the table contains extra junk (e.g. sort arrows, brackets, etc.) specify them here. They will be removed before parsing the table
-      "[[": "[["
-      "]]": "]]"
-
   # Define more hosts if desired
 
-show_item_count: false # Shows file count before displaying list
-download_art: true # If true, Mortar will attempt to find box art. If found it will display it and let you indicate if you want it
+download_art: true # If true, Mortar will attempt to find box art. If found, it will display it and let you indicate if you want it
 art_download_type: "BOX_ART" # Optional, defaults to BOX_ART. Does not impact art downloads from RoMM. Valid Choices: BOX_ART | TITLE_SCREEN | LOGOS | SCREENSHOTS
 log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
 ```
 
-Sample configuration files by host can be [found here](/resources/config_examples).
+Sample configuration files can be [found here](/.github/resources/config_examples).
 
-***
+---
 
-## Gotchas
+## Enjoying Mortar?
 
-While testing, I came across some gotchas. Here is what I caught.
+You might be interested in my other NextUI Paks!
 
-- Filtering Language Tags
-    - When using the filter feature on language tags `e.g. Filename (USA) (En, Fr, Jp).zip`, use the trailing comma or
-      parenthesis so that my naive filtering implementation (*`<cough>`* string compares *`</cough>`*) doesn't just
-      filter the filename.
+[Pak Store](https://github.com/UncleJunVIP/nextui-pak-store) - install, update and manage the amazing work from the community right on device
 
-- Apache Hosts
-    - Apache host running mod_autoindex by default truncate their table file names.
-    - To fix this, use the following `.htaccess` file in the parent directory of the files being served.
+[Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) - manage your ROM library right on device
 
-```
-Options +Indexes
-<IfModule mod_autoindex.c>
-  IndexOptions NameWidth=*
-</ifModule>
-```
+---
 
-- nginx Hosts
-    - nginx also truncates their filenames
-    - To fix this, add these to your nginx config for the appropriate location
+## Be a friend, tell a friend something nice; it might change their life!
 
-```
-location / {
-    root   /usr/share/html;
-    index  index.html index.htm;
-    
-    autoindex on;
-    autoindex_exact_size off;
-    autoindex_format json;
-    autoindex_localtime on;
-}
-```
+I've spent a good chunk of time building Mortar.
 
-## 🌸 Flower Giving Time! 🌸
+If you feel inclined to pay it forward, go do something nice for someone! ❤️
 
-Just want to give a huge shoutout
-to [@ro8inmorgan](https://github.com/ro8inmorgan), [@frysee](https://github.com/frysee) and the rest of the NextUI
-contributors for making the TrimUI
-Brick an amazing experience. Also huge props to the work [@shauninman](https://github.com/shauninman) put into MinUI of
-which NextUI is based.
-
-I want to also shoutout [@josegonzalez](https://github.com/josegonzalez) for their
-awesome [minui-list](https://github.com/josegonzalez/minui-list), [miniui-presenter](https://github.com/josegonzalez/minui-presenter)
-and [minui-keyboard](https://github.com/josegonzalez/minui-keyboard) projects.
-
-Without these phenomenal pieces of software I likely would not have built Mortar.
-
-✌️
+✌🏻
