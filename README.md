@@ -22,9 +22,7 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 ---
 
 <div align="center">
-<video autoplay loop muted>
-  <source src=".github/resources/mortar_preview.webm" type="video/webm" />
-</video>
+  <video src="https://github.com/user-attachments/assets/99679ca0-873f-43f9-af5c-9b2284e60c11" width="400" />
 </div>
 
 ---
