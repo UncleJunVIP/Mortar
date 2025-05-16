@@ -120,6 +120,7 @@ func main() {
 				}
 			}
 		case ui.Screens.PlatformSelection:
+			state.SetLastSelectedPosition(0, 0)
 			switch code {
 			case 0:
 				platform := res.(models.Platform)
