@@ -40,20 +40,15 @@ func (m MainMenu) Draw() (host interface{}, exitCode int, e error) {
 		})
 	}
 
-	fhi := []gaba.FooterHelpItem{
+	options := gaba.DefaultListOptions("Mortar", menuItems)
+	options.EnableAction = true
+	options.FooterHelpItems = []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Quit"},
 		{ButtonName: "X", HelpText: "Settings"},
 		{ButtonName: "A", HelpText: "Select"},
 	}
 
-	selection, err := gaba.List("Mortar", menuItems,
-		gaba.ListOptions{
-			FooterHelpItems:   fhi,
-			EnableAction:      true,
-			EnableMultiSelect: false,
-			EnableReordering:  false,
-			SelectedIndex:     0,
-		})
+	selection, err := gaba.List(options)
 	if err != nil {
 		return models.Host{}, -1, err
 	}

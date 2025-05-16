@@ -61,14 +61,11 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 		title = fmt.Sprintf("Mortar | %s", ps.Host.DisplayName)
 	}
 
-	selection, err := gaba.List(title, menuItems,
-		gaba.ListOptions{
-			FooterHelpItems:   fhi,
-			EnableAction:      ps.QuitOnBack,
-			EnableMultiSelect: false,
-			EnableReordering:  false,
-			SelectedIndex:     0,
-		})
+	options := gaba.DefaultListOptions(title, menuItems)
+	options.EnableAction = ps.QuitOnBack
+	options.FooterHelpItems = fhi
+
+	selection, err := gaba.List(options)
 
 	if err != nil {
 		return models.Platform{}, -1, err

@@ -90,7 +90,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 
 	footerHelpItems := []ui.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Cancel"},
-		{ButtonName: "←→", HelpText: "Change option"},
+		{ButtonName: "←→", HelpText: "Cycle"},
 		{ButtonName: "Start", HelpText: "Save"},
 	}
 
