@@ -33,7 +33,7 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 2. Connect your device to a Wi-Fi network.
 3. Download the latest Mortar release from this repo or install it using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
    - If downloading manually, unzip the release before continuing.
-4. Edit one of the templates [found here](https://github.com/UncleJunVIP/Mortar.pak/tree/main/resources/config_examples).
+4. Edit one of the templates [found here](/.github/resources/config_examples).
 5. Save the edited template as `config.yml`.
     - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
     - Manual Installers: upload the `Mortar.pak` directory that came in the releases zip and place `config.yml` inside.
