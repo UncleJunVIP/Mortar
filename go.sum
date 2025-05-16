@@ -2,8 +2,8 @@ github.com/PuerkitoBio/goquery v1.10.3 h1:pFYcNSqHxBD06Fpj/KsbStFRsgRATgnf3LeXiU
 github.com/PuerkitoBio/goquery v1.10.3/go.mod h1:tMUX0zDMHXYlAQk6p35XxQMqMweEKB7iK7iLNd4RH4Y=
 github.com/UncleJunVIP/certifiable v1.0.0 h1:g8SMZrGW74qLvli9j0CYO5BvpVcGhqxfvAUnTeSjyfc=
 github.com/UncleJunVIP/certifiable v1.0.0/go.mod h1:paPhCSE8DKzYvBcFcr5NVAYJmmvADq8e5fvkvs95np4=
-github.com/UncleJunVIP/gabagool v0.0.14 h1:M1C85wFOxECCpQ1+HaGvORZLVVJb7j5T8rXT+/k1J2s=
-github.com/UncleJunVIP/gabagool v0.0.14/go.mod h1:x6dMSy1rjhyGt88Qkz+63/Jt14DrmP+a0l3Nk9m4Pa8=
+github.com/UncleJunVIP/gabagool v0.0.15 h1:xTkOEmmggHjGSEJL8Bz0CgUuUUZ2pooUasRVL2trCsI=
+github.com/UncleJunVIP/gabagool v0.0.15/go.mod h1:x6dMSy1rjhyGt88Qkz+63/Jt14DrmP+a0l3Nk9m4Pa8=
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1 h1:hKmgw2V9AaSrEdyhsAk+daW2RLE6Dh/VqZYier2MOmI=
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1/go.mod h1:sXHrQmYySc2DVrGkhpoAoqDxb3lq3AS1HRbuHKCLnDE=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4 h1:6xQvdHFFMHHW8ubDS+xUW/USUx25kZtC6nfVnY8tZQU=

@@ -2,13 +2,13 @@ module mortar
 
 go 1.24.1
 
-replace github.com/UncleJunVIP/gabagool => ../gabagool
+//replace github.com/UncleJunVIP/gabagool => ../gabagool
 // 	github.com/UncleJunVIP/gabagool v0.0.0-00010101000000-000000000000
 
 //replace github.com/UncleJunVIP/nextui-pak-shared-functions => ../nextui-pak-shared-functions
 
 require (
-	github.com/UncleJunVIP/gabagool v0.0.0-00010101000000-000000000000
+	github.com/UncleJunVIP/gabagool v0.0.15
 	github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/spf13/viper v1.20.1
