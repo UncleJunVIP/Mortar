@@ -87,27 +87,24 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		})
 	}
 
-	fhi := []gaba.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "X", HelpText: "Search"},
-		{ButtonName: "SELECT", HelpText: "Multi-Select"},
-		{ButtonName: "A", HelpText: "Select"},
-	}
-
 	selectedIndex := gl.SelectedIndex
 
 	if selectedIndex < 9 {
 		selectedIndex = 0
 	}
 
-	selection, err := gaba.List(title, itemEntries,
-		gaba.ListOptions{
-			FooterHelpItems:   fhi,
-			EnableAction:      true,
-			EnableMultiSelect: true,
-			EnableReordering:  false,
-			SelectedIndex:     selectedIndex,
-		})
+	options := gaba.DefaultListOptions(title, itemEntries)
+	options.EnableAction = true
+	options.EnableMultiSelect = true
+	options.FooterHelpItems = []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: "Back"},
+		{ButtonName: "X", HelpText: "Search"},
+		{ButtonName: "Select", HelpText: "Multi"},
+		{ButtonName: "A", HelpText: "Select"},
+	}
+	options.SelectedIndex = selectedIndex
+
+	selection, err := gaba.List(options)
 	if err != nil {
 		return nil, -1, err
 	}
