@@ -123,7 +123,7 @@ func main() {
 			switch code {
 			case 0:
 				platform := res.(models.Platform)
-				screen = ui.InitGamesList(platform, shared.Items{}, "", 0)
+				screen = ui.InitGamesList(platform, shared.Items{}, "")
 			case 1, 2:
 				if quitOnBack {
 					os.Exit(0)
@@ -145,7 +145,7 @@ func main() {
 				screen = ui.InitDownloadScreen(gl.Platform, gl.Games, games, gl.SearchFilter)
 			case 2:
 				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "", 0) // Clear search filter
+					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "") // Clear search filter
 				} else {
 					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
@@ -155,7 +155,7 @@ func main() {
 
 			case 404:
 				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "", 0)
+					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "")
 				} else {
 					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
@@ -165,9 +165,9 @@ func main() {
 			switch code {
 			case 0:
 				query := res.(string)
-				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query, 0)
+				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query)
 			default:
-				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "", 0)
+				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "")
 			}
 		case ui.Screens.Download:
 			ds := screen.(ui.DownloadScreen)
@@ -177,20 +177,16 @@ func main() {
 					downloadedGames := res.([]shared.Item)
 					screen = ui.InitDownloadArtScreen(ds.Platform, downloadedGames, appState.Config.ArtDownloadType, ds.SearchFilter)
 				} else {
-					screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter, state.GetAppState().LastSelectedIndex)
+					screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 				}
 			case 1:
-				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter, state.GetAppState().LastSelectedIndex)
+				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 			default:
-				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter, state.GetAppState().LastSelectedIndex)
+				screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 			}
 		case ui.Screens.DownloadArt:
 			da := screen.(ui.DownloadArtScreen)
-			switch code {
-			case 404:
-			}
-
-			screen = ui.InitGamesList(da.Platform, state.GetAppState().CurrentFullGamesList, da.SearchFilter, state.GetAppState().LastSelectedIndex)
+			screen = ui.InitGamesList(da.Platform, state.GetAppState().CurrentFullGamesList, da.SearchFilter)
 		}
 	}
 }
