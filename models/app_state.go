@@ -11,6 +11,7 @@ type AppState struct {
 
 	CurrentFullGamesList shared.Items
 	LastSelectedIndex    int
+	LastSelectedPosition int
 }
 
 func (a AppState) MarshalLogObject(enc zapcore.ObjectEncoder) error {

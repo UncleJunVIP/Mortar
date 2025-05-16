@@ -38,14 +38,14 @@ func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
 	}
 
 	for _, game := range a.Games {
-		process, _ := ui.BlockingProcess(fmt.Sprintf("Finding art for %s...", game.DisplayName), func() (interface{}, error) {
+		process, _ := ui.BlockingProcess(fmt.Sprintf("Finding art for %s...", game.DisplayName), false, func() (interface{}, error) {
 			artPath := utils.FindArt(a.Platform, game, a.DownloadType)
 			return artPath, nil
 		})
 
 		artPath := process.Result.(string)
 		if artPath == "" {
-			_, _ = ui.BlockingProcess(fmt.Sprintf("No art found for %s!", game.DisplayName), func() (interface{}, error) {
+			_, _ = ui.BlockingProcess(fmt.Sprintf("No art found for %s!", game.DisplayName), false, func() (interface{}, error) {
 				time.Sleep(time.Millisecond * 1500)
 				return nil, nil
 			})

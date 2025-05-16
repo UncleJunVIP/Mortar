@@ -20,19 +20,18 @@ import (
 )
 
 type GameList struct {
-	Platform      models.Platform
-	Games         shared.Items
-	SearchFilter  string
-	SelectedIndex int
+	Platform     models.Platform
+	Games        shared.Items
+	SearchFilter string
 }
 
-func InitGamesList(platform models.Platform, games shared.Items, searchFilter string, selectedIndex int) GameList {
+func InitGamesList(platform models.Platform, games shared.Items, searchFilter string) GameList {
 	var g shared.Items
 
 	if len(games) > 0 {
 		g = games
 	} else {
-		process, err := gaba.BlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), func() (interface{}, error) {
+		process, err := gaba.BlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), true, func() (interface{}, error) {
 			var err error
 			g, err = loadGamesList(platform)
 			return g, err
@@ -47,10 +46,9 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	state.SetCurrentFullGamesList(g)
 
 	return GameList{
-		Platform:      platform,
-		Games:         g,
-		SearchFilter:  searchFilter,
-		SelectedIndex: selectedIndex,
+		Platform:     platform,
+		Games:        g,
+		SearchFilter: searchFilter,
 	}
 }
 
@@ -87,7 +85,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		})
 	}
 
-	selectedIndex := gl.SelectedIndex
+	selectedIndex := state.GetAppState().LastSelectedIndex
 
 	if selectedIndex < 9 {
 		selectedIndex = 0
@@ -103,6 +101,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		{ButtonName: "A", HelpText: "Select"},
 	}
 	options.SelectedIndex = selectedIndex
+	options.VisibleStartIndex = max(0, state.GetAppState().LastSelectedIndex-state.GetAppState().LastSelectedPosition)
 
 	selection, err := gaba.List(options)
 	if err != nil {
@@ -116,7 +115,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 			selections = append(selections, item.Metadata.(shared.Item))
 		}
 
-		state.SetLastSelectedIndex(selection.Unwrap().SelectedIndex)
+		state.SetLastSelectedPosition(selection.Unwrap().SelectedIndex, selection.Unwrap().VisiblePosition)
 
 		return selections, 0, nil
 	} else if selection.IsSome() && selection.Unwrap().ActionTriggered {
