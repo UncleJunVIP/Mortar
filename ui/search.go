@@ -9,12 +9,14 @@ import (
 )
 
 type Search struct {
-	Platform models.Platform
+	Platform    models.Platform
+	InitialText string
 }
 
-func InitSearch(platform models.Platform) Search {
+func InitSearch(platform models.Platform, initialText string) Search {
 	return Search{
-		Platform: platform,
+		Platform:    platform,
+		InitialText: initialText,
 	}
 }
 
@@ -25,7 +27,7 @@ func (s Search) Name() sum.Int[models.ScreenName] {
 func (s Search) Draw() (value interface{}, exitCode int, e error) {
 	logger := common.GetLoggerInstance()
 
-	res, err := ui.Keyboard("")
+	res, err := ui.Keyboard(s.InitialText)
 	if err != nil {
 		logger.Error("Error with blocking keyboard", zap.Error(err))
 		return nil, -1, err

@@ -1,8 +1,8 @@
 {
   "name": "Mortar",
-  "version": "v2.0.3",
+  "version": "v2.0.4",
   "type": "TOOL",
-  "description": "Download content from RomM, SMB, Megathread and more",
+  "description": "ROM Downloader for RomM and Megathread",
   "author": "K-Wall",
   "repo_url": "https://github.com/UncleJunVIP/Mortar",
   "release_filename": "Mortar.pak.zip",

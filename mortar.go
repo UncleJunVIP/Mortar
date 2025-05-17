@@ -78,7 +78,6 @@ func cleanup() {
 }
 
 func main() {
-
 	defer gaba.CloseSDL()
 	defer cleanup()
 
@@ -146,17 +145,17 @@ func main() {
 				screen = ui.InitDownloadScreen(gl.Platform, gl.Games, games, gl.SearchFilter)
 			case 2:
 				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "") // Clear search filter
+					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "")
 				} else {
 					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
 
 			case 4:
-				screen = ui.InitSearch(gl.Platform)
+				screen = ui.InitSearch(gl.Platform, gl.SearchFilter)
 
 			case 404:
 				if gl.SearchFilter != "" {
-					screen = ui.InitGamesList(gl.Platform, shared.Items{}, "")
+					screen = ui.InitGamesList(gl.Platform, state.GetAppState().CurrentFullGamesList, "")
 				} else {
 					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
