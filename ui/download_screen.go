@@ -11,7 +11,6 @@ import (
 	"mortar/models"
 	"mortar/utils"
 	"net/url"
-	"os"
 	"path/filepath"
 	"qlova.tech/sum"
 	"slices"
@@ -94,7 +93,7 @@ func BuildDownload(platform models.Platform, games shared.Items) []gabamod.Downl
 	for _, g := range games {
 
 		var downloadLocation string
-		if os.Getenv("DEVELOPMENT") == "true" {
+		if utils.IsDev() {
 			romDirectory := strings.ReplaceAll(platform.LocalDirectory, common.RomDirectory, utils.GetRomDirectory())
 			downloadLocation = filepath.Join(romDirectory, g.Filename)
 		} else {

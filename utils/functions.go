@@ -16,9 +16,13 @@ import (
 	"time"
 )
 
+func IsDev() bool {
+	return os.Getenv("ENVIRONMENT") == "DEV"
+}
+
 func GetRomDirectory() string {
-	if os.Getenv("DEVELOPMENT") == "true" {
-		return "/Users/btk/Desktop/Roms"
+	if IsDev() {
+		return os.Getenv("ROM_DIRECTORY")
 	}
 
 	return common.RomDirectory
@@ -29,7 +33,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 
 	artDirectory := ""
 
-	if os.Getenv("DEVELOPMENT") == "true" {
+	if IsDev() {
 		romDirectory := strings.ReplaceAll(platform.LocalDirectory, common.RomDirectory, GetRomDirectory())
 		artDirectory = filepath.Join(romDirectory, ".media")
 	} else {

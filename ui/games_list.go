@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	gabamod "github.com/UncleJunVIP/gabagool/models"
-	gaba "github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/ui"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
@@ -32,7 +32,7 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	if len(games) > 0 {
 		g = games
 	} else {
-		process, err := gaba.BlockingProcess(fmt.Sprintf("Loading %s...", platform.Name), true, func() (interface{}, error) {
+		process, err := ui.ProcessMessage(fmt.Sprintf("Loading %s...", platform.Name), ui.ProcessMessageOptions{ShowBackground: true}, func() (interface{}, error) {
 			var err error
 			g, err = loadGamesList(platform)
 			return g, err
@@ -74,18 +74,18 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 
 	if len(itemList) == 0 {
 		if gl.SearchFilter != "" {
-			gaba.BlockingProcess(
+			ui.ProcessMessage(
 				fmt.Sprintf("No results found for \"%s\"", gl.SearchFilter),
-				true,
+				ui.ProcessMessageOptions{ShowBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
 					return nil, nil
 				},
 			)
 		} else {
-			gaba.BlockingProcess(
+			ui.ProcessMessage(
 				fmt.Sprintf("No games found for %s", gl.Platform.Name),
-				true,
+				ui.ProcessMessageOptions{ShowBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
 					return nil, nil
@@ -111,10 +111,10 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		selectedIndex = 0
 	}
 
-	options := gaba.DefaultListOptions(title, itemEntries)
+	options := ui.DefaultListOptions(title, itemEntries)
 	options.EnableAction = true
 	options.EnableMultiSelect = true
-	options.FooterHelpItems = []gaba.FooterHelpItem{
+	options.FooterHelpItems = []ui.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Back"},
 		{ButtonName: "X", HelpText: "Search"},
 		{ButtonName: "Select", HelpText: "Multi"},
@@ -123,7 +123,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	options.SelectedIndex = selectedIndex
 	options.VisibleStartIndex = max(0, state.GetAppState().LastSelectedIndex-state.GetAppState().LastSelectedPosition)
 
-	selection, err := gaba.List(options)
+	selection, err := ui.List(options)
 	if err != nil {
 		return nil, -1, err
 	}
