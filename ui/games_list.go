@@ -17,6 +17,7 @@ import (
 	"qlova.tech/sum"
 	"slices"
 	"strings"
+	"time"
 )
 
 type GameList struct {
@@ -72,6 +73,25 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	}
 
 	if len(itemList) == 0 {
+		if gl.SearchFilter != "" {
+			gaba.BlockingProcess(
+				fmt.Sprintf("No results found for \"%s\"", gl.SearchFilter),
+				true,
+				func() (interface{}, error) {
+					time.Sleep(time.Second * 2)
+					return nil, nil
+				},
+			)
+		} else {
+			gaba.BlockingProcess(
+				fmt.Sprintf("No games found for %s", gl.Platform.Name),
+				true,
+				func() (interface{}, error) {
+					time.Sleep(time.Second * 2)
+					return nil, nil
+				},
+			)
+		}
 		return nil, 404, nil
 	}
 
