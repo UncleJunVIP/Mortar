@@ -54,7 +54,7 @@ func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
 			continue
 		}
 
-		result, err := ui.Message("", "Found This Art!", footerHelpItems, ui.MessageOptions{})
+		result, err := ui.Message("", "Found This Art!", footerHelpItems, ui.MessageOptions{ImagePath: artPath})
 		if err != nil {
 			return nil, -1, err
 		}
