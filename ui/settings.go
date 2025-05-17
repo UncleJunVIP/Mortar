@@ -109,9 +109,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		if result.Unwrap().SelectedItem.Item.Text == "Empty Cache" {
 			_ = utils.DeleteCache()
 
-			_, _ = ui.BlockingProcess(fmt.Sprintf("Cache Emptied!"), true, func() (interface{}, error) {
-				return nil, nil
-			})
+			_, _ = ui.ProcessMessage(fmt.Sprintf("Cache Emptied!"),
+				ui.ProcessMessageOptions{ShowBackground: true}, func() (interface{}, error) {
+					return nil, nil
+				})
 			return result, 404, nil
 		}
 

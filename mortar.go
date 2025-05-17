@@ -15,15 +15,18 @@ import (
 )
 
 func init() {
-	gaba.InitSDL("Mortar")
+	options := gaba.InitOptions("Mortar")
+	options.ShowBackground = true
+	gaba.InitSDL(options)
+
 	common.SetLogLevel("ERROR")
 
 	if !utils.IsConnectedToInternet() {
 		gaba.NewBlockingAnimation("resources/tiny_violin.png", gaba.WithLooping(true), gaba.WithMaxDisplayTime(time.Millisecond*2500))
 		_, err := gaba.Message("No Internet Connection!", "Make sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, "")
-		cleanup()
+		}, gaba.MessageOptions{})
+		defer cleanup()
 		common.LogStandardFatal("No Internet Connection", err)
 	}
 
@@ -31,8 +34,8 @@ func init() {
 	if err != nil {
 		_, err := gaba.Message("Setup Required!", "Scan the QR Code for Instructions", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, "resources/setup-qr.png")
-		cleanup()
+		}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
+		defer cleanup()
 		common.LogStandardFatal("Setup Required", err)
 	}
 
@@ -41,6 +44,8 @@ func init() {
 	}
 
 	logger := common.GetLoggerInstance()
+
+	logger.Debug("Configuration Loaded!", zap.Object("config", config))
 
 	if config.RawArtDownloadType == "" {
 		config.RawArtDownloadType = "BOX_ART"
@@ -56,7 +61,7 @@ func init() {
 	fb := filebrowser.NewFileBrowser(logger)
 	err = fb.CWD(utils.GetRomDirectory(), false)
 	if err != nil {
-		cleanup()
+		defer cleanup()
 		logger.Fatal("Error loading fetching ROM directories", zap.Error(err))
 	}
 
@@ -69,6 +74,8 @@ func init() {
 			}
 		}
 	}
+
+	logger.Debug("Populated ROM Directories by System Tag", zap.Object("config", config))
 
 	state.SetConfig(config)
 }

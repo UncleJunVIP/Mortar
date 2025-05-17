@@ -38,21 +38,23 @@ func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
 	}
 
 	for _, game := range a.Games {
-		process, _ := ui.BlockingProcess(fmt.Sprintf("Finding art for %s...", game.DisplayName), false, func() (interface{}, error) {
-			artPath := utils.FindArt(a.Platform, game, a.DownloadType)
-			return artPath, nil
-		})
+		process, _ := ui.ProcessMessage(fmt.Sprintf("Finding art for %s...", game.DisplayName),
+			ui.ProcessMessageOptions{ShowBackground: true}, func() (interface{}, error) {
+				artPath := utils.FindArt(a.Platform, game, a.DownloadType)
+				return artPath, nil
+			})
 
 		artPath := process.Result.(string)
 		if artPath == "" {
-			_, _ = ui.BlockingProcess(fmt.Sprintf("No art found for %s!", game.DisplayName), false, func() (interface{}, error) {
-				time.Sleep(time.Millisecond * 1500)
-				return nil, nil
-			})
+			_, _ = ui.ProcessMessage(fmt.Sprintf("No art found for %s!", game.DisplayName),
+				ui.ProcessMessageOptions{ShowBackground: false}, func() (interface{}, error) {
+					time.Sleep(time.Millisecond * 1500)
+					return nil, nil
+				})
 			continue
 		}
 
-		result, err := ui.Message("", "Found This Art!", footerHelpItems, artPath)
+		result, err := ui.Message("", "Found This Art!", footerHelpItems, ui.MessageOptions{})
 		if err != nil {
 			return nil, -1, err
 		}
