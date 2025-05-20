@@ -2,8 +2,7 @@ package ui
 
 import (
 	"encoding/base64"
-	gabamod "github.com/UncleJunVIP/gabagool/models"
-	"github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
@@ -51,11 +50,11 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 		headers["Authorization"] = authHeader
 	}
 
-	slices.SortFunc(downloads, func(a, b gabamod.Download) int {
+	slices.SortFunc(downloads, func(a, b gabagool.Download) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))
 	})
 
-	res, err := ui.Download(downloads, headers)
+	res, err := gabagool.DownloadManager(downloads, headers)
 	if err != nil {
 		logger.Error("Error downloading", zap.Error(err))
 		return nil, -1, err
@@ -78,7 +77,7 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 	var downloadedGames []shared.Item
 
 	for _, g := range d.Games {
-		if slices.ContainsFunc(res.CompletedDownloads, func(d gabamod.Download) bool {
+		if slices.ContainsFunc(res.CompletedDownloads, func(d gabagool.Download) bool {
 			return d.DisplayName == g.DisplayName
 		}) {
 			downloadedGames = append(downloadedGames, g)
@@ -88,8 +87,8 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 	return downloadedGames, exitCode, err
 }
 
-func BuildDownload(platform models.Platform, games shared.Items) []gabamod.Download {
-	var downloads []gabamod.Download
+func BuildDownload(platform models.Platform, games shared.Items) []gabagool.Download {
+	var downloads []gabagool.Download
 	for _, g := range games {
 
 		var downloadLocation string
@@ -115,7 +114,7 @@ func BuildDownload(platform models.Platform, games shared.Items) []gabamod.Downl
 			sourceURL, _ = url.JoinPath(root, platform.HostSubdirectory, g.Filename)
 		}
 
-		downloads = append(downloads, gabamod.Download{
+		downloads = append(downloads, gabagool.Download{
 			URL:         sourceURL,
 			Location:    downloadLocation,
 			DisplayName: g.DisplayName,

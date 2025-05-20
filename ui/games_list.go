@@ -3,8 +3,7 @@ package ui
 import (
 	"encoding/json"
 	"fmt"
-	gabamod "github.com/UncleJunVIP/gabagool/models"
-	"github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/zap"
@@ -32,7 +31,7 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	if len(games) > 0 {
 		g = games
 	} else {
-		process, err := ui.ProcessMessage(fmt.Sprintf("Loading %s...", platform.Name), ui.ProcessMessageOptions{ShowBackground: true}, func() (interface{}, error) {
+		process, err := gabagool.ProcessMessage(fmt.Sprintf("Loading %s...", platform.Name), gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
 			var err error
 			g, err = loadGamesList(platform)
 			return g, err
@@ -74,18 +73,18 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 
 	if len(itemList) == 0 {
 		if gl.SearchFilter != "" {
-			ui.ProcessMessage(
+			gabagool.ProcessMessage(
 				fmt.Sprintf("No results found for \"%s\"", gl.SearchFilter),
-				ui.ProcessMessageOptions{ShowBackground: true},
+				gabagool.ProcessMessageOptions{ShowThemeBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
 					return nil, nil
 				},
 			)
 		} else {
-			ui.ProcessMessage(
+			gabagool.ProcessMessage(
 				fmt.Sprintf("No games found for %s", gl.Platform.Name),
-				ui.ProcessMessageOptions{ShowBackground: true},
+				gabagool.ProcessMessageOptions{ShowThemeBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
 					return nil, nil
@@ -95,9 +94,9 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		return nil, 404, nil
 	}
 
-	var itemEntries []gabamod.MenuItem
+	var itemEntries []gabagool.MenuItem
 	for _, game := range itemList {
-		itemEntries = append(itemEntries, gabamod.MenuItem{
+		itemEntries = append(itemEntries, gabagool.MenuItem{
 			Text:     strings.ReplaceAll(game.Filename, filepath.Ext(game.Filename), ""),
 			Selected: false,
 			Focused:  false,
@@ -111,10 +110,10 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		selectedIndex = 0
 	}
 
-	options := ui.DefaultListOptions(title, itemEntries)
+	options := gabagool.DefaultListOptions(title, itemEntries)
 	options.EnableAction = true
 	options.EnableMultiSelect = true
-	options.FooterHelpItems = []ui.FooterHelpItem{
+	options.FooterHelpItems = []gabagool.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Back"},
 		{ButtonName: "X", HelpText: "Search"},
 		{ButtonName: "Select", HelpText: "Multi"},
@@ -123,7 +122,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	options.SelectedIndex = selectedIndex
 	options.VisibleStartIndex = max(0, state.GetAppState().LastSelectedIndex-state.GetAppState().LastSelectedPosition)
 
-	selection, err := ui.List(options)
+	selection, err := gabagool.List(options)
 	if err != nil {
 		return nil, -1, err
 	}

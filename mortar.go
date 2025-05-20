@@ -1,7 +1,8 @@
 package main
 
 import (
-	gaba "github.com/UncleJunVIP/gabagool/ui"
+	"fmt"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
@@ -11,30 +12,29 @@ import (
 	"mortar/ui"
 	"mortar/utils"
 	"os"
-	"time"
 )
 
 func init() {
-	options := gaba.InitOptions("Mortar")
-	options.ShowBackground = true
-	gaba.InitSDL(options)
+	gabagool.InitSDL(gabagool.GabagoolOptions{
+		WindowTitle:    "Mortar",
+		ShowBackground: true,
+	})
 
 	common.SetLogLevel("ERROR")
 
 	if !utils.IsConnectedToInternet() {
-		gaba.NewBlockingAnimation("resources/tiny_violin.png", gaba.WithLooping(true), gaba.WithMaxDisplayTime(time.Millisecond*2500))
-		_, err := gaba.Message("No Internet Connection!", "Make sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
+		_, err := gabagool.Message("No Internet Connection!", "Make sure you are connected to Wi-Fi.", []gabagool.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, gaba.MessageOptions{})
+		}, gabagool.MessageOptions{})
 		defer cleanup()
 		common.LogStandardFatal("No Internet Connection", err)
 	}
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		_, err := gaba.Message("Setup Required!", "Scan the QR Code for Instructions", []gaba.FooterHelpItem{
+		_, err := gabagool.Message("Setup Required!", "Scan the QR Code for Instructions", []gabagool.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
+		}, gabagool.MessageOptions{ImagePath: "resources/setup-qr.png"})
 		defer cleanup()
 		common.LogStandardFatal("Setup Required", err)
 	}
@@ -67,6 +67,15 @@ func init() {
 
 	romDirectories := utils.MapTagsToDirectories(fb.Items)
 
+	var logMappings []zap.Field
+
+	for tag, path := range romDirectories {
+		logMappings = append(logMappings, zap.String(tag, path))
+	}
+
+	logger.Debug(fmt.Sprintf("Discovered %d ROM Directories",
+		len(romDirectories)), zap.Dict("mappings", logMappings...))
+
 	for hostIdx, host := range config.Hosts {
 		for sectionIdx, section := range host.Platforms {
 			if section.SystemTag != "" {
@@ -85,7 +94,7 @@ func cleanup() {
 }
 
 func main() {
-	defer gaba.CloseSDL()
+	defer gabagool.CloseSDL()
 	defer cleanup()
 
 	logger := common.GetLoggerInstance()

@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	"github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"mortar/models"
@@ -32,29 +32,29 @@ func (a DownloadArtScreen) Name() sum.Int[models.ScreenName] {
 }
 
 func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
-	footerHelpItems := []ui.FooterHelpItem{
+	footerHelpItems := []gabagool.FooterHelpItem{
 		{ButtonName: "B", HelpText: "I'll Find My Own"},
 		{ButtonName: "A", HelpText: "Use It!"},
 	}
 
 	for _, game := range a.Games {
-		process, _ := ui.ProcessMessage(fmt.Sprintf("Finding art for %s...", game.DisplayName),
-			ui.ProcessMessageOptions{ShowBackground: true}, func() (interface{}, error) {
+		process, _ := gabagool.ProcessMessage(fmt.Sprintf("Finding art for %s...", game.DisplayName),
+			gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
 				artPath := utils.FindArt(a.Platform, game, a.DownloadType)
 				return artPath, nil
 			})
 
 		artPath := process.Result.(string)
 		if artPath == "" {
-			_, _ = ui.ProcessMessage(fmt.Sprintf("No art found for %s!", game.DisplayName),
-				ui.ProcessMessageOptions{ShowBackground: false}, func() (interface{}, error) {
+			_, _ = gabagool.ProcessMessage(fmt.Sprintf("No art found for %s!", game.DisplayName),
+				gabagool.ProcessMessageOptions{ShowThemeBackground: false}, func() (interface{}, error) {
 					time.Sleep(time.Millisecond * 1500)
 					return nil, nil
 				})
 			continue
 		}
 
-		result, err := ui.Message("", "Found This Art!", footerHelpItems, ui.MessageOptions{ImagePath: artPath})
+		result, err := gabagool.Message("", "Found This Art!", footerHelpItems, gabagool.MessageOptions{ImagePath: artPath})
 		if err != nil {
 			return nil, -1, err
 		}
