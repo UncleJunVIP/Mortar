@@ -2,8 +2,7 @@ package ui
 
 import (
 	"fmt"
-	gabamod "github.com/UncleJunVIP/gabagool/models"
-	"github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/spf13/viper"
@@ -30,12 +29,12 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 
 	appState := state.GetAppState()
 
-	items := []ui.ItemWithOptions{
+	items := []gabagool.ItemWithOptions{
 		{
-			Item: gabamod.MenuItem{
+			Item: gabagool.MenuItem{
 				Text: "Download Art",
 			},
-			Options: []ui.Option{
+			Options: []gabagool.Option{
 				{DisplayName: "True", Value: true},
 				{DisplayName: "False", Value: false},
 			},
@@ -47,10 +46,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}(),
 		},
 		{
-			Item: gabamod.MenuItem{
+			Item: gabagool.MenuItem{
 				Text: "Art Type",
 			},
-			Options: []ui.Option{
+			Options: []gabagool.Option{
 				{DisplayName: "Box Art", Value: "BOX_ART"},
 				{DisplayName: "Title Screen", Value: "TITLE_SCREEN"},
 				{DisplayName: "Logos", Value: "LOGOS"},
@@ -74,27 +73,27 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 	}
 
 	if utils.CacheFolderExists() {
-		items = append(items, ui.ItemWithOptions{
-			Item: gabamod.MenuItem{
+		items = append(items, gabagool.ItemWithOptions{
+			Item: gabagool.MenuItem{
 				Text: "Empty Cache",
 			},
-			Options: []ui.Option{
+			Options: []gabagool.Option{
 				{
 					DisplayName: "",
 					Value:       "empty",
-					Type:        ui.OptionTypeClickable,
+					Type:        gabagool.OptionTypeClickable,
 				},
 			},
 		})
 	}
 
-	footerHelpItems := []ui.FooterHelpItem{
+	footerHelpItems := []gabagool.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Cancel"},
 		{ButtonName: "←→", HelpText: "Cycle"},
 		{ButtonName: "Start", HelpText: "Save"},
 	}
 
-	result, err := ui.OptionsList(
+	result, err := gabagool.OptionsList(
 		"Mortar Settings",
 		items,
 		footerHelpItems,
@@ -109,8 +108,8 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		if result.Unwrap().SelectedItem.Item.Text == "Empty Cache" {
 			_ = utils.DeleteCache()
 
-			_, _ = ui.ProcessMessage(fmt.Sprintf("Cache Emptied!"),
-				ui.ProcessMessageOptions{ShowBackground: true}, func() (interface{}, error) {
+			_, _ = gabagool.ProcessMessage(fmt.Sprintf("Cache Emptied!"),
+				gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
 					return nil, nil
 				})
 			return result, 404, nil

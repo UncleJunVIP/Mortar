@@ -2,8 +2,7 @@ package ui
 
 import (
 	"fmt"
-	gabamod "github.com/UncleJunVIP/gabagool/models"
-	gaba "github.com/UncleJunVIP/gabagool/ui"
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"mortar/models"
 	"qlova.tech/sum"
 )
@@ -29,10 +28,10 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 		return models.Platform{}, 404, nil
 	}
 
-	var menuItems []gabamod.MenuItem
+	var menuItems []gabagool.MenuItem
 	for _, platform := range ps.Host.Platforms {
 		platform.Host = ps.Host
-		menuItems = append(menuItems, gabamod.MenuItem{
+		menuItems = append(menuItems, gabagool.MenuItem{
 			Text:     platform.Name,
 			Selected: false,
 			Focused:  false,
@@ -40,16 +39,16 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 		})
 	}
 
-	var fhi []gaba.FooterHelpItem
+	var fhi []gabagool.FooterHelpItem
 
 	if ps.QuitOnBack {
-		fhi = []gaba.FooterHelpItem{
+		fhi = []gabagool.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 			{ButtonName: "X", HelpText: "Settings"},
 			{ButtonName: "A", HelpText: "Select"},
 		}
 	} else {
-		fhi = []gaba.FooterHelpItem{
+		fhi = []gabagool.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Back"},
 			{ButtonName: "A", HelpText: "Select"},
 		}
@@ -61,11 +60,11 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 		title = fmt.Sprintf("Mortar | %s", ps.Host.DisplayName)
 	}
 
-	options := gaba.DefaultListOptions(title, menuItems)
+	options := gabagool.DefaultListOptions(title, menuItems)
 	options.EnableAction = ps.QuitOnBack
 	options.FooterHelpItems = fhi
 
-	selection, err := gaba.List(options)
+	selection, err := gabagool.List(options)
 
 	if err != nil {
 		return models.Platform{}, -1, err
