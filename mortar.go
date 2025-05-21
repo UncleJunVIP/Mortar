@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/UncleJunVIP/certifiable"
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
