@@ -10,16 +10,14 @@
     "BRICK": ".github/resources/banner.png"
   },
   "screenshots": [
-    ".github/resources/screenshots/main_menu.png",
-    ".github/resources/screenshots/settings.png",
-    ".github/resources/screenshots/platforms.png",
-    ".github/resources/screenshots/games_list.png",
-    ".github/resources/screenshots/search.png",
-    ".github/resources/screenshots/search_results.png",
-    ".github/resources/screenshots/download.png",
-    ".github/resources/screenshots/finding_art.png",
-    ".github/resources/screenshots/art_download.png",
-    ".github/resources/screenshots/multi_select.png"
+    ".github/resources/screenshots/main_menu.jpg",
+    ".github/resources/screenshots/settings.jpg",
+    ".github/resources/screenshots/platforms.jpg",
+    ".github/resources/screenshots/games_list.jpg",
+    ".github/resources/screenshots/search.jpg",
+    ".github/resources/screenshots/search_results.jpg",
+    ".github/resources/screenshots/download.jpg",
+    ".github/resources/screenshots/art_download.jpg"
   ],
   "platforms": [
     "tg5040"
