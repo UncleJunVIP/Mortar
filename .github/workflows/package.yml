@@ -21,17 +21,8 @@ jobs:
         with:
           version: 3.x
 
-      - name: Build with Dockerfile (matching bullseye environment)
-        run: |
-          docker buildx build --platform linux/arm64 -t retro-console-arm64 -f Dockerfile .
-          docker create --name extract retro-console-arm64
-          docker cp extract:/build/mortar mortar
-          docker rm extract
-
-      - name: Build Package Folder
-        run: |
-          mkdir Mortar.pak
-          cp -R mortar launch.sh README.md LICENSE pak.json resources data Mortar.pak
+      - name: Build and Package
+        run: task build package
 
       - uses: actions/upload-artifact@v4
         with:
