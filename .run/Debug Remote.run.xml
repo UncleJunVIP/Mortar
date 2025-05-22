@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Debug Remote" type="GoRemoteDebugConfigurationType" factoryName="Go Remote" host="192.168.1.210">
-    <option name="disconnectOption" value="STOP" />
-    <disconnect value="STOP" />
-    <method v="2" />
-  </configuration>
-</component>

@@ -1,0 +1,58 @@
+version: '3'
+
+tasks:
+  all:
+    cmds:
+      - task: cleanup
+      - task: build
+      - task: package
+      - task: adb
+    silent: true
+
+  build:
+    cmds:
+      - rm -rf build
+      - mkdir -p build
+      - mkdir -p build/lib
+      - docker buildx build --platform=linux/arm64 -t retro-console-arm64 -f Dockerfile .
+    silent: true
+
+  package:
+    cmds:
+      - docker create --name extract retro-console-arm64
+      - docker cp extract:/build/mortar build/mortar
+      - docker cp extract:/usr/lib/aarch64-linux-gnu/libSDL2_gfx-1.0.so.0.0.2 build/lib/libSDL2_gfx-1.0.so.0
+      - rm -rf build/Mortar.pak || true
+      - mkdir -p build/Mortar.pak
+      - mkdir -p build/Mortar.pak/resources/lib
+      - cp build/mortar launch.sh README.md LICENSE pak.json build/Mortar.pak
+      - cp -R build/lib build/Mortar.pak/resources
+      - cp resources/setup-qr.png build/Mortar.pak/resources
+    silent: true
+
+  cleanup:
+    cmds:
+      - docker rm extract || true
+    silent: true
+
+  adb:
+    cmds:
+      - adb shell rm -rf /mnt/SDCARD/Tools/tg5040/Mortar.pak || true
+      - adb push build/Mortar.pak /mnt/SDCARD/Tools/tg5040
+      - adb push config.yml /mnt/SDCARD/Tools/tg5040/Mortar.pak
+      - say Finished deploying Mortar!
+    silent: true
+
+  kill:
+    cmds:
+      - sshpass -p 'tina' ssh root@192.168.1.210 "kill  \$(pidof dlv)" > /dev/null 2>&1 || true
+      - sshpass -p 'tina' ssh root@192.168.1.210 "kill  \$(pidof mortar)" > /dev/null 2>&1 || true
+    silent: true
+
+  debug:
+    cmds:
+      - sshpass -p 'tina' ssh root@192.168.1.210 "sh -c '/mnt/SDCARD/Developer/bin/dlv attach --headless --listen=:2345 --api-version=2 --accept-multiclient \$(pidof mortar)'" > /dev/null &
+      - printf "Press any key to quit debugging...\n"
+      - read
+      - task: kill
+    silent: true
