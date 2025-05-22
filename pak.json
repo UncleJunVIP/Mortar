@@ -10,7 +10,7 @@
     "BRICK": ".github/resources/banner.png"
   },
   "changelog": {
-    "v2.1.0": "Upgraded the UI Library Dependency which brings system theme consistency and an upgraded parallel download manager."
+    "v2.1.0": "Upgraded the UI Library Dependency which brings system theme consistency and a new parallel download manager."
   },
   "screenshots": [
     ".github/resources/screenshots/main_menu.jpg",
