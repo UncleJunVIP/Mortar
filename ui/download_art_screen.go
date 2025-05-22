@@ -32,37 +32,52 @@ func (a DownloadArtScreen) Name() sum.Int[models.ScreenName] {
 }
 
 func (a DownloadArtScreen) Draw() (value interface{}, exitCode int, e error) {
-	footerHelpItems := []gabagool.FooterHelpItem{
-		{ButtonName: "B", HelpText: "I'll Find My Own"},
-		{ButtonName: "A", HelpText: "Use It!"},
-	}
+	var artPaths []string
 
-	for _, game := range a.Games {
-		process, _ := gabagool.ProcessMessage(fmt.Sprintf("Finding art for %s...", game.DisplayName),
-			gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+	gabagool.ProcessMessage("Downloading art...",
+		gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+			for _, game := range a.Games {
 				artPath := utils.FindArt(a.Platform, game, a.DownloadType)
-				return artPath, nil
+
+				if artPath != "" {
+					artPaths = append(artPaths, artPath)
+				}
+			}
+			return nil, nil
+		})
+
+	if len(artPaths) == 0 {
+		gabagool.ProcessMessage("No art found!",
+			gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+				time.Sleep(time.Millisecond * 1500)
+				return nil, nil
 			})
 
-		artPath := process.Result.(string)
-		if artPath == "" {
-			_, _ = gabagool.ProcessMessage(fmt.Sprintf("No art found for %s!", game.DisplayName),
-				gabagool.ProcessMessageOptions{ShowThemeBackground: false}, func() (interface{}, error) {
-					time.Sleep(time.Millisecond * 1500)
-					return nil, nil
-				})
-			continue
-		}
+		return nil, 404, nil
+	} else if len(a.Games) > 1 {
+		gabagool.ProcessMessage(fmt.Sprintf("Art found for %d/%d games!", len(artPaths), len(a.Games)),
+			gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+				time.Sleep(time.Millisecond * 1500)
+				return nil, nil
+			})
+	}
 
-		result, err := gabagool.Message("", "Found This Art!", footerHelpItems, gabagool.MessageOptions{ImagePath: artPath})
-		if err != nil {
-			return nil, -1, err
-		}
+	for _, artPath := range artPaths {
+		result, err := gabagool.ConfirmationMessage("Found This Art!",
+			[]gabagool.FooterHelpItem{
+				{ButtonName: "B", HelpText: "I'll Find My Own"},
+				{ButtonName: "A", HelpText: "Use It!"},
+			},
+			gabagool.MessageOptions{
+				ImagePath: artPath,
+			})
 
-		if result.IsNone() {
+		if err != nil || result.IsNone() {
 			common.DeleteFile(artPath)
 		}
 	}
 
-	return nil, 2, nil
+	time.Sleep(time.Millisecond * 100)
+
+	return nil, 0, nil
 }

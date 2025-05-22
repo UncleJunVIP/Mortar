@@ -23,8 +23,10 @@ func init() {
 
 	common.SetLogLevel("ERROR")
 
+	common.InitIncludes()
+
 	if !utils.IsConnectedToInternet() {
-		_, err := gabagool.Message("No Internet Connection!", "Make sure you are connected to Wi-Fi.", []gabagool.FooterHelpItem{
+		_, err := gabagool.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gabagool.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gabagool.MessageOptions{})
 		defer cleanup()
@@ -33,7 +35,7 @@ func init() {
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		_, err := gabagool.Message("Setup Required!", "Scan the QR Code for Instructions", []gabagool.FooterHelpItem{
+		_, err := gabagool.ConfirmationMessage("Setup Required!\nScan the QR Code for Instructions", []gabagool.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gabagool.MessageOptions{ImagePath: "resources/setup-qr.png"})
 		defer cleanup()
@@ -182,6 +184,7 @@ func main() {
 			switch code {
 			case 0:
 				query := res.(string)
+				state.SetLastSelectedPosition(0, 0)
 				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query)
 			default:
 				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "")

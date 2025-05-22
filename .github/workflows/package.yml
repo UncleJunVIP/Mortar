@@ -16,6 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
       - name: Build with Dockerfile (matching bullseye environment)
         run: |
           docker buildx build --platform linux/arm64 -t retro-console-arm64 -f Dockerfile .
@@ -26,7 +31,7 @@ jobs:
       - name: Build Package Folder
         run: |
           mkdir Mortar.pak
-          cp -R mortar launch.sh README.md LICENSE pak.json resources fonts data Mortar.pak
+          cp -R mortar launch.sh README.md LICENSE pak.json resources data Mortar.pak
 
       - uses: actions/upload-artifact@v4
         with:

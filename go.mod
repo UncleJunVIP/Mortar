@@ -2,14 +2,9 @@ module mortar
 
 go 1.24.1
 
-replace github.com/UncleJunVIP/gabagool => ../gabagool
-
-// 	github.com/UncleJunVIP/gabagool v0.0.0-00010101000000-000000000000
-
-//replace github.com/UncleJunVIP/nextui-pak-shared-functions => ../nextui-pak-shared-functions
-
 require (
-	github.com/UncleJunVIP/gabagool v0.0.0-00010101000000-000000000000
+	github.com/UncleJunVIP/certifiable v1.0.0
+	github.com/UncleJunVIP/gabagool v0.0.34
 	github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/spf13/viper v1.20.1
@@ -21,7 +16,6 @@ require (
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3 // indirect
-	github.com/UncleJunVIP/certifiable v1.0.0 // indirect
 	github.com/activcoding/HTML-Table-to-JSON v0.0.4 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect

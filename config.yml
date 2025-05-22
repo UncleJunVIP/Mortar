@@ -1,0 +1,65 @@
+art_download_type: BOX_ART
+download_art: true
+hosts:
+  - display_name: Megathread
+    filters:
+      exclusive_filters:
+        - (Proto
+        - (Demo)
+        - (Beta)
+        - (Aftermarket
+        - 4-in-1
+        - 4 in 1
+        - (Europe)
+        - (Japan)
+        - '[BIOS]'
+      inclusive_filters:
+        - USA
+        - En,
+        - (World)
+    host_type: MEGATHREAD
+    platforms:
+      - host_subdirectory: /files/No-Intro/Nintendo%20-%20Game%20Boy/
+        platform_name: Game Boy
+        system_tag: GB
+      - host_subdirectory: /files/No-Intro/Nintendo%20-%20Game%20Boy%20Color/
+        platform_name: Game Boy Color
+        system_tag: GBC
+      - host_subdirectory: /files/No-Intro/Nintendo%20-%20Game%20Boy%20Advance/
+        platform_name: Game Boy Advance
+        system_tag: GBA
+      - host_subdirectory: /files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20(Headered)/
+        platform_name: Nintendo Entertainment System
+        system_tag: FC
+      - host_subdirectory: /files/No-Intro/Nintendo%20-%20Super%20Nintendo%20Entertainment%20System/
+        platform_name: Super Nintendo Entertainment System
+        system_tag: SFC
+      - host_subdirectory: /files/Internet%20Archive/chadmaster/chd_psx/CHD-PSX-USA/
+        platform_name: PlayStation
+        system_tag: PS
+
+    #        - host_subdirectory: /files/Redump/Sony%20-%20PlayStation%20Portable/
+    #          platform_name: PSP
+    #          system_tag: PSP
+
+    root_uri: https://myrient.erista.me
+  - display_name: RomM
+    host_type: ROMM
+    password: Ue@TkuBZdi9!rJ!ME!W6_p7k3uL22qU-
+    platforms:
+      - platform_name: Game Boy
+        romm_platform_id: "4"
+        system_tag: GB
+      - platform_name: Game Boy Color
+        romm_platform_id: "3"
+        system_tag: GBC
+      - platform_name: Game Boy Advance
+        romm_platform_id: "2"
+        system_tag: GBA
+      - platform_name: Nintendo 64
+        romm_platform_id: "6"
+        system_tag: N64
+    port: 1550
+    root_uri: http://192.168.1.20
+    username: btk
+log_level: DEBUG
