@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	_ "github.com/UncleJunVIP/certifiable"
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	gabagool.InitSDL(gabagool.GabagoolOptions{
+	gaba.InitSDL(gaba.GabagoolOptions{
 		WindowTitle:    "Mortar",
 		ShowBackground: true,
 	})
@@ -26,18 +26,18 @@ func init() {
 	common.InitIncludes()
 
 	if !utils.IsConnectedToInternet() {
-		_, err := gabagool.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gabagool.FooterHelpItem{
+		_, err := gaba.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, gabagool.MessageOptions{})
+		}, gaba.MessageOptions{})
 		defer cleanup()
 		common.LogStandardFatal("No Internet Connection", err)
 	}
 
 	config, err := state.LoadConfig()
 	if err != nil {
-		_, err := gabagool.ConfirmationMessage("Setup Required!\nScan the QR Code for Instructions", []gabagool.FooterHelpItem{
+		_, err := gaba.ConfirmationMessage("Setup Required!\nScan the QR Code for Instructions", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
-		}, gabagool.MessageOptions{ImagePath: "resources/setup-qr.png"})
+		}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
 		defer cleanup()
 		common.LogStandardFatal("Setup Required", err)
 	}
@@ -97,7 +97,7 @@ func cleanup() {
 }
 
 func main() {
-	defer gabagool.CloseSDL()
+	defer gaba.CloseSDL()
 	defer cleanup()
 
 	logger := common.GetLoggerInstance()
