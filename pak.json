@@ -1,6 +1,6 @@
 {
   "name": "Mortar",
-  "version": "v2.1.2",
+  "version": "v2.2.0",
   "type": "TOOL",
   "description": "ROM Downloader for RomM and Megathread",
   "author": "K-Wall",
@@ -10,6 +10,7 @@
     "BRICK": ".github/resources/banner.png"
   },
   "changelog": {
+    "v2.2.0": "A quick fix that should address the weird ROM folder discovery issue. Fingers crossed!",
     "v2.1.1": "Upgraded the UI Library Dependency which brings system theme consistency and a new parallel download manager."
   },
   "screenshots": [
