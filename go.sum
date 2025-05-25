@@ -18,6 +18,8 @@ github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1 h1:hKmgw2V9AaSrEdyhsAk
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1/go.mod h1:sXHrQmYySc2DVrGkhpoAoqDxb3lq3AS1HRbuHKCLnDE=
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.7.0 h1:QWh6DxBGIkjrANPzlNFBLlEygi+ozUdY8nABYiU4J1s=
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.7.0/go.mod h1:sXHrQmYySc2DVrGkhpoAoqDxb3lq3AS1HRbuHKCLnDE=
+github.com/UncleJunVIP/nextui-pak-shared-functions v1.7.1 h1:5gpqVfTz2kr5cuXdAYapX7o8CyW41vsDa2kwT7f3NfE=
+github.com/UncleJunVIP/nextui-pak-shared-functions v1.7.1/go.mod h1:sXHrQmYySc2DVrGkhpoAoqDxb3lq3AS1HRbuHKCLnDE=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4 h1:6xQvdHFFMHHW8ubDS+xUW/USUx25kZtC6nfVnY8tZQU=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4/go.mod h1:xStjYiUrfnpo8937cHqbWh4hHGMSpT0sZ+qjvbCTLA0=
 github.com/andybalholm/cascadia v1.3.3 h1:AG2YHrzJIm4BZ19iwJ/DAua6Btl3IwJX+VI4kktS1LM=
