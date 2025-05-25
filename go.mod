@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/UncleJunVIP/certifiable v1.0.0
 	github.com/UncleJunVIP/gabagool v0.0.38
-	github.com/UncleJunVIP/nextui-pak-shared-functions v1.6.1
+	github.com/UncleJunVIP/nextui-pak-shared-functions v1.7.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/spf13/viper v1.20.1
 	go.uber.org/atomic v1.11.0
