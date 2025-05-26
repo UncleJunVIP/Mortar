@@ -1,7 +1,7 @@
 hosts:
   - display_name: "Megathread"
     host_type: MEGATHREAD
-    root_uri: "https://myrient.erista.me"
+    root_uri: "https://REPLACE.me"
 
     platforms:
       - platform_name: "Game Boy"
