@@ -198,7 +198,7 @@ func main() {
 					downloadedGames := res.([]shared.Item)
 
 					for _, game := range downloadedGames {
-						if filepath.Ext(game.Path) == ".zip" {
+						if filepath.Ext(game.Filename) == ".zip" {
 							utils.UnzipGame(ds.Platform, game)
 						}
 					}
