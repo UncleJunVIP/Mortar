@@ -72,7 +72,7 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 
 	if selection.IsSome() && selection.Unwrap().ActionTriggered && ps.QuitOnBack {
 		return nil, 4, nil
-	} else if selection.IsSome() {
+	} else if selection.IsSome() && selection.Unwrap().SelectedIndex != -1 {
 		return selection.Unwrap().SelectedItem.Metadata.(models.Platform), 0, nil
 	}
 

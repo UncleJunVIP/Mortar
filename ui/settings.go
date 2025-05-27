@@ -70,6 +70,24 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 				}
 			}(),
 		},
+		{
+			Item: gabagool.MenuItem{
+				Text: "Log Level",
+			},
+			Options: []gabagool.Option{
+				{DisplayName: "Debug", Value: "DEBUG"},
+				{DisplayName: "Error", Value: "ERROR"},
+			},
+			SelectedOption: func() int {
+				switch appState.Config.LogLevel {
+				case "DEBUG":
+					return 0
+				case "ERROR":
+					return 1
+				}
+				return 0
+			}(),
+		},
 	}
 
 	if utils.CacheFolderExists() {
@@ -136,6 +154,9 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 				case "SCREENSHOTS":
 					appState.Config.ArtDownloadType = shared.ArtDownloadTypes.SCREENSHOTS
 				}
+			} else if option.Item.Text == "Log Level" {
+				logLevelValue := option.Options[option.SelectedOption].Value.(string)
+				appState.Config.LogLevel = logLevelValue
 			}
 		}
 
@@ -164,6 +185,9 @@ func SaveConfig(config *models.Config) error {
 
 	viper.Set("download_art", config.DownloadArt)
 	viper.Set("art_download_type", config.ArtDownloadType)
+	viper.Set("log_level", config.LogLevel)
+
+	common.SetLogLevel(config.LogLevel)
 
 	return viper.WriteConfigAs("config.yml")
 }
