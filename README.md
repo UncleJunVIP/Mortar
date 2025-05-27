@@ -24,7 +24,7 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 ---
 
 <div align="center">
-  <video src="https://github.com/user-attachments/assets/99679ca0-873f-43f9-af5c-9b2284e60c11" width="400" />
+  <video src="https://github.com/user-attachments/assets/e0d0b400-06d0-4cdc-b4d1-8266b180ecf5" width="400" />
 </div>
 
 ---
