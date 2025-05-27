@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	Hosts              Hosts                           `yaml:"hosts"`
+	UnzipDownloads     bool                            `yaml:"unzip_downloads"`
 	DownloadArt        bool                            `yaml:"download_art"`
 	RawArtDownloadType string                          `yaml:"art_download_type"`
 	ArtDownloadType    sum.Int[shared.ArtDownloadType] `yaml:"-"`
