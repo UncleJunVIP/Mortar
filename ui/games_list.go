@@ -127,7 +127,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		return nil, -1, err
 	}
 
-	if selection.IsSome() && !selection.Unwrap().Cancelled && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
+	if selection.IsSome() && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
 
 		var selections shared.Items
 		for _, item := range selection.Unwrap().SelectedItems {

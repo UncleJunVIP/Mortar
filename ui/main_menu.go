@@ -53,7 +53,7 @@ func (m MainMenu) Draw() (host interface{}, exitCode int, e error) {
 
 	if selection.IsSome() && selection.Unwrap().ActionTriggered {
 		return models.Host{}, 4, nil
-	} else if selection.IsSome() && !selection.Unwrap().Cancelled && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
+	} else if selection.IsSome() && !selection.Unwrap().ActionTriggered && selection.Unwrap().SelectedIndex != -1 {
 		return selection.Unwrap().SelectedItem.Metadata.(models.Host), 0, nil
 	}
 
