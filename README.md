@@ -11,6 +11,8 @@ Supports RomM and Megathread
 Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
 
+## [Download this in Pak Store!](https://github.com/UncleJunVIP/nextui-pak-store)
+
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar.pak?style=for-the-badge)
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar.pak?sort=semver&style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar.pak?style=for-the-badge)
