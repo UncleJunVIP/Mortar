@@ -13,6 +13,7 @@ import (
 	"mortar/ui"
 	"mortar/utils"
 	"os"
+	"path/filepath"
 )
 
 func init() {
@@ -193,6 +194,16 @@ func main() {
 			ds := screen.(ui.DownloadScreen)
 			switch code {
 			case 0:
+				if appState.Config.UnzipDownloads {
+					downloadedGames := res.([]shared.Item)
+
+					for _, game := range downloadedGames {
+						if filepath.Ext(game.Path) == ".zip" {
+							utils.UnzipGame(ds.Platform, game)
+						}
+					}
+				}
+
 				if appState.Config.DownloadArt {
 					downloadedGames := res.([]shared.Item)
 					screen = ui.InitDownloadArtScreen(ds.Platform, downloadedGames, appState.Config.ArtDownloadType, ds.SearchFilter)

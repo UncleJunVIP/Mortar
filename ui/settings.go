@@ -72,6 +72,21 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		},
 		{
 			Item: gabagool.MenuItem{
+				Text: "Unzip Downloads",
+			},
+			Options: []gabagool.Option{
+				{DisplayName: "True", Value: true},
+				{DisplayName: "False", Value: false},
+			},
+			SelectedOption: func() int {
+				if appState.Config.UnzipDownloads {
+					return 0
+				}
+				return 1
+			}(),
+		},
+		{
+			Item: gabagool.MenuItem{
 				Text: "Log Level",
 			},
 			Options: []gabagool.Option{
@@ -154,6 +169,12 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 				case "SCREENSHOTS":
 					appState.Config.ArtDownloadType = shared.ArtDownloadTypes.SCREENSHOTS
 				}
+			} else if option.Item.Text == "Unzip Downloads" {
+				if option.SelectedOption == 0 {
+					appState.Config.UnzipDownloads = true
+				} else {
+					appState.Config.UnzipDownloads = false
+				}
 			} else if option.Item.Text == "Log Level" {
 				logLevelValue := option.Options[option.SelectedOption].Value.(string)
 				appState.Config.LogLevel = logLevelValue
@@ -185,6 +206,7 @@ func SaveConfig(config *models.Config) error {
 
 	viper.Set("download_art", config.DownloadArt)
 	viper.Set("art_download_type", config.ArtDownloadType)
+	viper.Set("unzip_downloads", config.UnzipDownloads)
 	viper.Set("log_level", config.LogLevel)
 
 	common.SetLogLevel(config.LogLevel)

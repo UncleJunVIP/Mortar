@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"archive/zip"
 	"fmt"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/disintegration/imaging"
 	"go.uber.org/zap"
+	"io"
 	"mortar/clients"
 	"mortar/models"
 	"net"
@@ -26,6 +29,123 @@ func GetRomDirectory() string {
 	}
 
 	return common.RomDirectory
+}
+
+func UnzipGame(platform models.Platform, game shared.Item) error {
+	logger := common.GetLoggerInstance()
+
+	zipPath := filepath.Join(platform.LocalDirectory, game.Filename)
+	romDirectory := platform.LocalDirectory
+
+	if IsDev() {
+		romDirectory = strings.ReplaceAll(platform.LocalDirectory, common.RomDirectory, GetRomDirectory())
+		zipPath = filepath.Join(romDirectory, game.Filename)
+	}
+
+	_, err := gaba.ProcessMessage(fmt.Sprintf("%s %s...", "Unzipping", game.DisplayName), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
+		err := Unzip(zipPath, romDirectory)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	if err != nil {
+		gaba.ProcessMessage(fmt.Sprintf("Unable to unzip %s", game.DisplayName), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
+			time.Sleep(3 * time.Second)
+			return nil, nil
+		})
+		logger.Error("Unable to unzip pak", zap.Error(err))
+		return err
+	} else {
+		err := os.RemoveAll(zipPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func Unzip(src, dest string) error {
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := r.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	err = os.MkdirAll(dest, 0755)
+	if err != nil {
+		return err
+	}
+
+	extractAndWriteFile := func(f *zip.File) error {
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if err := rc.Close(); err != nil {
+				panic(err)
+			}
+		}()
+
+		path := filepath.Join(dest, f.Name)
+
+		// Check for ZipSlip (Directory traversal)
+		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return fmt.Errorf("illegal file path: %s", path)
+		}
+
+		if f.FileInfo().IsDir() {
+			err := os.MkdirAll(path, f.Mode())
+			if err != nil {
+				return err
+			}
+		} else {
+			err := os.MkdirAll(filepath.Dir(path), f.Mode())
+			if err != nil {
+				return err
+			}
+
+			// Use a temporary file to avoid ETXTBSY error
+			tempPath := path + ".tmp"
+			tempFile, err := os.OpenFile(tempPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+
+			_, err = io.Copy(tempFile, rc)
+			tempFile.Close() // Close the file before attempting to rename it
+
+			if err != nil {
+				os.Remove(tempPath) // Clean up on error
+				return err
+			}
+
+			// Now rename the temporary file to the target path
+			err = os.Rename(tempPath, path)
+			if err != nil {
+				os.Remove(tempPath) // Clean up on error
+				return err
+			}
+		}
+		return nil
+	}
+
+	for _, f := range r.File {
+		err := extractAndWriteFile(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[shared.ArtDownloadType]) string {
