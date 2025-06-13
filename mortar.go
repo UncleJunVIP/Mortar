@@ -14,6 +14,7 @@ import (
 	"mortar/utils"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func init() {
@@ -194,19 +195,61 @@ func main() {
 			ds := screen.(ui.DownloadScreen)
 			switch code {
 			case 0:
-				if appState.Config.UnzipDownloads {
-					downloadedGames := res.([]shared.Item)
+				downloadedGames := res.([]shared.Item)
 
-					for _, game := range downloadedGames {
-						if filepath.Ext(game.Filename) == ".zip" {
+				for _, game := range downloadedGames {
+					isMultiDisc := utils.IsMultiDisc(ds.Platform, game)
+
+					if filepath.Ext(game.Filename) == ".zip" {
+						isBinCue := utils.HasBinCue(ds.Platform, game)
+
+						if isMultiDisc && appState.Config.GroupMultiDisc {
+							utils.GroupMultiDisk(ds.Platform, game)
+						} else if appState.Config.GroupBinCue && isBinCue {
+							utils.GroupBinCue(ds.Platform, game)
+						} else if appState.Config.UnzipDownloads {
 							utils.UnzipGame(ds.Platform, game)
 						}
+					} else if appState.Config.GroupMultiDisc && isMultiDisc {
+						utils.GroupMultiDisk(ds.Platform, game)
 					}
 				}
 
 				if appState.Config.DownloadArt {
-					downloadedGames := res.([]shared.Item)
-					screen = ui.InitDownloadArtScreen(ds.Platform, downloadedGames, appState.Config.ArtDownloadType, ds.SearchFilter)
+					seenBaseNames := make(map[string]bool)
+
+					// Create a pruned list for art downloads that only includes one instance of each multi-disk game
+					prunedGamesForArt := make([]shared.Item, 0, len(downloadedGames))
+
+					for _, game := range downloadedGames {
+						// Get base name by trimming at "(Disk" or "(Disc"
+						baseName := game.DisplayName
+						diskIndex := strings.Index(baseName, "(Disk")
+						discIndex := strings.Index(baseName, "(Disc")
+
+						trimIndex := -1
+						if diskIndex != -1 && discIndex != -1 {
+							trimIndex = min(diskIndex, discIndex)
+						} else if diskIndex != -1 {
+							trimIndex = diskIndex
+						} else if discIndex != -1 {
+							trimIndex = discIndex
+						}
+
+						if trimIndex != -1 {
+							baseName = baseName[:trimIndex]
+						}
+						baseName = strings.TrimSpace(baseName)
+
+						// If we haven't seen this base name before, add it to the pruned list
+						if !seenBaseNames[baseName] {
+							seenBaseNames[baseName] = true
+							game.Filename = baseName
+							prunedGamesForArt = append(prunedGamesForArt, game)
+						}
+					}
+
+					screen = ui.InitDownloadArtScreen(ds.Platform, prunedGamesForArt, appState.Config.ArtDownloadType, ds.SearchFilter)
 				} else {
 					screen = ui.InitGamesList(ds.Platform, state.GetAppState().CurrentFullGamesList, ds.SearchFilter)
 				}

@@ -87,6 +87,36 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		},
 		{
 			Item: gabagool.MenuItem{
+				Text: "Group BIN / CUE",
+			},
+			Options: []gabagool.Option{
+				{DisplayName: "True", Value: true},
+				{DisplayName: "False", Value: false},
+			},
+			SelectedOption: func() int {
+				if appState.Config.GroupBinCue {
+					return 0
+				}
+				return 1
+			}(),
+		},
+		{
+			Item: gabagool.MenuItem{
+				Text: "Group Multi-Disc",
+			},
+			Options: []gabagool.Option{
+				{DisplayName: "True", Value: true},
+				{DisplayName: "False", Value: false},
+			},
+			SelectedOption: func() int {
+				if appState.Config.GroupMultiDisc {
+					return 0
+				}
+				return 1
+			}(),
+		},
+		{
+			Item: gabagool.MenuItem{
 				Text: "Log Level",
 			},
 			Options: []gabagool.Option{
@@ -152,11 +182,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 
 		for _, option := range newSettingOptions {
 			if option.Item.Text == "Download Art" {
-				if option.SelectedOption == 0 {
-					appState.Config.DownloadArt = true
-				} else {
-					appState.Config.DownloadArt = false
-				}
+				appState.Config.DownloadArt = option.SelectedOption == 0
 			} else if option.Item.Text == "Art Type" {
 				artTypeValue := option.Options[option.SelectedOption].Value.(string)
 				switch artTypeValue {
@@ -170,11 +196,11 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 					appState.Config.ArtDownloadType = shared.ArtDownloadTypes.SCREENSHOTS
 				}
 			} else if option.Item.Text == "Unzip Downloads" {
-				if option.SelectedOption == 0 {
-					appState.Config.UnzipDownloads = true
-				} else {
-					appState.Config.UnzipDownloads = false
-				}
+				appState.Config.UnzipDownloads = option.SelectedOption == 0
+			} else if option.Item.Text == "Group BIN / CUE" {
+				appState.Config.GroupBinCue = option.SelectedOption == 0
+			} else if option.Item.Text == "Group Multi-Disc" {
+				appState.Config.GroupMultiDisc = option.SelectedOption == 0
 			} else if option.Item.Text == "Log Level" {
 				logLevelValue := option.Options[option.SelectedOption].Value.(string)
 				appState.Config.LogLevel = logLevelValue
@@ -207,6 +233,8 @@ func SaveConfig(config *models.Config) error {
 	viper.Set("download_art", config.DownloadArt)
 	viper.Set("art_download_type", config.ArtDownloadType)
 	viper.Set("unzip_downloads", config.UnzipDownloads)
+	viper.Set("group_bin_cue", config.GroupBinCue)
+	viper.Set("group_multi_disc", config.GroupMultiDisc)
 	viper.Set("log_level", config.LogLevel)
 
 	common.SetLogLevel(config.LogLevel)
