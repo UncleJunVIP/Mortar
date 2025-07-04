@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	github.com/UncleJunVIP/certifiable v1.0.0
-	github.com/UncleJunVIP/gabagool v0.0.48
+	github.com/UncleJunVIP/gabagool v0.0.49
 	github.com/UncleJunVIP/nextui-pak-shared-functions v1.8.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/spf13/viper v1.20.1
