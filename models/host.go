@@ -5,7 +5,6 @@ import (
 	"go.uber.org/zap/zapcore"
 	"qlova.tech/sum"
 	"strconv"
-	"strings"
 )
 
 type Host struct {
@@ -16,8 +15,6 @@ type Host struct {
 
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
-
-	ExtensionFilters []string `yaml:"extension_filters"`
 
 	Platforms Platforms `yaml:"platforms"`
 	Filters   Filters   `yaml:"filters"`
@@ -73,8 +70,6 @@ func (h Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 		enc.AddString("username", h.Username)
 		enc.AddString("password", h.Password)
 	}
-
-	enc.AddString("extension_filters", strings.Join(h.ExtensionFilters, ","))
 
 	_ = enc.AddArray("platforms", h.Platforms)
 
