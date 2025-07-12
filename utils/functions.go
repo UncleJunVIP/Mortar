@@ -456,11 +456,14 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 
 	noExtension := strings.TrimSuffix(game.Filename, filepath.Ext(game.Filename))
 
+	// toastd's trick for Libretro Thumbnail Naming
+	cleanedName := strings.ReplaceAll(noExtension, "&", "_")
+
 	var matched shared.Item
 
 	// naive search first
 	for _, art := range artList {
-		if strings.Contains(strings.ToLower(art.Filename), strings.ToLower(noExtension)) {
+		if strings.Contains(strings.ToLower(art.Filename), strings.ToLower(cleanedName)) {
 			matched = art
 			break
 		}
