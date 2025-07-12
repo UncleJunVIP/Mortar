@@ -104,12 +104,6 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		})
 	}
 
-	selectedIndex := state.GetAppState().LastSelectedIndex
-
-	if selectedIndex < 9 {
-		selectedIndex = 0
-	}
-
 	options := gabagool.DefaultListOptions(title, itemEntries)
 	options.EnableAction = true
 	options.EnableMultiSelect = true
@@ -119,7 +113,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		{ButtonName: "Select", HelpText: "Multi"},
 		{ButtonName: "A", HelpText: "Select"},
 	}
-	options.SelectedIndex = selectedIndex
+	options.SelectedIndex = state.GetAppState().LastSelectedIndex
 	options.VisibleStartIndex = max(0, state.GetAppState().LastSelectedIndex-state.GetAppState().LastSelectedPosition)
 
 	selection, err := gabagool.List(options)
