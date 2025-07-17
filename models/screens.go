@@ -7,6 +7,7 @@ type ScreenName struct {
 	Settings,
 	PlatformSelection,
 	GameList,
+	GlobalGamesList,
 	SearchBox,
 	Download,
 	DownloadArt sum.Int[ScreenName]

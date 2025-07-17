@@ -2,6 +2,7 @@ package utils
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"fmt"
 	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
@@ -13,6 +14,7 @@ import (
 	"mortar/models"
 	"net"
 	"os"
+	"path"
 	"path/filepath"
 	"qlova.tech/sum"
 	"strings"
@@ -510,7 +512,163 @@ func MapTagsToDirectories(items shared.Items) map[string]string {
 	return mapping
 }
 
-func CachedMegaThreadJsonFilename(hostName, platformName string) string {
+func FetchListStateless(platform models.Platform) (shared.Items, error) {
+	logger := common.GetLoggerInstance()
+
+	logger.Debug("Fetching Item List",
+		zap.Object("host", platform.Host))
+
+	client, err := clients.BuildClient(platform.Host)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(client shared.Client) {
+		err := client.Close()
+		if err != nil {
+			logger.Error("Unable to close client", zap.Error(err))
+		}
+	}(client)
+
+	subdirectory := ""
+
+	switch platform.Host.HostType {
+	case shared.HostTypes.ROMM:
+		subdirectory = platform.RomMPlatformID
+	default:
+		subdirectory = platform.HostSubdirectory
+	}
+
+	items, err := client.ListDirectory(subdirectory)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, item := range items {
+		items[i].DisplayName = strings.ReplaceAll(item.Filename, filepath.Ext(item.Filename), "")
+		items[i].Path = filepath.Join(platform.HostSubdirectory, item.Filename)
+		items[i].Tag = platform.SystemTag
+	}
+
+	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
+		jsonData, err := json.Marshal(items)
+		if err != nil {
+			logger.Debug("Unable to get marshal JSON for Megathread", zap.Error(err))
+
+			cwd, err := os.Getwd()
+			if err != nil {
+				logger.Debug("Unable to get current working directory for caching Megathread", zap.Error(err))
+			}
+
+			filePath := path.Join(cwd, ".cache", CachedMegathreadJsonFilename("", ""))
+			err = os.WriteFile(filePath, jsonData, 0644)
+			if err != nil {
+				logger.Debug("Unable to write JSON to file for Megathread", zap.Error(err))
+			}
+		}
+	}
+
+	return items, nil
+}
+
+func FilterList(itemList []shared.Item, filters models.Filters) []shared.Item {
+	var filteredItemListInclusive []shared.Item
+
+	for _, item := range itemList {
+		for _, filter := range filters.InclusiveFilters {
+			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(filter)) {
+				filteredItemListInclusive = append(filteredItemListInclusive, item)
+				break
+			}
+		}
+	}
+
+	var filteredItemListExclusive []shared.Item
+
+	for _, item := range filteredItemListInclusive {
+		contains := false
+		for _, filter := range filters.ExclusiveFilters {
+			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(filter)) {
+				contains = true
+				break
+			}
+		}
+		if !contains {
+			filteredItemListExclusive = append(filteredItemListExclusive, item)
+		}
+	}
+
+	return filteredItemListExclusive
+}
+
+func CheckCache(platform models.Platform) shared.Items {
+	logger := common.GetLoggerInstance()
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		logger.Debug("Unable to get current working directory for loading cached Megathread", zap.Error(err))
+		return nil
+	}
+
+	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
+		cachePath := filepath.Join(cwd, ".cache", CachedMegathreadJsonFilename(platform.Host.DisplayName, platform.Name))
+		if _, err := os.Stat(cachePath); os.IsNotExist(err) {
+			return nil
+		}
+
+		data, err := os.ReadFile(cachePath)
+		if err != nil {
+			logger.Debug("Unable to read cached Megathread JSON file", zap.Error(err))
+			return nil
+		}
+
+		var items shared.Items
+		err = json.Unmarshal(data, &items)
+		if err != nil {
+			logger.Debug("Unable to unmarshal cached Megathread JSON data", zap.Error(err))
+			return nil
+		}
+
+		return items
+	}
+
+	return nil
+}
+
+func Cache(platform models.Platform, gamesList shared.Items) {
+	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
+		logger := common.GetLoggerInstance()
+
+		jsonData, err := json.Marshal(gamesList)
+		if err != nil {
+			logger.Debug("Unable to get marshal JSON for Megathread", zap.Error(err))
+			return
+		}
+
+		cwd, err := os.Getwd()
+		if err != nil {
+			logger.Debug("Unable to get current working directory for caching Megathread", zap.Error(err))
+			return
+		}
+
+		dir := filepath.Join(cwd, ".cache")
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			logger.Debug("Unable to make cache directory", zap.Error(err))
+			return
+		}
+
+		filePath := path.Join(cwd, ".cache", CachedMegathreadJsonFilename(platform.Host.DisplayName, platform.Name))
+		err = os.WriteFile(filePath, jsonData, 0644)
+		if err != nil {
+			logger.Debug("Unable to write JSON to file for Megathread", zap.Error(err))
+			return
+		}
+
+		logger.Info("Cached Megathread Platform", zap.String("platform_name", platform.Name))
+	}
+}
+
+func CachedMegathreadJsonFilename(hostName, platformName string) string {
 	return strings.ReplaceAll(fmt.Sprintf("%s_%s_%s.json",
 		hostName, platformName, "megathread"), " ", "")
 }

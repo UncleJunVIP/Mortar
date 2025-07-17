@@ -3,9 +3,7 @@ package ui
 import (
 	"fmt"
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/state"
 	"mortar/utils"
@@ -15,25 +13,25 @@ import (
 	"time"
 )
 
-type GameList struct {
-	Platform     models.Platform
+type GlobalGameList struct {
+	Host         models.Host
 	Games        shared.Items
 	SearchFilter string
 }
 
-func InitGamesList(platform models.Platform, games shared.Items, searchFilter string) GameList {
+func InitGlobalGamesList(host models.Host, games shared.Items, searchFilter string) GlobalGameList {
 	var g shared.Items
 
 	if len(games) > 0 {
 		g = games
 	} else {
-		process, err := gabagool.ProcessMessage(fmt.Sprintf("Loading %s...", platform.Name), gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+		process, err := gabagool.ProcessMessage(fmt.Sprintf("Loading %s...", host.DisplayName), gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
 			var err error
-			g, err = loadGamesList(platform)
+			g, err = loadHostGamesList(host)
 			return g, err
 		})
 		if err != nil {
-			return GameList{}
+			return GlobalGameList{}
 		}
 
 		g = process.Result.(shared.Items)
@@ -41,36 +39,36 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 
 	state.SetCurrentFullGamesList(g)
 
-	return GameList{
-		Platform:     platform,
+	return GlobalGameList{
+		Host:         host,
 		Games:        g,
 		SearchFilter: searchFilter,
 	}
 }
 
-func (gl GameList) Name() sum.Int[models.ScreenName] {
-	return models.ScreenNames.GameList
+func (ggl GlobalGameList) Name() sum.Int[models.ScreenName] {
+	return models.ScreenNames.GlobalGamesList
 }
 
-func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
-	host := gl.Platform.Host
-	title := gl.Platform.Name
+func (ggl GlobalGameList) Draw() (game interface{}, exitCode int, e error) {
+	host := ggl.Host
+	title := fmt.Sprintf("%s All Games", host.DisplayName)
 
-	itemList := gl.Games
+	itemList := ggl.Games
 
 	if len(host.Filters.InclusiveFilters) > 0 || len(host.Filters.ExclusiveFilters) > 0 {
-		itemList = utils.FilterList(gl.Games, host.Filters)
+		itemList = utils.FilterList(ggl.Games, host.Filters)
 	}
 
-	if gl.SearchFilter != "" {
-		title = "[Search: \"" + gl.SearchFilter + "\"]"
-		itemList = utils.FilterList(itemList, models.Filters{InclusiveFilters: []string{gl.SearchFilter}})
+	if ggl.SearchFilter != "" {
+		title = "[Search: \"" + ggl.SearchFilter + "\"]"
+		itemList = utils.FilterList(itemList, models.Filters{InclusiveFilters: []string{ggl.SearchFilter}})
 	}
 
 	if len(itemList) == 0 {
-		if gl.SearchFilter != "" {
+		if ggl.SearchFilter != "" {
 			gabagool.ProcessMessage(
-				fmt.Sprintf("No results found for \"%s\"", gl.SearchFilter),
+				fmt.Sprintf("No results found for \"%s\"", ggl.SearchFilter),
 				gabagool.ProcessMessageOptions{ShowThemeBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
@@ -79,7 +77,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 			)
 		} else {
 			gabagool.ProcessMessage(
-				fmt.Sprintf("No games found for %s", gl.Platform.Name),
+				fmt.Sprintf("No games found for %s", ggl.Host.DisplayName),
 				gabagool.ProcessMessageOptions{ShowThemeBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
@@ -93,7 +91,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	var itemEntries []gabagool.MenuItem
 	for _, game := range itemList {
 		itemEntries = append(itemEntries, gabagool.MenuItem{
-			Text:     game.DisplayName,
+			Text:     fmt.Sprintf("[%s] %s", game.Tag, game.DisplayName),
 			Selected: false,
 			Focused:  false,
 			Metadata: game,
@@ -134,28 +132,21 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	return nil, 2, err
 }
 
-func loadGamesList(platform models.Platform) (games shared.Items, e error) {
-	logger := common.GetLoggerInstance()
+func loadHostGamesList(host models.Host) (games shared.Items, e error) {
+	var items shared.Items
 
-	cacheResults := utils.CheckCache(platform)
-	if cacheResults != nil {
-		return cacheResults, nil
-	}
-
-	items, err := utils.FetchListStateless(platform)
-	if err != nil {
-		logger.Error("Error downloading Item List", zap.Error(err))
-	}
-
-	if len(items) == 0 {
-		return nil, nil
+	for _, platform := range host.Platforms {
+		platform.Host = host
+		pi, err := loadGamesList(platform)
+		if err == nil {
+			items = append(items, pi...)
+		}
 	}
 
 	slices.SortFunc(items, func(a, b shared.Item) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))
 	})
 
-	utils.Cache(platform, items)
 	return items, nil
 
 }

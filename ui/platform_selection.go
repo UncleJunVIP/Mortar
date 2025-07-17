@@ -29,6 +29,19 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 	}
 
 	var menuItems []gabagool.MenuItem
+
+	//if ps.Host.HostType == shared.HostTypes.MEGATHREAD {
+	//	menuItems = append(menuItems, gabagool.MenuItem{
+	//		Text:     "All Games",
+	//		Selected: false,
+	//		Focused:  false,
+	//		Metadata: models.Platform{
+	//			Name: "All Games",
+	//			Host: ps.Host,
+	//		},
+	//	})
+	//}
+
 	for _, platform := range ps.Host.Platforms {
 		platform.Host = ps.Host
 		menuItems = append(menuItems, gabagool.MenuItem{
@@ -73,6 +86,12 @@ func (ps PlatformSelection) Draw() (p interface{}, exitCode int, e error) {
 	if selection.IsSome() && selection.Unwrap().ActionTriggered && ps.QuitOnBack {
 		return nil, 4, nil
 	} else if selection.IsSome() && selection.Unwrap().SelectedIndex != -1 {
+		if selection.Unwrap().SelectedItem.Metadata.(models.Platform).Name == "All Games" {
+			return models.Platform{
+				Name: "All Games",
+				Host: ps.Host,
+			}, 5, nil
+		}
 		return selection.Unwrap().SelectedItem.Metadata.(models.Platform), 0, nil
 	}
 

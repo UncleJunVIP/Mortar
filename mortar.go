@@ -152,6 +152,9 @@ func main() {
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			case 4:
 				screen = ui.InitSettingsScreen()
+			case 5:
+				host := screen.(ui.PlatformSelection).Host
+				screen = ui.InitGlobalGamesList(host, shared.Items{}, "")
 			case 404:
 				screen = ui.InitMainMenu(appState.Config.Hosts)
 			case -1:
@@ -172,7 +175,7 @@ func main() {
 				}
 
 			case 4:
-				screen = ui.InitSearch(gl.Platform, gl.SearchFilter)
+				screen = ui.InitSearch(gl.Platform.Host, gl.Platform, gl.SearchFilter)
 
 			case 404:
 				if gl.SearchFilter != "" {
@@ -181,15 +184,48 @@ func main() {
 					screen = ui.InitPlatformSelection(gl.Platform.Host, quitOnBack)
 				}
 			}
+		case ui.Screens.GlobalGamesList:
+			ggl := screen.(ui.GlobalGameList)
+
+			switch code {
+			case 0:
+				//games := res.(shared.Items)
+				//screen = ui.InitDownloadScreen(ggl.Platform, ggl.Games, games, ggl.SearchFilter)
+			case 2:
+				if ggl.SearchFilter != "" {
+					screen = ui.InitGlobalGamesList(ggl.Host, state.GetAppState().CurrentFullGamesList, "")
+				} else {
+					screen = ui.InitPlatformSelection(ggl.Host, quitOnBack)
+				}
+
+			case 4:
+				screen = ui.InitSearch(ggl.Host, models.Platform{}, ggl.SearchFilter)
+
+			case 404:
+				if ggl.SearchFilter != "" {
+					screen = ui.InitGlobalGamesList(ggl.Host, state.GetAppState().CurrentFullGamesList, "")
+				} else {
+					screen = ui.InitPlatformSelection(ggl.Host, quitOnBack)
+				}
+			}
 		case ui.Screens.SearchBox:
 			sb := screen.(ui.Search)
+			isGlobal := sb.Platform.Name == ""
 			switch code {
 			case 0:
 				query := res.(string)
 				state.SetLastSelectedPosition(0, 0)
-				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query)
+				if isGlobal {
+					screen = ui.InitGlobalGamesList(sb.Host, state.GetAppState().CurrentFullGamesList, query)
+				} else {
+					screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, query)
+				}
 			default:
-				screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "")
+				if isGlobal {
+					screen = ui.InitGlobalGamesList(sb.Host, state.GetAppState().CurrentFullGamesList, "")
+				} else {
+					screen = ui.InitGamesList(sb.Platform, state.GetAppState().CurrentFullGamesList, "")
+				}
 			}
 		case ui.Screens.Download:
 			ds := screen.(ui.DownloadScreen)

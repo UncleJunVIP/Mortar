@@ -9,12 +9,14 @@ import (
 )
 
 type Search struct {
+	Host        models.Host
 	Platform    models.Platform
 	InitialText string
 }
 
-func InitSearch(platform models.Platform, initialText string) Search {
+func InitSearch(host models.Host, platform models.Platform, initialText string) Search {
 	return Search{
+		Host:        host,
 		Platform:    platform,
 		InitialText: initialText,
 	}
