@@ -41,6 +41,16 @@ Art Downloads powered by the _Libretro Thumbnail Project_
     - Manual Installers: upload the `Mortar.pak` directory that came in the releases zip and place `config.yml` inside.
 6. Launch `Mortar` from the `Tools` menu and enjoy!
 
+---
+
+## A note about configs. 
+
+Do not ask for the root url nor a config file on the NextUI Discord. 
+
+You have been warned. 
+
+---
+
 ## Configuration Reference
 
 ```yaml
