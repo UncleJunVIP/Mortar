@@ -1,7 +1,7 @@
 hosts:
   - display_name: "Megathread"
     host_type: MEGATHREAD
-    root_uri: "https://mxxxxxx.exxxxx.me" # REPLACE ME. Do not ask for this or a config file on the NextUI Discord. You have been warned. 
+    root_uri: "https://mxxxxxx.exxxxx.me" # REPLACE THIS! If you ask for this in the NextUI Discord we will not answer you.
 
     platforms:
       - platform_name: "Game Boy"
