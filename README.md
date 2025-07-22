@@ -36,18 +36,12 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 3. Download the latest Mortar release from this repo or install it using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
    - If downloading manually, unzip the release before continuing.
 4. Edit one of the templates [found here](/.github/resources/config_examples).
+   - **Do not ask for the Megathread `root_url` on the NextUI Discord**
+   - Use your 🧠. I believe in you!
 5. Save the edited template as `config.yml`.
     - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
     - Manual Installers: upload the `Mortar.pak` directory that came in the releases zip and place `config.yml` inside.
 6. Launch `Mortar` from the `Tools` menu and enjoy!
-
----
-
-## A note about configs. 
-
-Do not ask for the root url nor a config file on the NextUI Discord. 
-
-You have been warned. 
 
 ---
 
