@@ -9,6 +9,7 @@ import (
 	"mortar/models"
 	"mortar/state"
 	"mortar/utils"
+	"mortar/web"
 	"qlova.tech/sum"
 )
 
@@ -141,13 +142,22 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			},
 			Options: []gabagool.Option{
 				{
-					DisplayName: "",
-					Value:       "empty",
-					Type:        gabagool.OptionTypeClickable,
+					Type: gabagool.OptionTypeClickable,
 				},
 			},
 		})
 	}
+
+	items = append(items, gabagool.ItemWithOptions{
+		Item: gabagool.MenuItem{
+			Text: "Launch Configuration API",
+		},
+		Options: []gabagool.Option{
+			{
+				Type: gabagool.OptionTypeClickable,
+			},
+		},
+	})
 
 	footerHelpItems := []gabagool.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Cancel"},
@@ -167,6 +177,16 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 	}
 
 	if result.IsSome() {
+		if result.Unwrap().SelectedItem.Item.Text == "Launch Configuration API" {
+			web.QRScreen()
+			config, err := utils.LoadConfig()
+			if err == nil {
+				state.SetConfig(config)
+				utils.DeleteCache()
+			}
+			return result, 404, nil
+		}
+
 		if result.Unwrap().SelectedItem.Item.Text == "Empty Cache" {
 			_ = utils.DeleteCache()
 

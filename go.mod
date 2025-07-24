@@ -7,6 +7,8 @@ require (
 	github.com/UncleJunVIP/gabagool v0.0.54
 	github.com/UncleJunVIP/nextui-pak-shared-functions v1.8.0
 	github.com/disintegration/imaging v1.6.2
+	github.com/labstack/echo/v4 v4.13.4
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/viper v1.20.1
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.27.0
@@ -21,6 +23,9 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
 	github.com/kettek/apng v0.0.0-20220823221153-ff692776a607 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/patrickhuber/go-types v0.6.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.9.0 // indirect
@@ -29,8 +34,11 @@ require (
 	github.com/spf13/cast v1.9.2 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/veandco/go-sdl2 v0.4.40 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/image v0.29.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect

@@ -8,9 +8,11 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/disintegration/imaging"
+	"github.com/skip2/go-qrcode"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
+	"image/color"
 	"io"
 	"mortar/clients"
 	"mortar/models"
@@ -554,8 +556,81 @@ func IsConnectedToInternet() bool {
 	return err == nil
 }
 
+func GetLocalIP() (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", fmt.Errorf("failed to get network interfaces: %w", err)
+	}
+
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
+			continue
+		}
+
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+
+		for _, addr := range addrs {
+			if ipNet, ok := addr.(*net.IPNet); ok {
+				ip := ipNet.IP
+				if ip.To4() != nil && !ip.IsLoopback() {
+					if isPrivateIP(ip) {
+						return ip.String(), nil
+					}
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no suitable local IP address found")
+}
+
+func isPrivateIP(ip net.IP) bool {
+	privateRanges := []string{
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+	}
+
+	for _, rangeStr := range privateRanges {
+		_, network, err := net.ParseCIDR(rangeStr)
+		if err != nil {
+			continue
+		}
+		if network.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func CreateTempQRCode(content string, size int) (string, error) {
+	qr, err := qrcode.New(content, qrcode.Medium)
+
+	if err != nil {
+		return "", err
+	}
+
+	qr.BackgroundColor = color.Black
+	qr.ForegroundColor = color.White
+	qr.DisableBorder = true
+
+	tempFile, err := os.CreateTemp("", "qrcode-*")
+
+	err = qr.Write(size, tempFile)
+
+	if err != nil {
+		return "", err
+	}
+	defer tempFile.Close()
+
+	return tempFile.Name(), err
+}
+
 func LoadConfig() (*models.Config, error) {
-	configFiles := []string{"config.yml", "config.json"}
+	configFiles := []string{"config.json", "config.yml"}
 
 	var data []byte
 	var err error
@@ -594,7 +669,7 @@ func LoadConfig() (*models.Config, error) {
 }
 
 func SaveConfig(config *models.Config) error {
-	configFiles := []string{"config.yml", "config.json"}
+	configFiles := []string{"config.json", "config.yml"}
 
 	var existingFile string
 	var configType string
@@ -626,6 +701,7 @@ func SaveConfig(config *models.Config) error {
 		return fmt.Errorf("error reading config file: %w", err)
 	}
 
+	viper.Set("hosts", config.Hosts)
 	viper.Set("download_art", config.DownloadArt)
 	viper.Set("art_download_type", config.ArtDownloadType)
 	viper.Set("unzip_downloads", config.UnzipDownloads)
