@@ -2,12 +2,15 @@ package utils
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"fmt"
 	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/disintegration/imaging"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
 	"io"
 	"mortar/clients"
 	"mortar/models"
@@ -549,4 +552,88 @@ func IsConnectedToInternet() bool {
 	timeout := 5 * time.Second
 	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
 	return err == nil
+}
+
+func LoadConfig() (*models.Config, error) {
+	configFiles := []string{"config.yml", "config.json"}
+
+	var data []byte
+	var err error
+	var foundFile string
+
+	for _, filename := range configFiles {
+		data, err = os.ReadFile(filename)
+		if err == nil {
+			foundFile = filename
+			break
+		}
+	}
+
+	if foundFile == "" {
+		return nil, fmt.Errorf("no config file found (tried: %s)", strings.Join(configFiles, ", "))
+	}
+
+	var config models.Config
+
+	ext := strings.ToLower(filepath.Ext(foundFile))
+
+	switch ext {
+	case ".json":
+		err = json.Unmarshal(data, &config)
+	case ".yaml", ".yml":
+		err = yaml.Unmarshal(data, &config)
+	default:
+		return nil, fmt.Errorf("unknown config file type: %s", ext)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("parsing %s: %w", foundFile, err)
+	}
+
+	return &config, nil
+}
+
+func SaveConfig(config *models.Config) error {
+	configFiles := []string{"config.yml", "config.json"}
+
+	var existingFile string
+	var configType string
+
+	for _, filename := range configFiles {
+		if _, err := os.Stat(filename); err == nil {
+			existingFile = filename
+			ext := strings.ToLower(filepath.Ext(filename))
+			switch ext {
+			case ".json":
+				configType = "json"
+			case ".yml":
+				configType = "yml"
+			}
+			break
+		}
+	}
+
+	if existingFile == "" {
+		existingFile = "config.yml"
+		configType = "yml"
+	}
+
+	viper.SetConfigName(strings.TrimSuffix(filepath.Base(existingFile), filepath.Ext(existingFile)))
+	viper.SetConfigType(configType)
+	viper.AddConfigPath(".")
+
+	if err := viper.ReadInConfig(); err != nil {
+		return fmt.Errorf("error reading config file: %w", err)
+	}
+
+	viper.Set("download_art", config.DownloadArt)
+	viper.Set("art_download_type", config.ArtDownloadType)
+	viper.Set("unzip_downloads", config.UnzipDownloads)
+	viper.Set("group_bin_cue", config.GroupBinCue)
+	viper.Set("group_multi_disc", config.GroupMultiDisc)
+	viper.Set("log_level", config.LogLevel)
+
+	common.SetLogLevel(config.LogLevel)
+
+	return viper.WriteConfigAs(existingFile)
 }

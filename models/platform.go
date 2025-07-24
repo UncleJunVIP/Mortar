@@ -3,13 +3,13 @@ package models
 import "go.uber.org/zap/zapcore"
 
 type Platform struct {
-	Name             string `yaml:"platform_name"`
-	SystemTag        string `yaml:"system_tag"`
-	LocalDirectory   string `yaml:"local_directory"`
-	HostSubdirectory string `yaml:"host_subdirectory"`
-	RomMPlatformID   string `yaml:"romm_platform_id"`
+	Name             string `yaml:"platform_name" json:"platform_name"`
+	SystemTag        string `yaml:"system_tag" json:"system_tag"`
+	LocalDirectory   string `yaml:"local_directory" json:"local_directory"`
+	HostSubdirectory string `yaml:"host_subdirectory" json:"host_subdirectory"`
+	RomMPlatformID   string `yaml:"romm_platform_id" json:"romm_platform_id"`
 
-	Host Host `yaml:"-"`
+	Host Host `yaml:"-" json:"-"`
 }
 
 type Platforms []Platform

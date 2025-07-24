@@ -5,7 +5,6 @@ import (
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/state"
@@ -207,7 +206,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}
 		}
 
-		err := SaveConfig(appState.Config)
+		err := utils.SaveConfig(appState.Config)
 		if err != nil {
 			logger.Error("Error saving config", zap.Error(err))
 			return nil, 0, err
@@ -219,25 +218,4 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 	}
 
 	return nil, 2, nil
-}
-
-func SaveConfig(config *models.Config) error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yml")
-	viper.AddConfigPath(".")
-
-	if err := viper.ReadInConfig(); err != nil {
-		return fmt.Errorf("error reading config file: %w", err)
-	}
-
-	viper.Set("download_art", config.DownloadArt)
-	viper.Set("art_download_type", config.ArtDownloadType)
-	viper.Set("unzip_downloads", config.UnzipDownloads)
-	viper.Set("group_bin_cue", config.GroupBinCue)
-	viper.Set("group_multi_disc", config.GroupMultiDisc)
-	viper.Set("log_level", config.LogLevel)
-
-	common.SetLogLevel(config.LogLevel)
-
-	return viper.WriteConfigAs("config.yml")
 }

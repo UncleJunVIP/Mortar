@@ -7,17 +7,15 @@ import (
 )
 
 type Config struct {
-	Hosts              Hosts  `yaml:"hosts"`
-	UnzipDownloads     bool   `yaml:"unzip_downloads"`
-	DownloadArt        bool   `yaml:"download_art"`
-	RawArtDownloadType string `yaml:"art_download_type"`
-	LogLevel           string `yaml:"log_level"`
+	Hosts              Hosts  `yaml:"hosts" json:"hosts"`
+	UnzipDownloads     bool   `yaml:"unzip_downloads" json:"unzip_downloads"`
+	GroupBinCue        bool   `yaml:"group_bin_cue" json:"group_bin_cue"`
+	GroupMultiDisc     bool   `yaml:"group_multi_disc" json:"group_multi_disc"`
+	DownloadArt        bool   `yaml:"download_art" json:"download_art"`
+	RawArtDownloadType string `yaml:"art_download_type" json:"art_download_type"`
+	LogLevel           string `yaml:"log_level" json:"log_level"`
 
-	ArtDownloadType sum.Int[shared.ArtDownloadType] `yaml:"-"`
-
-	// Coming Soon
-	GroupBinCue    bool `yaml:"group_bin_cue"`
-	GroupMultiDisc bool `yaml:"group_multi_disc"`
+	ArtDownloadType sum.Int[shared.ArtDownloadType] `yaml:"-" json:"-"`
 }
 
 func (c *Config) MarshalLogObject(enc zapcore.ObjectEncoder) error {

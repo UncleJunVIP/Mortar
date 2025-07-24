@@ -8,21 +8,21 @@ import (
 )
 
 type Host struct {
-	DisplayName string                   `yaml:"display_name"`
-	HostType    sum.Int[shared.HostType] `yaml:"host_type"`
-	RootURI     string                   `yaml:"root_uri"`
-	Port        int                      `yaml:"port"`
+	DisplayName string                   `yaml:"display_name" json:"display_name"`
+	HostType    sum.Int[shared.HostType] `yaml:"host_type" json:"host_type"`
+	RootURI     string                   `yaml:"root_uri" json:"root_uri"`
+	Port        int                      `yaml:"port" json:"port"`
 
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Username string `yaml:"username" json:"username"`
+	Password string `yaml:"password" json:"password"`
 
-	Platforms Platforms `yaml:"platforms"`
-	Filters   Filters   `yaml:"filters"`
+	Platforms Platforms `yaml:"platforms" json:"platforms"`
+	Filters   Filters   `yaml:"filters" json:"filters"`
 
-	TableColumns       shared.TableColumns `yaml:"table_columns"`
-	SourceReplacements SourceReplacements  `yaml:"source_replacements"`
+	TableColumns       shared.TableColumns `yaml:"table_columns" json:"table_columns"`
+	SourceReplacements SourceReplacements  `yaml:"source_replacements" json:"source_replacements"`
 
-	PlatformIndices PlatformIndices `yaml:"-"`
+	PlatformIndices PlatformIndices `yaml:"-" json:"-"`
 }
 
 func (h Host) Value() interface{} {
@@ -32,8 +32,8 @@ func (h Host) Value() interface{} {
 type Hosts []Host
 
 type Filters struct {
-	InclusiveFilters []string `yaml:"inclusive_filters"`
-	ExclusiveFilters []string `yaml:"exclusive_filters"`
+	InclusiveFilters []string `yaml:"inclusive_filters" json:"inclusive_filters"`
+	ExclusiveFilters []string `yaml:"exclusive_filters" json:"exclusive_filters"`
 }
 
 type SourceReplacements map[string]string
