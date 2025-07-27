@@ -19,8 +19,8 @@ type Host struct {
 	Platforms Platforms `yaml:"platforms" json:"platforms"`
 	Filters   Filters   `yaml:"filters" json:"filters"`
 
-	TableColumns       shared.TableColumns `yaml:"table_columns" json:"table_columns"`
-	SourceReplacements SourceReplacements  `yaml:"source_replacements" json:"source_replacements"`
+	TableColumns       shared.TableColumns `yaml:"-" json:"-"`
+	SourceReplacements SourceReplacements  `yaml:"-" json:"-"`
 
 	PlatformIndices PlatformIndices `yaml:"-" json:"-"`
 }
@@ -37,14 +37,6 @@ type Filters struct {
 }
 
 type SourceReplacements map[string]string
-
-func (s SourceReplacements) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	for k, v := range s {
-		enc.AddString(k, v)
-	}
-
-	return nil
-}
 
 type PlatformIndices map[string]int
 
@@ -72,10 +64,6 @@ func (h Host) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	}
 
 	_ = enc.AddArray("platforms", h.Platforms)
-
-	_ = enc.AddObject("table_columns", h.TableColumns)
-
-	_ = enc.AddObject("source_replacements", h.SourceReplacements)
 
 	return nil
 }
