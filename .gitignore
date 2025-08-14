@@ -14,3 +14,4 @@
 /.local/
 /setup-qr.png
 /config.*
+/.env
