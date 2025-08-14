@@ -438,14 +438,8 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 		return LastSavedArtPath
 	}
 
-	tag := common.TagRegex.FindStringSubmatch(platform.LocalDirectory)
-
-	if tag == nil {
-		return ""
-	}
-
 	client := common.NewThumbnailClient(downloadType)
-	section := client.BuildThumbnailSection(tag[1])
+	section := client.BuildThumbnailSection(platform.SystemTag)
 
 	artList, err := client.ListDirectory(section.HostSubdirectory)
 
