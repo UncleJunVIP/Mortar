@@ -23,12 +23,6 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 
 ---
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/e0d0b400-06d0-4cdc-b4d1-8266b180ecf5" width="400" />
-</div>
-
----
-
 ## How do I setup Mortar?
 
 1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI.
@@ -36,7 +30,6 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 3. Download the latest Mortar release from this repo or install it using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
    - If downloading manually, unzip the release before continuing.
 4. Edit one of the templates [found here](/.github/resources/config_examples).
-   - **Do not ask for the Megathread `root_url` on the NextUI Discord.**
    - Use your 🧠. I believe in you!
 5. Save the edited template as `config.yml`.
     - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
