@@ -1,10 +1,10 @@
 package ui
 
 import (
+	"mortar/models"
+
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	"go.uber.org/zap"
-	"mortar/models"
 	"qlova.tech/sum"
 )
 
@@ -29,7 +29,7 @@ func (s Search) Draw() (value interface{}, exitCode int, e error) {
 
 	res, err := gabagool.Keyboard(s.InitialText)
 	if err != nil {
-		logger.Error("Error with blocking keyboard", zap.Error(err))
+		logger.Error("Error with blocking keyboard", "error", err)
 		return nil, -1, err
 	}
 

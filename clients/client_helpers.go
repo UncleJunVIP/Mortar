@@ -1,9 +1,10 @@
 package clients
 
 import (
+	"mortar/models"
+
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"mortar/models"
 )
 
 func BuildClient(host models.Host) (shared.Client, error) {

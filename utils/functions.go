@@ -3,20 +3,20 @@ package utils
 import (
 	"archive/zip"
 	"fmt"
-	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"github.com/disintegration/imaging"
-	"go.uber.org/zap"
 	"io"
 	"mortar/clients"
 	"mortar/models"
 	"net"
 	"os"
 	"path/filepath"
-	"qlova.tech/sum"
 	"strings"
 	"time"
+
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"github.com/disintegration/imaging"
+	"qlova.tech/sum"
 )
 
 func IsDev() bool {
@@ -48,7 +48,7 @@ func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {
 			return nil, err
 		}
 
-		logger.Info("Extracted files", zap.Strings("files", extractedFiles))
+		logger.Info("Extracted files", "files", extractedFiles)
 
 		return extractedFiles, nil
 	})
@@ -58,7 +58,7 @@ func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {
 			time.Sleep(3 * time.Second)
 			return nil, nil
 		})
-		logger.Error("Unable to unzip pak", zap.Error(err))
+		logger.Error("Unable to unzip pak", "error", err)
 		return nil, err
 	} else {
 		err := os.RemoveAll(zipPath)
@@ -238,8 +238,8 @@ func GroupBinCue(platform models.Platform, game shared.Item) {
 				err := os.MkdirAll(dirPath, 0755)
 				if err != nil {
 					logger.Error("Failed to create directory for BIN/CUE grouping",
-						zap.String("directory", dirPath),
-						zap.Error(err))
+						"directory", dirPath,
+						"error", err)
 					continue
 				}
 
@@ -254,17 +254,17 @@ func GroupBinCue(platform models.Platform, game shared.Item) {
 							err := os.Rename(file, newPath)
 							if err != nil {
 								logger.Error("Failed to move file to BIN/CUE group directory",
-									zap.String("file", file),
-									zap.String("destination", newPath),
-									zap.Error(err))
+									"file", file,
+									"destination", newPath,
+									"error", err)
 							}
 						}
 					}
 				}
 
 				logger.Info("Successfully grouped BIN/CUE files",
-					zap.String("cueFile", baseName),
-					zap.String("directory", dirPath))
+					"cueFile", baseName,
+					"directory", dirPath)
 			}
 
 			return nil, nil
@@ -303,12 +303,12 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 	if _, err := os.Stat(gameFolderPath); os.IsNotExist(err) {
 		err := os.MkdirAll(gameFolderPath, 0755)
 		if err != nil {
-			logger.Error("Failed to create game directory", zap.Error(err))
+			logger.Error("Failed to create game directory", "error", err)
 			return err
 		}
-		logger.Info("Created new game directory", zap.String("path", gameFolderPath))
+		logger.Info("Created new game directory", "path", gameFolderPath)
 	} else {
-		logger.Info("Game directory already exists, skipping creation", zap.String("path", gameFolderPath))
+		logger.Info("Game directory already exists, skipping creation", "path", gameFolderPath)
 	}
 
 	var extractedFiles []string
@@ -317,7 +317,7 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 		var err error
 		extractedFiles, err = UnzipGame(platform, game)
 		if err != nil {
-			logger.Error("Failed to unzip game", zap.Error(err))
+			logger.Error("Failed to unzip game", "error", err)
 			return err
 		}
 	} else {
@@ -339,7 +339,7 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 
 			err := os.Rename(filePath, destPath)
 			if err != nil {
-				logger.Error("Failed to move file", zap.String("source", filePath), zap.String("destination", destPath), zap.Error(err))
+				logger.Error("Failed to move file", "source", filePath, "destination", destPath, "error", err)
 				return nil, err
 			}
 		}
@@ -365,7 +365,7 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 			// Open the M3U file for appending (or create if it doesn't exist)
 			m3uFile, err := os.OpenFile(m3uFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
-				logger.Error("Failed to open M3U file", zap.Error(err))
+				logger.Error("Failed to open M3U file", "error", err)
 				return nil, err
 			}
 			defer m3uFile.Close()
@@ -374,21 +374,21 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 			for _, discFile := range discFiles {
 				_, err := m3uFile.WriteString(discFile + "\n")
 				if err != nil {
-					logger.Error("Failed to write to M3U file", zap.Error(err))
+					logger.Error("Failed to write to M3U file", "error", err)
 					return nil, err
 				}
 			}
 
 			logger.Info("Successfully appended to M3U file",
-				zap.String("m3u", m3uFilePath),
-				zap.Strings("addedDiscFiles", discFiles))
+				"m3u_path", m3uFilePath,
+				"disc_files", discFiles)
 		} else {
 			logger.Info("No .cue, .chd, or .pbp files found to add to M3U file")
 		}
 
 		logger.Info("Successfully processed game",
-			zap.String("folder", gameFolderPath),
-			zap.String("m3u", m3uFilePath))
+			"folder", gameFolderPath,
+			"m3u_path", m3uFilePath)
 
 		return nil, nil
 	})
@@ -444,14 +444,12 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 	artList, err := client.ListDirectory(section.HostSubdirectory)
 
 	if err != nil {
-		logger.Info("Unable to fetch artlist", zap.Error(err))
+		logger.Info("Unable to fetch artlist", "error", err)
 		return ""
 	}
 
-	noExtension := strings.TrimSuffix(game.Filename, filepath.Ext(game.Filename))
-
 	// toastd's trick for Libretro Thumbnail Naming
-	cleanedName := strings.ReplaceAll(noExtension, "&", "_")
+	cleanedName := strings.ReplaceAll(game.DisplayName, "&", "_")
 
 	var matched shared.Item
 
@@ -471,7 +469,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 
 		src, err := imaging.Open(lastSavedArtPath)
 		if err != nil {
-			logger.Error("Unable to open last saved art", zap.Error(err))
+			logger.Error("Unable to open last saved art", "error", err)
 			return ""
 		}
 
@@ -479,7 +477,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 
 		err = imaging.Save(dst, lastSavedArtPath)
 		if err != nil {
-			logger.Error("Unable to save resized last saved art", zap.Error(err))
+			logger.Error("Unable to save resized last saved art", "error", err)
 			return ""
 		}
 
@@ -531,7 +529,7 @@ func DeleteCache() error {
 	}
 	err = os.RemoveAll(filepath.Join(cwd, ".cache"))
 	if err != nil {
-		logger.Error("Unable to delete cache", zap.Error(err))
+		logger.Error("Unable to delete cache", "error", err)
 		return err
 	}
 
@@ -543,4 +541,19 @@ func IsConnectedToInternet() bool {
 	timeout := 5 * time.Second
 	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
 	return err == nil
+}
+
+func AllPlatformsHaveLocalFolders(config *models.Config) bool {
+	allHave := true
+
+	for _, h := range config.Hosts {
+		for _, p := range h.Platforms {
+			if p.LocalDirectory == "" {
+				allHave = false
+				continue
+			}
+		}
+	}
+
+	return allHave
 }

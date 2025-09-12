@@ -2,12 +2,6 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/UncleJunVIP/certifiable"
-	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
 	"mortar/models"
 	"mortar/state"
 	"mortar/ui"
@@ -15,6 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	_ "github.com/UncleJunVIP/certifiable"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 )
 
 func init() {
@@ -28,6 +28,7 @@ func init() {
 	common.InitIncludes()
 
 	if !utils.IsConnectedToInternet() {
+		fmt.Println("No Internet Connection")
 		_, err := gaba.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gaba.MessageOptions{})
@@ -37,6 +38,7 @@ func init() {
 
 	config, err := state.LoadConfig()
 	if err != nil {
+		fmt.Println("Setup Required")
 		_, err := gaba.ConfirmationMessage("Setup Required!\nScan the QR Code for Instructions", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
@@ -50,7 +52,7 @@ func init() {
 
 	logger := common.GetLoggerInstance()
 
-	logger.Debug("Configuration Loaded!", zap.Object("config", config))
+	logger.Info("Configuration Loaded!", "config", config)
 
 	if config.RawArtDownloadType == "" {
 		config.RawArtDownloadType = "BOX_ART"
@@ -67,19 +69,17 @@ func init() {
 	err = fb.CWD(utils.GetRomDirectory(), false)
 	if err != nil {
 		defer cleanup()
-		logger.Fatal("Error loading fetching ROM directories", zap.Error(err))
+		logger.Error("Error loading fetching ROM directories", "error", err)
 	}
 
 	romDirectories := utils.MapTagsToDirectories(fb.Items)
 
-	var logMappings []zap.Field
+	logger.Debug(fmt.Sprintf("Discovered %d ROM Directories",
+		len(romDirectories)))
 
 	for tag, path := range romDirectories {
-		logMappings = append(logMappings, zap.String(tag, path))
+		logger.Debug(fmt.Sprintf("Mapped System %s", tag), "tag", tag, "path", path)
 	}
-
-	logger.Debug(fmt.Sprintf("Discovered %d ROM Directories",
-		len(romDirectories)), zap.Dict("mappings", logMappings...))
 
 	for hostIdx, host := range config.Hosts {
 		for sectionIdx, section := range host.Platforms {
@@ -89,7 +89,17 @@ func init() {
 		}
 	}
 
-	logger.Debug("Populated ROM Directories by System Tag", zap.Object("config", config))
+	if !utils.AllPlatformsHaveLocalFolders(config) {
+		gaba.ConfirmationMessage("Not all platforms have local folders defined.\nCheck logs for details.", []gaba.FooterHelpItem{
+			{ButtonName: "B", HelpText: "Quit"},
+		}, gaba.MessageOptions{})
+		logger.Error("Not all platforms have local folders. Ensure they are correct and try again. " +
+			"If you are using the automation folder detection feature, please make sure a matching system tag exits on a directory in your ROM directory.")
+
+		os.Exit(1)
+	}
+
+	logger.Info("Populated ROM Directories by System Tag", "config", config)
 
 	state.SetConfig(config)
 }

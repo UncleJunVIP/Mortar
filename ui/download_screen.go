@@ -2,19 +2,20 @@ package ui
 
 import (
 	"encoding/base64"
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
+	"mortar/state"
 	"mortar/utils"
 	"net/url"
 	"path/filepath"
-	"qlova.tech/sum"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"qlova.tech/sum"
 )
 
 type DownloadScreen struct {
@@ -48,15 +49,19 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 		auth := d.Platform.Host.Username + ":" + d.Platform.Host.Password
 		authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 		headers["Authorization"] = authHeader
+
+		logger.Debug("RomM Auth Header", "header", authHeader)
 	}
 
 	slices.SortFunc(downloads, func(a, b gabagool.Download) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))
 	})
 
-	res, err := gabagool.DownloadManager(downloads, headers)
+	logger.Debug("Starting ROM download", "downloads", downloads)
+
+	res, err := gabagool.DownloadManager(downloads, headers, state.GetAppState().Config.DownloadArt)
 	if err != nil {
-		logger.Error("Error downloading", zap.Error(err))
+		logger.Error("Error downloading", "error", err)
 		return nil, -1, err
 	}
 

@@ -4,9 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 )
 
 type RomMClient struct {
@@ -274,10 +274,10 @@ func (c *RomMClient) DownloadArt(remotePath, localPath, filename, rename string)
 	logger := common.GetLoggerInstance()
 
 	logger.Debug("Downloading file...",
-		zap.String("remotePath", remotePath),
-		zap.String("localPath", localPath),
-		zap.String("filename", filename),
-		zap.String("rename", rename))
+		"remotePath", remotePath,
+		"localPath", localPath,
+		"filename", filename,
+		"rename", rename)
 
 	sourceURL, err := url.JoinPath(c.buildRootURL(), remotePath, filename)
 	if err != nil {
