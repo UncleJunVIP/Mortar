@@ -2,14 +2,14 @@ package ui
 
 import (
 	"fmt"
+	"mortar/models"
+	"mortar/state"
+	"mortar/utils"
+
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
-	"mortar/models"
-	"mortar/state"
-	"mortar/utils"
 	"qlova.tech/sum"
 )
 
@@ -209,7 +209,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 
 		err := SaveConfig(appState.Config)
 		if err != nil {
-			logger.Error("Error saving config", zap.Error(err))
+			logger.Error("Error saving config", "error", err)
 			return nil, 0, err
 		}
 

@@ -2,12 +2,13 @@ package state
 
 import (
 	"fmt"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/atomic"
-	"gopkg.in/yaml.v3"
 	"mortar/models"
 	"os"
 	"sync"
+
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"go.uber.org/atomic"
+	"gopkg.in/yaml.v3"
 )
 
 var appState atomic.Pointer[models.AppState]

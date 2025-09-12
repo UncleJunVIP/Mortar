@@ -2,13 +2,14 @@ package ui
 
 import (
 	"fmt"
+	"mortar/models"
+	"mortar/utils"
+	"time"
+
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"mortar/models"
-	"mortar/utils"
 	"qlova.tech/sum"
-	"time"
 )
 
 type DownloadArtScreen struct {

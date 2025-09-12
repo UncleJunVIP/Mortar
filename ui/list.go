@@ -2,9 +2,6 @@ package ui
 
 import (
 	"encoding/json"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
-	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"go.uber.org/zap"
 	"mortar/clients"
 	"mortar/models"
 	"mortar/utils"
@@ -12,13 +9,16 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 )
 
 func FetchListStateless(platform models.Platform) (shared.Items, error) {
 	logger := common.GetLoggerInstance()
 
 	logger.Debug("Fetching Item List",
-		zap.Object("host", platform.Host))
+		"host", platform.Host)
 
 	client, err := clients.BuildClient(platform.Host)
 	if err != nil {
@@ -28,7 +28,7 @@ func FetchListStateless(platform models.Platform) (shared.Items, error) {
 	defer func(client shared.Client) {
 		err := client.Close()
 		if err != nil {
-			logger.Error("Unable to close client", zap.Error(err))
+			logger.Error("Unable to close client", "error", err)
 		}
 	}(client)
 
@@ -53,17 +53,17 @@ func FetchListStateless(platform models.Platform) (shared.Items, error) {
 	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
 		jsonData, err := json.Marshal(items)
 		if err != nil {
-			logger.Debug("Unable to get marshal JSON for Megathread", zap.Error(err))
+			logger.Debug("Unable to get marshal JSON for Megathread", "error", err)
 
 			cwd, err := os.Getwd()
 			if err != nil {
-				logger.Debug("Unable to get current working directory for caching Megathread", zap.Error(err))
+				logger.Debug("Unable to get current working directory for caching Megathread", "error", err)
 			}
 
 			filePath := path.Join(cwd, ".cache", utils.CachedMegaThreadJsonFilename("", ""))
 			err = os.WriteFile(filePath, jsonData, 0644)
 			if err != nil {
-				logger.Debug("Unable to write JSON to file for Megathread", zap.Error(err))
+				logger.Debug("Unable to write JSON to file for Megathread", "error", err)
 			}
 		}
 	}
