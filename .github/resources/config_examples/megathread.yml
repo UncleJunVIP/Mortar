@@ -22,6 +22,10 @@ hosts:
       - platform_name: "PlayStation"
         system_tag: "PS"
         host_subdirectory: "/files/Internet%20Archive/chadmaster/chd_psx/CHD-PSX-USA/"
+      - platform_name: "FBN Arcade"
+        system_tag: "FBN"
+        host_subdirectory: "/files/Internet%20Archive/chadmaster/fbnarcade-fullnonmerged/arcade/"
+        is_arcade: true
 
     filters:
       exclusive_filters:

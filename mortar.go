@@ -89,12 +89,16 @@ func init() {
 		}
 	}
 
-	if !utils.AllPlatformsHaveLocalFolders(config) {
-		gaba.ConfirmationMessage("Not all platforms have local folders defined.\nCheck logs for details.", []gaba.FooterHelpItem{
+	missingPlatforms := utils.AllPlatformsHaveLocalFolders(config)
+
+	if len(missingPlatforms) > 0 {
+		mps := strings.Join(missingPlatforms, "\n")
+		gaba.ConfirmationMessage(fmt.Sprintf("These platforms are missing local folders:\n%s", mps), []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gaba.MessageOptions{})
-		logger.Error("Not all platforms have local folders. Ensure they are correct and try again. " +
-			"If you are using the automation folder detection feature, please make sure a matching system tag exits on a directory in your ROM directory.")
+		logger.Error("Not all platforms have local folders. Ensure they are correct and try again. "+
+			"If you are using the automation folder detection feature, please make sure a matching system tag exits on a directory in your ROM directory.",
+			"missing_platforms", missingPlatforms)
 
 		os.Exit(1)
 	}
@@ -217,7 +221,7 @@ func main() {
 							utils.GroupMultiDisk(ds.Platform, game)
 						} else if appState.Config.GroupBinCue && isBinCue {
 							utils.GroupBinCue(ds.Platform, game)
-						} else if appState.Config.UnzipDownloads {
+						} else if appState.Config.UnzipDownloads && !screen.(ui.DownloadScreen).Platform.IsArcade {
 							utils.UnzipGame(ds.Platform, game)
 						}
 					} else if appState.Config.GroupMultiDisc && isMultiDisc {

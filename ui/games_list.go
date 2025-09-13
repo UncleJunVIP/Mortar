@@ -62,8 +62,28 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 
 	itemList := gl.Games
 
+	for idx, _ := range itemList {
+		if gl.Platform.IsArcade {
+			itemList[idx].DisplayName = utils.ArcadeMapping[itemList[idx].Filename]
+		}
+
+		if !gl.Platform.IsArcade || itemList[idx].DisplayName == "" {
+			itemList[idx].DisplayName = strings.ReplaceAll(itemList[idx].Filename, filepath.Ext(itemList[idx].Filename), "")
+		}
+	}
+
 	if len(host.Filters.InclusiveFilters) > 0 || len(host.Filters.ExclusiveFilters) > 0 {
-		itemList = filterList(gl.Games, host.Filters)
+		filters := host.Filters
+
+		if gl.Platform.SkipExclusiveFilters {
+			filters.ExclusiveFilters = []string{}
+		}
+
+		if gl.Platform.SkipInclusiveFilters {
+			filters.InclusiveFilters = []string{}
+		}
+
+		itemList = filterList(gl.Games, filters)
 	}
 
 	if gl.SearchFilter != "" {
@@ -97,7 +117,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	var itemEntries []gabagool.MenuItem
 	for _, game := range itemList {
 		itemEntries = append(itemEntries, gabagool.MenuItem{
-			Text:     strings.ReplaceAll(game.Filename, filepath.Ext(game.Filename), ""),
+			Text:     game.DisplayName,
 			Selected: false,
 			Focused:  false,
 			Metadata: game,

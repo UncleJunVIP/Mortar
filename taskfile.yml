@@ -27,7 +27,7 @@ tasks:
       - mkdir -p build/Mortar.pak/resources/lib
       - cp build/mortar launch.sh README.md LICENSE pak.json build/Mortar.pak
       - cp -R build/lib build/Mortar.pak/resources
-      - cp resources/setup-qr.png build/Mortar.pak/resources
+      - cp -R resources/ build/Mortar.pak/resources
     silent: true
 
   cleanup:
