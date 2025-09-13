@@ -3,7 +3,6 @@ version: '3'
 tasks:
   all:
     cmds:
-      - task: cleanup
       - task: build
       - task: package
       - task: adb
@@ -19,6 +18,7 @@ tasks:
 
   package:
     cmds:
+      - docker rm extract || true
       - docker create --name extract retro-console-arm64
       - docker cp extract:/build/mortar build/mortar
       - docker cp extract:/usr/lib/aarch64-linux-gnu/libSDL2_gfx-1.0.so.0.0.2 build/lib/libSDL2_gfx-1.0.so.0
@@ -27,12 +27,7 @@ tasks:
       - mkdir -p build/Mortar.pak/resources/lib
       - cp build/mortar launch.sh README.md LICENSE pak.json build/Mortar.pak
       - cp -R build/lib build/Mortar.pak/resources
-      - cp -R resources/ build/Mortar.pak/resources
-    silent: true
-
-  cleanup:
-    cmds:
-      - docker rm extract || true
+      - cp -R resources build/Mortar.pak/
     silent: true
 
   adb:
