@@ -72,31 +72,36 @@ func FetchListStateless(platform models.Platform) (shared.Items, error) {
 }
 
 func filterList(itemList []shared.Item, filters models.Filters) []shared.Item {
-	var filteredItemListInclusive []shared.Item
+	result := itemList
 
-	for _, item := range itemList {
-		for _, filter := range filters.InclusiveFilters {
-			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(filter)) {
-				filteredItemListInclusive = append(filteredItemListInclusive, item)
-				break
+	if len(filters.InclusiveFilters) > 0 {
+		result = nil
+		for _, item := range itemList {
+			for _, filter := range filters.InclusiveFilters {
+				if strings.Contains(strings.ToLower(item.DisplayName), strings.ToLower(filter)) {
+					result = append(result, item)
+					break
+				}
 			}
 		}
 	}
 
-	var filteredItemListExclusive []shared.Item
-
-	for _, item := range filteredItemListInclusive {
-		contains := false
-		for _, filter := range filters.ExclusiveFilters {
-			if strings.Contains(strings.ToLower(item.Filename), strings.ToLower(filter)) {
-				contains = true
-				break
+	if len(filters.ExclusiveFilters) > 0 {
+		filtered := make([]shared.Item, 0, len(result))
+		for _, item := range result {
+			excluded := false
+			for _, filter := range filters.ExclusiveFilters {
+				if strings.Contains(strings.ToLower(item.DisplayName), strings.ToLower(filter)) {
+					excluded = true
+					break
+				}
+			}
+			if !excluded {
+				filtered = append(filtered, item)
 			}
 		}
-		if !contains {
-			filteredItemListExclusive = append(filteredItemListExclusive, item)
-		}
+		result = filtered
 	}
 
-	return filteredItemListExclusive
+	return result
 }

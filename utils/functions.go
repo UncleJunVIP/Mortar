@@ -2,6 +2,7 @@ package utils
 
 import (
 	"archive/zip"
+	"bufio"
 	"fmt"
 	"io"
 	"mortar/clients"
@@ -18,6 +19,14 @@ import (
 	"github.com/disintegration/imaging"
 	"qlova.tech/sum"
 )
+
+const arcadeMappingFile = "resources/arcade_mapping.txt"
+
+var ArcadeMapping map[string]string
+
+func init() {
+	ArcadeMapping, _ = LoadArcadeMapping(arcadeMappingFile)
+}
 
 func IsDev() bool {
 	return os.Getenv("ENVIRONMENT") == "DEV"
@@ -537,23 +546,54 @@ func DeleteCache() error {
 	return nil
 }
 
+func LoadArcadeMapping(filePath string) (map[string]string, error) {
+	mapping := make(map[string]string)
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		if line == "" {
+			continue
+		}
+
+		parts := strings.Split(line, "\t")
+		if len(parts) >= 2 {
+			romFile := strings.TrimSpace(parts[0])
+			displayName := strings.TrimSpace(parts[1])
+			mapping[romFile] = displayName
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return mapping, nil
+}
+
 func IsConnectedToInternet() bool {
 	timeout := 5 * time.Second
 	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
 	return err == nil
 }
 
-func AllPlatformsHaveLocalFolders(config *models.Config) bool {
-	allHave := true
+func AllPlatformsHaveLocalFolders(config *models.Config) []string {
+	var missingPlatforms []string
 
 	for _, h := range config.Hosts {
 		for _, p := range h.Platforms {
 			if p.LocalDirectory == "" {
-				allHave = false
-				continue
+				missingPlatforms = append(missingPlatforms, p.Name)
 			}
 		}
 	}
 
-	return allHave
+	return missingPlatforms
 }

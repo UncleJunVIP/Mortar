@@ -57,6 +57,9 @@ hosts:
         local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Explicitly set the path. This will be overwritten if `system_tag` is set
         host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/" # The subdirectory on the host, not used by RomM
         romm_platform_id: "1" # Used by RomM in place of `host_subdirectory`
+        skip_inclusive_filters: false # If true, everything in the host directory will be included
+        skip_exclusive_filters: false # If true, nothing in the host directory will be excluded
+        is_arcade: false # If true, Mortar will use an internal mapping file for arcade names
 
         # Define more sections if desired
 
