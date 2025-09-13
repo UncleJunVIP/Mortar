@@ -214,14 +214,14 @@ func main() {
 				for _, game := range downloadedGames {
 					isMultiDisc := utils.IsMultiDisc(ds.Platform, game)
 
-					if filepath.Ext(game.Filename) == ".zip" {
+					if filepath.Ext(game.Filename) == ".zip" && !screen.(ui.DownloadScreen).Platform.IsArcade {
 						isBinCue := utils.HasBinCue(ds.Platform, game)
 
 						if isMultiDisc && appState.Config.GroupMultiDisc {
 							utils.GroupMultiDisk(ds.Platform, game)
 						} else if appState.Config.GroupBinCue && isBinCue {
 							utils.GroupBinCue(ds.Platform, game)
-						} else if appState.Config.UnzipDownloads && !screen.(ui.DownloadScreen).Platform.IsArcade {
+						} else if appState.Config.UnzipDownloads {
 							utils.UnzipGame(ds.Platform, game)
 						}
 					} else if appState.Config.GroupMultiDisc && isMultiDisc {
