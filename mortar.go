@@ -258,7 +258,6 @@ func main() {
 						// If we haven't seen this base name before, add it to the pruned list
 						if !seenBaseNames[baseName] {
 							seenBaseNames[baseName] = true
-							game.Filename = baseName
 							prunedGamesForArt = append(prunedGamesForArt, game)
 						}
 					}

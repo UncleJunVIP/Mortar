@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
@@ -102,6 +103,10 @@ func filterList(itemList []shared.Item, filters models.Filters) []shared.Item {
 		}
 		result = filtered
 	}
+
+	slices.SortFunc(result, func(a, b shared.Item) int {
+		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))
+	})
 
 	return result
 }
