@@ -6,6 +6,7 @@
 /.idea/
 /build/
 /certs/*
+/logs/*
 /.local/config.yml
 /gabagool/
 /mortar

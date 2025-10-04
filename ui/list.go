@@ -51,6 +51,14 @@ func FetchListStateless(platform models.Platform) (shared.Items, error) {
 		items[i].DisplayName = strings.ReplaceAll(item.Filename, filepath.Ext(item.Filename), "")
 	}
 
+	filtered := make([]shared.Item, 0, len(items))
+	for _, item := range items {
+		if !strings.HasPrefix(item.Filename, ".") {
+			filtered = append(filtered, item)
+		}
+	}
+	items = filtered
+
 	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
 		jsonData, err := json.Marshal(items)
 		if err != nil {
