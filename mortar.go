@@ -18,9 +18,10 @@ import (
 )
 
 func init() {
-	gaba.InitSDL(gaba.GabagoolOptions{
+	gaba.InitSDL(gaba.Options{
 		WindowTitle:    "Mortar",
 		ShowBackground: true,
+		LogFilename:    "mortar.log",
 	})
 
 	common.SetLogLevel("ERROR")
