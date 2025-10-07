@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"mortar/models"
 	"mortar/state"
 	"mortar/ui"
@@ -22,9 +23,8 @@ func init() {
 		WindowTitle:    "Mortar",
 		ShowBackground: true,
 		LogFilename:    "mortar.log",
+		LogLevel:       slog.LevelDebug,
 	})
-
-	common.SetLogLevel("ERROR")
 
 	common.InitIncludes()
 
@@ -45,15 +45,16 @@ func init() {
 		}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
 		defer cleanup()
 		common.LogStandardFatal("Setup Required", err)
+		return
 	}
 
 	if config.LogLevel != "" {
-		common.SetLogLevel(config.LogLevel)
+		gaba.SetRawLogLevel(config.LogLevel)
 	}
 
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
-	logger.Info("Configuration Loaded!", "config", config)
+	logger.Debug("Configuration Loaded!", "config", config)
 
 	if config.RawArtDownloadType == "" {
 		config.RawArtDownloadType = "BOX_ART"
@@ -62,7 +63,7 @@ func init() {
 	if val, ok := shared.ArtDownloadTypeFromString[config.RawArtDownloadType]; ok {
 		config.ArtDownloadType = val
 	} else {
-		logger.Info("Invalid art download type provided... defaulting to BOX_ART")
+		logger.Debug("Invalid art download type provided... defaulting to BOX_ART")
 		config.ArtDownloadType = shared.ArtDownloadTypes.BOX_ART
 	}
 
@@ -104,7 +105,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	logger.Info("Populated ROM Directories by System Tag", "config", config)
+	logger.Debug("Populated ROM Directories by System Tag", "config", config)
 
 	state.SetConfig(config)
 }
@@ -117,10 +118,10 @@ func main() {
 	defer gaba.CloseSDL()
 	defer cleanup()
 
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 	appState := state.GetAppState()
 
-	logger.Info("Starting Mortar")
+	logger.Debug("Starting Mortar")
 
 	var screen models.Screen
 

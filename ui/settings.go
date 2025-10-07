@@ -6,7 +6,7 @@ import (
 	"mortar/state"
 	"mortar/utils"
 
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/spf13/viper"
@@ -25,16 +25,16 @@ func (s SettingsScreen) Name() sum.Int[models.ScreenName] {
 }
 
 func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	appState := state.GetAppState()
 
-	items := []gabagool.ItemWithOptions{
+	items := []gaba.ItemWithOptions{
 		{
-			Item: gabagool.MenuItem{
+			Item: gaba.MenuItem{
 				Text: "Download Art",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{DisplayName: "True", Value: true},
 				{DisplayName: "False", Value: false},
 			},
@@ -46,10 +46,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}(),
 		},
 		{
-			Item: gabagool.MenuItem{
+			Item: gaba.MenuItem{
 				Text: "Art Type",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{DisplayName: "Box Art", Value: "BOX_ART"},
 				{DisplayName: "Title Screen", Value: "TITLE_SCREEN"},
 				{DisplayName: "Logos", Value: "LOGOS"},
@@ -71,10 +71,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}(),
 		},
 		{
-			Item: gabagool.MenuItem{
+			Item: gaba.MenuItem{
 				Text: "Unzip Downloads",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{DisplayName: "True", Value: true},
 				{DisplayName: "False", Value: false},
 			},
@@ -86,10 +86,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}(),
 		},
 		{
-			Item: gabagool.MenuItem{
+			Item: gaba.MenuItem{
 				Text: "Group BIN / CUE",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{DisplayName: "True", Value: true},
 				{DisplayName: "False", Value: false},
 			},
@@ -101,10 +101,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}(),
 		},
 		{
-			Item: gabagool.MenuItem{
+			Item: gaba.MenuItem{
 				Text: "Group Multi-Disc",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{DisplayName: "True", Value: true},
 				{DisplayName: "False", Value: false},
 			},
@@ -116,10 +116,10 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}(),
 		},
 		{
-			Item: gabagool.MenuItem{
+			Item: gaba.MenuItem{
 				Text: "Log Level",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{DisplayName: "Debug", Value: "DEBUG"},
 				{DisplayName: "Error", Value: "ERROR"},
 			},
@@ -136,27 +136,27 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 	}
 
 	if utils.CacheFolderExists() {
-		items = append(items, gabagool.ItemWithOptions{
-			Item: gabagool.MenuItem{
+		items = append(items, gaba.ItemWithOptions{
+			Item: gaba.MenuItem{
 				Text: "Empty Cache",
 			},
-			Options: []gabagool.Option{
+			Options: []gaba.Option{
 				{
 					DisplayName: "",
 					Value:       "empty",
-					Type:        gabagool.OptionTypeClickable,
+					Type:        gaba.OptionTypeClickable,
 				},
 			},
 		})
 	}
 
-	footerHelpItems := []gabagool.FooterHelpItem{
+	footerHelpItems := []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Cancel"},
 		{ButtonName: "←→", HelpText: "Cycle"},
 		{ButtonName: "Start", HelpText: "Save"},
 	}
 
-	result, err := gabagool.OptionsList(
+	result, err := gaba.OptionsList(
 		"Mortar Settings",
 		items,
 		footerHelpItems,
@@ -171,8 +171,8 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		if result.Unwrap().SelectedItem.Item.Text == "Empty Cache" {
 			_ = utils.DeleteCache()
 
-			_, _ = gabagool.ProcessMessage(fmt.Sprintf("Cache Emptied!"),
-				gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+			_, _ = gaba.ProcessMessage(fmt.Sprintf("Cache Emptied!"),
+				gaba.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
 					return nil, nil
 				})
 			return result, 404, nil

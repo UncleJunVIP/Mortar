@@ -3,6 +3,7 @@ package utils
 import (
 	"archive/zip"
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"mortar/clients"
@@ -41,7 +42,7 @@ func GetRomDirectory() string {
 }
 
 func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	zipPath := filepath.Join(platform.LocalDirectory, game.Filename)
 	romDirectory := platform.LocalDirectory
@@ -57,7 +58,7 @@ func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {
 			return nil, err
 		}
 
-		logger.Info("Extracted files", "files", extractedFiles)
+		logger.Debug("Extracted files", "files", extractedFiles)
 
 		return extractedFiles, nil
 	})
@@ -70,9 +71,9 @@ func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {
 		logger.Error("Unable to unzip pak", "error", err)
 		return nil, err
 	} else {
-		err := os.RemoveAll(zipPath)
-		if err != nil {
-			return nil, err
+		deleted := common.DeleteFile(zipPath)
+		if !deleted {
+			return nil, errors.New("unable to delete zip file")
 		}
 	}
 
@@ -135,14 +136,14 @@ func Unzip(src, dest string) ([]string, error) {
 			tempFile.Close() // Close the file before attempting to rename it
 
 			if err != nil {
-				os.Remove(tempPath) // Clean up on error
+				common.DeleteFile(tempPath)
 				return err
 			}
 
 			// Now rename the temporary file to the target path
 			err = os.Rename(tempPath, path)
 			if err != nil {
-				os.Remove(tempPath) // Clean up on error
+				common.DeleteFile(tempPath)
 				return err
 			}
 
@@ -219,7 +220,7 @@ func IsMultiDisc(platform models.Platform, game shared.Item) bool {
 }
 
 func GroupBinCue(platform models.Platform, game shared.Item) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	unzipped, err := UnzipGame(platform, game)
 
@@ -271,7 +272,7 @@ func GroupBinCue(platform models.Platform, game shared.Item) {
 					}
 				}
 
-				logger.Info("Successfully grouped BIN/CUE files",
+				logger.Debug("Successfully grouped BIN/CUE files",
 					"cueFile", baseName,
 					"directory", dirPath)
 			}
@@ -282,7 +283,7 @@ func GroupBinCue(platform models.Platform, game shared.Item) {
 }
 
 func GroupMultiDisk(platform models.Platform, game shared.Item) error {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	gameFolderName := game.DisplayName
 	diskIndex := strings.Index(gameFolderName, "(Disk")
@@ -315,9 +316,9 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 			logger.Error("Failed to create game directory", "error", err)
 			return err
 		}
-		logger.Info("Created new game directory", "path", gameFolderPath)
+		logger.Debug("Created new game directory", "path", gameFolderPath)
 	} else {
-		logger.Info("Game directory already exists, skipping creation", "path", gameFolderPath)
+		logger.Debug("Game directory already exists, skipping creation", "path", gameFolderPath)
 	}
 
 	var extractedFiles []string
@@ -388,14 +389,14 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 				}
 			}
 
-			logger.Info("Successfully appended to M3U file",
+			logger.Debug("Successfully appended to M3U file",
 				"m3u_path", m3uFilePath,
 				"disc_files", discFiles)
 		} else {
-			logger.Info("No .cue, .chd, or .pbp files found to add to M3U file")
+			logger.Debug("No .cue, .chd, or .pbp files found to add to M3U file")
 		}
 
-		logger.Info("Successfully processed game",
+		logger.Debug("Successfully processed game",
 			"folder", gameFolderPath,
 			"m3u_path", m3uFilePath)
 
@@ -406,7 +407,7 @@ func GroupMultiDisk(platform models.Platform, game shared.Item) error {
 }
 
 func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[shared.ArtDownloadType]) string {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	artDirectory := ""
 
@@ -453,7 +454,7 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 	artList, err := client.ListDirectory(section.HostSubdirectory)
 
 	if err != nil {
-		logger.Info("Unable to fetch artlist", "error", err)
+		logger.Debug("Unable to fetch artlist", "error", err)
 		return ""
 	}
 
@@ -531,7 +532,7 @@ func CacheFolderExists() bool {
 }
 
 func DeleteCache() error {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -542,7 +543,7 @@ func DeleteCache() error {
 		return err
 	}
 
-	logger.Info("Cache deleted")
+	logger.Debug("Cache deleted")
 	return nil
 }
 
