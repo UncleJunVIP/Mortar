@@ -13,8 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"qlova.tech/sum"
 )
@@ -31,7 +30,7 @@ func InitGamesList(platform models.Platform, games shared.Items, searchFilter st
 	if len(games) > 0 {
 		g = games
 	} else {
-		process, err := gabagool.ProcessMessage(fmt.Sprintf("Loading %s...", platform.Name), gabagool.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
+		process, err := gaba.ProcessMessage(fmt.Sprintf("Loading %s...", platform.Name), gaba.ProcessMessageOptions{ShowThemeBackground: true}, func() (interface{}, error) {
 			var err error
 			g, err = loadGamesList(platform)
 			return g, err
@@ -72,7 +71,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		}
 	}
 
-	if len(host.Filters.InclusiveFilters) > 0 || len(host.Filters.ExclusiveFilters) > 0 {
+	if !gl.Platform.IsArcade && len(host.Filters.InclusiveFilters) > 0 || len(host.Filters.ExclusiveFilters) > 0 {
 		filters := host.Filters
 
 		if gl.Platform.SkipExclusiveFilters {
@@ -93,18 +92,18 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 
 	if len(itemList) == 0 {
 		if gl.SearchFilter != "" {
-			gabagool.ProcessMessage(
+			gaba.ProcessMessage(
 				fmt.Sprintf("No results found for \"%s\"", gl.SearchFilter),
-				gabagool.ProcessMessageOptions{ShowThemeBackground: true},
+				gaba.ProcessMessageOptions{ShowThemeBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
 					return nil, nil
 				},
 			)
 		} else {
-			gabagool.ProcessMessage(
+			gaba.ProcessMessage(
 				fmt.Sprintf("No games found for %s", gl.Platform.Name),
-				gabagool.ProcessMessageOptions{ShowThemeBackground: true},
+				gaba.ProcessMessageOptions{ShowThemeBackground: true},
 				func() (interface{}, error) {
 					time.Sleep(time.Second * 2)
 					return nil, nil
@@ -114,9 +113,9 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		return nil, 404, nil
 	}
 
-	var itemEntries []gabagool.MenuItem
+	var itemEntries []gaba.MenuItem
 	for _, game := range itemList {
-		itemEntries = append(itemEntries, gabagool.MenuItem{
+		itemEntries = append(itemEntries, gaba.MenuItem{
 			Text:     game.DisplayName,
 			Selected: false,
 			Focused:  false,
@@ -124,10 +123,10 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 		})
 	}
 
-	options := gabagool.DefaultListOptions(title, itemEntries)
+	options := gaba.DefaultListOptions(title, itemEntries)
 	options.EnableAction = true
 	options.EnableMultiSelect = true
-	options.FooterHelpItems = []gabagool.FooterHelpItem{
+	options.FooterHelpItems = []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Back"},
 		{ButtonName: "X", HelpText: "Search"},
 		{ButtonName: "Select", HelpText: "Multi"},
@@ -136,7 +135,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 	options.SelectedIndex = state.GetAppState().LastSelectedIndex
 	options.VisibleStartIndex = max(0, state.GetAppState().LastSelectedIndex-state.GetAppState().LastSelectedPosition)
 
-	selection, err := gabagool.List(options)
+	selection, err := gaba.List(options)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -159,7 +158,7 @@ func (gl GameList) Draw() (game interface{}, exitCode int, e error) {
 }
 
 func loadGamesList(platform models.Platform) (games shared.Items, e error) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	cacheResults := checkCache(platform)
 	if cacheResults != nil {
@@ -185,7 +184,7 @@ func loadGamesList(platform models.Platform) (games shared.Items, e error) {
 }
 
 func checkCache(platform models.Platform) shared.Items {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -220,7 +219,7 @@ func checkCache(platform models.Platform) shared.Items {
 
 func cache(platform models.Platform, gamesList shared.Items) {
 	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
-		logger := common.GetLoggerInstance()
+		logger := gaba.GetLoggerInstance()
 
 		jsonData, err := json.Marshal(gamesList)
 		if err != nil {
@@ -247,6 +246,6 @@ func cache(platform models.Platform, gamesList shared.Items) {
 			return
 		}
 
-		logger.Info("Cached Megathread Platform", "platform_name", platform.Name)
+		logger.Debug("Cached Megathread Platform", "platform_name", platform.Name)
 	}
 }

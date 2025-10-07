@@ -3,8 +3,7 @@ package ui
 import (
 	"mortar/models"
 
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"qlova.tech/sum"
 )
 
@@ -25,9 +24,9 @@ func (s Search) Name() sum.Int[models.ScreenName] {
 }
 
 func (s Search) Draw() (value interface{}, exitCode int, e error) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
-	res, err := gabagool.Keyboard(s.InitialText)
+	res, err := gaba.Keyboard(s.InitialText)
 	if err != nil {
 		logger.Error("Error with blocking keyboard", "error", err)
 		return nil, -1, err

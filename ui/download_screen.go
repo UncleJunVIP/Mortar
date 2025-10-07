@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"qlova.tech/sum"
@@ -39,7 +39,7 @@ func (d DownloadScreen) Name() sum.Int[models.ScreenName] {
 }
 
 func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	downloads := BuildDownload(d.Platform, d.SelectedGames)
 
@@ -53,13 +53,13 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 		logger.Debug("RomM Auth Header", "header", authHeader)
 	}
 
-	slices.SortFunc(downloads, func(a, b gabagool.Download) int {
+	slices.SortFunc(downloads, func(a, b gaba.Download) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))
 	})
 
 	logger.Debug("Starting ROM download", "downloads", downloads)
 
-	res, err := gabagool.DownloadManager(downloads, headers, state.GetAppState().Config.DownloadArt)
+	res, err := gaba.DownloadManager(downloads, headers, state.GetAppState().Config.DownloadArt)
 	if err != nil {
 		logger.Error("Error downloading", "error", err)
 		return nil, -1, err
@@ -82,7 +82,7 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 	var downloadedGames []shared.Item
 
 	for _, g := range d.Games {
-		if slices.ContainsFunc(res.CompletedDownloads, func(d gabagool.Download) bool {
+		if slices.ContainsFunc(res.CompletedDownloads, func(d gaba.Download) bool {
 			return d.DisplayName == g.DisplayName
 		}) {
 			downloadedGames = append(downloadedGames, g)
@@ -92,8 +92,8 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 	return downloadedGames, exitCode, err
 }
 
-func BuildDownload(platform models.Platform, games shared.Items) []gabagool.Download {
-	var downloads []gabagool.Download
+func BuildDownload(platform models.Platform, games shared.Items) []gaba.Download {
+	var downloads []gaba.Download
 	for _, g := range games {
 
 		var downloadLocation string
@@ -119,7 +119,7 @@ func BuildDownload(platform models.Platform, games shared.Items) []gabagool.Down
 			sourceURL, _ = url.JoinPath(root, platform.HostSubdirectory, g.Filename)
 		}
 
-		downloads = append(downloads, gabagool.Download{
+		downloads = append(downloads, gaba.Download{
 			URL:         sourceURL,
 			Location:    downloadLocation,
 			DisplayName: g.DisplayName,

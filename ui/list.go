@@ -11,12 +11,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
+	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 )
 
 func FetchListStateless(platform models.Platform) (shared.Items, error) {
-	logger := common.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
 	logger.Debug("Fetching Item List",
 		"host", platform.Host)
