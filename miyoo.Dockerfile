@@ -86,9 +86,10 @@ RUN echo "=== Building minimal SDL2 from source for Miyoo Mini Plus ===" && \
         --prefix=$SYSROOT/usr \
         --disable-static \
         --enable-shared \
+        --enable-video-fbcon \
+        --enable-video-dummy \
         --disable-video-x11 \
         --disable-video-wayland \
-        --enable-video-dummy \
         --disable-pulseaudio \
         --disable-alsa \
         --enable-audio-dummy \
@@ -100,12 +101,16 @@ RUN echo "=== Building minimal SDL2 from source for Miyoo Mini Plus ===" && \
         --enable-file \
         --enable-loadso \
         --enable-cpuinfo \
-        --enable-assembly \
+        --disable-assembly \
         --enable-threads \
         --enable-atomic \
         --enable-events \
         --enable-video \
-        --enable-render && \
+        --enable-render \
+        --enable-video-opengl=no \
+        --enable-video-opengles=no \
+        --enable-video-opengles1=no \
+        --enable-video-opengles2=no && \
     make -j$(nproc) && \
     make install
 
@@ -216,7 +221,6 @@ WORKDIR /app
 
 COPY --from=builder /build/bin/ /app/bin/
 COPY --from=builder /build/lib/ /app/lib/
-COPY config.json config.yml ./
 
 # Final analysis
 RUN echo "=== Miyoo Mini Plus Build Complete ===" && \

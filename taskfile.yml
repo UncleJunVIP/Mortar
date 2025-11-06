@@ -25,7 +25,7 @@ tasks:
       - rm -rf build/Mortar.pak || true
       - mkdir -p build/Mortar.pak
       - mkdir -p build/Mortar.pak/resources/lib
-      - cp build/mortar launch.sh README.md LICENSE pak.json build/Mortar.pak
+      - cp build/mortar resources/NextUI/launch.sh README.md LICENSE pak.json build/Mortar.pak
       - cp -R build/lib build/Mortar.pak/resources
       - cp -R resources build/Mortar.pak/
     silent: true

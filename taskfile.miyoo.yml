@@ -33,21 +33,17 @@ tasks:
 
   extract-files:
     desc: Extract Miyoo-specific binaries and libraries
-    vars:
-      CONTAINER_ID:
-        sh: docker create {{.IMAGE_NAME}}
     cmds:
       - echo "Creating temporary container..."
       - mkdir -p {{.BUILD_DIR}}
+      - docker create --name mortar-extract {{.IMAGE_NAME}} /bin/true
       - echo "Copying Miyoo binary..."
-      - docker cp {{.CONTAINER_ID}}:/app/bin/mortar-miyoo {{.BUILD_DIR}}/
+      - docker cp mortar-extract:/app/bin/mortar-miyoo {{.BUILD_DIR}}/
       - echo "Copying configuration files..."
-      - docker cp {{.CONTAINER_ID}}:/app/config.json {{.BUILD_DIR}}/ || echo "No config.json found"
-      - docker cp {{.CONTAINER_ID}}:/app/config.yml {{.BUILD_DIR}}/ || echo "No config.yml found"
       - echo "Copying Miyoo libraries..."
-      - docker cp {{.CONTAINER_ID}}:/app/lib/miyoo {{.BUILD_DIR}}/lib/ 2>/dev/null || echo "No libraries to copy"
+      - docker cp mortar-extract:/app/lib/miyoo {{.BUILD_DIR}}/lib/ 2>/dev/null || echo "No libraries to copy"
       - echo "Cleaning up container..."
-      - docker rm {{.CONTAINER_ID}}
+      - docker rm mortar-extract
 
   list-output:
     desc: List the Miyoo Mini Plus build output
@@ -75,12 +71,3 @@ tasks:
       - rm -rf {{.BUILD_DIR}}
       - docker rmi {{.IMAGE_NAME}} 2>/dev/null || echo "Image not found"
       - echo "Miyoo build cleaned!"
-
-  info:
-    desc: Show information about the Miyoo toolchain
-    cmds:
-      - echo "Miyoo Mini Plus Build Tasks:"
-      - echo "  task --taskfile taskfile.miyoo.yml build     # Build for Miyoo"
-      - echo "  task --taskfile taskfile.miyoo.yml analyze   # Analyze dependencies"
-      - echo "  task --taskfile taskfile.miyoo.yml deploy    # Deploy via ADB"
-      - echo "  task --taskfile taskfile.miyoo.yml clean     # Clean up"

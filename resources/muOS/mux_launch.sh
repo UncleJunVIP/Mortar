@@ -1,0 +1,20 @@
+#!/bin/bash
+# HELP: Mortar
+# ICON: tool
+# GRID: Mortar
+
+. /opt/muos/script/var/func.sh
+echo app >/tmp/act_go
+
+GOV_GO="/tmp/gov_go"
+[ -e "$GOV_GO" ] && cat "$GOV_GO" >"$(GET_VAR "device" "cpu/governor")"
+
+#!/bin/sh
+PAK_DIR="$(dirname "$0")"
+cd "$PAK_DIR" || exit 1
+
+export LD_LIBRARY_PATH=$PAK_DIR/resources/lib
+
+export FALLBACK_FONT=$PAK_DIR/font.ttf
+
+./mortar
