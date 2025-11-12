@@ -14,7 +14,8 @@ PAK_DIR="$(dirname "$0")"
 cd "$PAK_DIR" || exit 1
 
 export LD_LIBRARY_PATH=$PAK_DIR/resources/lib
-
 export FALLBACK_FONT=$PAK_DIR/font.ttf
+export INPUT_MAPPING_PATH=$PAK_DIR/rg35xxsp_mapping.json
+export ROM_DIRECTORY=/mnt/sdcard/ROMS
 
 ./mortar

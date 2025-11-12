@@ -4,30 +4,45 @@ tasks:
   all:
     cmds:
       - task: build
-      - task: package
-      - task: adb
+      - task: extract
+      - task: package-next
+      - task: package-muos
     silent: true
 
   build:
     cmds:
       - rm -rf build
-      - mkdir -p build
-      - mkdir -p build/lib
       - docker buildx build --platform=linux/arm64 -t retro-console-arm64 -f Dockerfile .
     silent: true
 
-  package:
+  extract:
     cmds:
+      - mkdir -p build
+      - mkdir -p build/lib
       - docker rm extract || true
       - docker create --name extract retro-console-arm64
       - docker cp extract:/build/mortar build/mortar
       - docker cp extract:/usr/lib/aarch64-linux-gnu/libSDL2_gfx-1.0.so.0.0.2 build/lib/libSDL2_gfx-1.0.so.0
+    silent: true
+
+  package-next:
+    cmds:
       - rm -rf build/Mortar.pak || true
       - mkdir -p build/Mortar.pak
       - mkdir -p build/Mortar.pak/resources/lib
-      - cp build/mortar resources/NextUI/launch.sh README.md LICENSE pak.json build/Mortar.pak
+      - cp build/mortar scripts/NextUI/launch.sh README.md LICENSE pak.json build/Mortar.pak
       - cp -R build/lib build/Mortar.pak/resources
       - cp -R resources build/Mortar.pak/
+    silent: true
+
+  package-muos:
+    cmds:
+      - rm -rf build/muOS || true
+      - mkdir -p build/muOS/Mortar
+      - mkdir -p build/muOS/Mortar/resources/lib
+      - cp build/mortar scripts/muOS/mux_launch.sh README.md LICENSE pak.json build/muOS/Mortar
+      - cp -R build/lib build/muOS/Mortar/resources
+      - cp -R resources build/muOS/Mortar/
     silent: true
 
   adb:

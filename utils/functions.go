@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -590,7 +591,7 @@ func AllPlatformsHaveLocalFolders(config *models.Config) []string {
 
 	for _, h := range config.Hosts {
 		for _, p := range h.Platforms {
-			if p.LocalDirectory == "" {
+			if p.LocalDirectory == "" && !slices.Contains(missingPlatforms, p.Name) {
 				missingPlatforms = append(missingPlatforms, p.Name)
 			}
 		}

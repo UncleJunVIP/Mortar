@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
 	"mortar/models"
 	"mortar/state"
 	"mortar/ui"
@@ -16,6 +15,7 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/filebrowser"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
+	"go.uber.org/atomic"
 )
 
 func init() {
@@ -23,7 +23,23 @@ func init() {
 		WindowTitle:    "Mortar",
 		ShowBackground: true,
 		LogFilename:    "mortar.log",
-		LogLevel:       slog.LevelDebug,
+	})
+
+	p := atomic.NewFloat64(0)
+
+	gaba.ProcessMessage("Scanning ROM Library...", gaba.ProcessMessageOptions{
+		ShowThemeBackground: true,
+		ShowProgressBar:     true,
+		Progress:            p,
+	}, func() (interface{}, error) {
+		totalFiles := 1000
+
+		for i := 0; i < totalFiles; i++ {
+			progress := float64(i+1) / float64(totalFiles)
+			p.Store(progress)
+		}
+
+		return "Download complete", nil
 	})
 
 	common.InitIncludes()
