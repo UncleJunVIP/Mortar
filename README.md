@@ -28,10 +28,12 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 
 1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI.
 2. Connect your device to a Wi-Fi network.
-3. Download the [latest Mortar release](https://github.com/UncleJunVIP/Mortar/releases/latest) for NextUI (look for
-   `Mortar.pak.zip`) or install it
-   using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
-    - If downloading manually, unzip the release before continuing.
+3. The preferred Mortar installation method is to use the NextUI Pak Store. You can find the Pak Store in the
+   `Tools` menu. Once in the Pak Store, Mortar can be found under the `ROM Management` category.
+    - Alternatively, download the [latest Mortar release](https://github.com/UncleJunVIP/Mortar/releases/latest) for
+      NextUI (look for
+      `Mortar.pak.zip`)
+    - If downloading manually, be sure to unzip the release before continuing.
 4. Edit one of the templates [found here](/.github/resources/config_examples).
     - Use your 🧠. I believe in you!
 5. Save the edited template as `config.yml`.
@@ -71,6 +73,24 @@ Please help by verifying if it works on other devices!
 ---
 
 ## Configuration Reference
+
+**Note:** Mortar **_will not_** function without a valid `config.yml` file.
+
+If Mortar does not find a config.yml file or if the provided config file has syntax errors you will see an error screen
+with a QR Code that leads to this page. If you arrived at this page for this reason, please continue reading.
+
+Please edit one of the templates [found here](/.github/resources/config_examples) and save the edited file as
+`config.yml`.
+
+These are templates. They will not function without modification.
+
+YAML files contain indentation that matters. You should edit the template using a plain text editor. If you do not have
+a tool that does syntax highlighting, [YAML Checker](https://yamlchecker.com) can help troubleshoot issues with your
+config file.
+
+---
+
+The various configuration options are described in detail below.
 
 ```yaml
 hosts:
