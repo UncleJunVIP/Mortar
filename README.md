@@ -62,7 +62,7 @@ Please help by verifying if it works on other devices!
 9. Transfer the `config.yml` file to SD1 `(mmc)/Applications/Mortar` on your device.
 10. Find an [input mapping config](/.github/resources/input_mappings) for your device.
     - If one does not exist, please try one for a different device.
-    - If that does not work, please find an issue.
+    - If that does not work, please [create an issue](https://github.com/UncleJunVIP/Mortar/issues/new).
     - A first launch setup process is in the works but is not ready for prime-time.
 11. Save the input mapping JSON file as `input_mapping.json` and transfer it to SD1 `(mmc)/Applications/Mortar` on your
     device.
