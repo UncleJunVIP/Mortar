@@ -36,7 +36,7 @@ Art Downloads powered by the _Libretro Thumbnail Project_
     - Use your 🧠. I believe in you!
 5. Save the edited template as `config.yml`.
     - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
-    - Manual Installers: upload the `Mortar.pak` directory that came in the releases zip and place `config.yml` inside.
+    - Manual Installers: upload the `Mortar.pak` directory that came in the release zip and place `config.yml` inside.
 6. Launch `Mortar` from the `Tools` menu and enjoy!
 
 ---
@@ -45,9 +45,9 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 
 Mortar has only been tested on muOS 2508.1 Canada Goose on an Anbernic RG35XXSP.
 
-I will need help verifying if it works on other devices.
+Please help by verifying if it works on other devices!
 
-1. Own a supported device that is running muOS.
+1. Own a supported device running muOS.
 2. Download the [latest Mortar release](https://github.com/UncleJunVIP/Mortar/releases/latest) for muOS (look for
    `Mortar.muxapp`).
 3. Transfer the `Mortar.muxapp` file to SD1 `(mmc)/ARCHIVE` on your device.
@@ -57,7 +57,12 @@ I will need help verifying if it works on other devices.
 7. Edit one of the templates [found here](/.github/resources/config_examples).
 8. Save the edited template as `config.yml`.
 9. Transfer the `config.yml` file to SD1 `(mmc)/Applications/Mortar` on your device.
-10. Select `Apps` on the Main Menu, launch Mortar and enjoy!
+10. Find an [input mapping config](/.github/resources/input_mappings) for your device.
+    1. If one does not exist and an existing one for a different device does not work for you please file an issue.
+    2. A first launch setup process is in the works but is not ready for prime-time.
+11. Save the input mapping JSON file as `input_mapping.json` and transfer it to SD1 `(mmc)/Applications/Mortar` on your
+    device.
+12. Select `Apps` on the Main Menu, launch Mortar and enjoy!
 
 **Note:** Mortar does not support downloading art on muOS. This will be added in a future release.
 
