@@ -1,7 +1,7 @@
 #!/bin/bash
 # HELP: Mortar
-# ICON: tool
-# GRID: Mortar
+# ICON: retroarch
+# GRID: RetroArch
 
 . /opt/muos/script/var/func.sh
 echo app >/tmp/act_go

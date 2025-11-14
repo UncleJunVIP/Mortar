@@ -35,7 +35,7 @@ func IsDev() bool {
 }
 
 func GetRomDirectory() string {
-	if IsDev() {
+	if IsDev() || os.Getenv("ROM_DIRECTORY") != "" {
 		return os.Getenv("ROM_DIRECTORY")
 	}
 

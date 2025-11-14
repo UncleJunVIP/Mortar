@@ -2,11 +2,10 @@
 
 <img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
 <h3 style="font-size: 25px;">
-    A ROM download client for <a href="https://nextui.loveretro.games" target="_blank">NextUI</a>
+    A ROM download client that supports RomM and /r/Roms Megathread.
 </h3>
 
 <h4 style="font-size: 18px;">
-Supports RomM and Megathread
 
 Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
@@ -25,16 +24,42 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 
 ## How do I setup Mortar?
 
+### NextUI Setup
+
 1. Own a TrimUI Brick or Smart Pro and have a SD Card with NextUI.
 2. Connect your device to a Wi-Fi network.
-3. Download the latest Mortar release from this repo or install it using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
-   - If downloading manually, unzip the release before continuing.
+3. Download the [latest Mortar release](https://github.com/UncleJunVIP/Mortar/releases/latest) for NextUI (look for
+   `Mortar.pak.zip`) or install it
+   using [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store).
+    - If downloading manually, unzip the release before continuing.
 4. Edit one of the templates [found here](/.github/resources/config_examples).
-   - Use your 🧠. I believe in you!
+    - Use your 🧠. I believe in you!
 5. Save the edited template as `config.yml`.
     - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
     - Manual Installers: upload the `Mortar.pak` directory that came in the releases zip and place `config.yml` inside.
 6. Launch `Mortar` from the `Tools` menu and enjoy!
+
+---
+
+### muOS Setup
+
+Mortar has only been tested on muOS 2508.1 Canada Goose on an Anbernic RG35XXSP.
+
+I will need help verifying if it works on other devices.
+
+1. Own a supported device that is running muOS.
+2. Download the [latest Mortar release](https://github.com/UncleJunVIP/Mortar/releases/latest) for muOS (look for
+   `Mortar.muxapp`).
+3. Transfer the `Mortar.muxapp` file to SD1 `(mmc)/ARCHIVE` on your device.
+4. Go to Applications and launch Archive Manager.
+5. Select [SD1-APP] Mortar from the list and let it extract to your applications directory.
+6. Exit Archive Manager.
+7. Edit one of the templates [found here](/.github/resources/config_examples).
+8. Save the edited template as `config.yml`.
+9. Transfer the `config.yml` file to SD1 `(mmc)/Applications/Mortar` on your device.
+10. Select `Apps` on the Main Menu, launch Mortar and enjoy!
+
+**Note:** Mortar does not support downloading art on muOS. This will be added in a future release.
 
 ---
 
@@ -88,11 +113,12 @@ Sample configuration files can be [found here](/.github/resources/config_example
 
 ---
 
-## Enjoying Mortar?
+## Enjoying Mortar And Use NextUI?
 
 You might be interested in my other NextUI Paks!
 
-[Pak Store](https://github.com/UncleJunVIP/nextui-pak-store) - install, update and manage the amazing work from the community right on device
+[Pak Store](https://github.com/UncleJunVIP/nextui-pak-store) - install, update and manage the amazing work from the
+community right on device
 
 [Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) - manage your ROM library right on device
 

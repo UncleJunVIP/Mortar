@@ -7,7 +7,6 @@ import (
 	"mortar/utils"
 
 	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/spf13/viper"
 	"qlova.tech/sum"
@@ -237,7 +236,7 @@ func SaveConfig(config *models.Config) error {
 	viper.Set("group_multi_disc", config.GroupMultiDisc)
 	viper.Set("log_level", config.LogLevel)
 
-	common.SetLogLevel(config.LogLevel)
+	gaba.SetRawLogLevel(config.LogLevel)
 
 	return viper.WriteConfigAs("config.yml")
 }
