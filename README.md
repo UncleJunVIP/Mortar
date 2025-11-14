@@ -55,11 +55,13 @@ Please help by verifying if it works on other devices!
 5. Select [SD1-APP] Mortar from the list and let it extract to your applications directory.
 6. Exit Archive Manager.
 7. Edit one of the templates [found here](/.github/resources/config_examples).
+    - **Note**: Mortar currently does not support the `system_tag` ROM directory auto-detection on muOS.
 8. Save the edited template as `config.yml`.
 9. Transfer the `config.yml` file to SD1 `(mmc)/Applications/Mortar` on your device.
 10. Find an [input mapping config](/.github/resources/input_mappings) for your device.
-    1. If one does not exist and an existing one for a different device does not work for you please file an issue.
-    2. A first launch setup process is in the works but is not ready for prime-time.
+    - If one does not exist, please try one for a different device.
+    - If that does not work, please find an issue.
+    - A first launch setup process is in the works but is not ready for prime-time.
 11. Save the input mapping JSON file as `input_mapping.json` and transfer it to SD1 `(mmc)/Applications/Mortar` on your
     device.
 12. Select `Apps` on the Main Menu, launch Mortar and enjoy!

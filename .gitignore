@@ -7,12 +7,11 @@
 /build/
 /certs/*
 /logs/*
-/.local/config.yml
 /gabagool/
 /mortar
 /mortar.log
 /resources/fonts
-/.local/
 /setup-qr.png
 /config.*
 /.env
+/*-config.yml
