@@ -157,17 +157,18 @@ These are templates. They **_will not function_** without modification.
 
 #### Filter Configuration
 
-- **inclusive_filters**: Inclusive filters are applied first. If the ROM filename contains any of these, it will be
+- **inclusive_filters**: These are applied first. If the ROM filename contains any of these, it will be
   included
-- **exclusive_filters**: Exclusive filters are applied second. If the ROM filename contains any of these, it will be
+- **exclusive_filters**: These are applied second. If the ROM filename contains any of these, it will be
   excluded
 
 #### Art Configuration
 
 - **download_art**: If true, Mortar will attempt to find box art. If found, it will display it and let you indicate if
   you want it
-- **art_download_type**: Optional, defaults to `BOX_ART`. Does not impact art downloads from RoMM. Valid Choices:
-  `BOX_ART` | `TITLE_SCREEN` | `LOGOS` | `SCREENSHOTS`
+- **art_download_type**: Optional, defaults to `BOX_ART`.
+    - This setting does not impact art downloads from RomM.
+    - Valid Choices: `BOX_ART` | `TITLE_SCREEN` | `LOGOS` | `SCREENSHOTS`
 
 #### Logging
 
@@ -176,6 +177,8 @@ These are templates. They **_will not function_** without modification.
 Sample configuration files can be [found here](/.github/resources/config_examples).
 
 **Note:** The old YAML format will automatically migrate to the new JSON format. No more fighting indentation!
+
+### To easily edit the config file, use the [Web Editor](https://mortar.unclejun.vip).
 
 ---
 
