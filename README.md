@@ -2,7 +2,7 @@
 
 <img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
 <h3 style="font-size: 25px; padding-top: 0; margin-top: 0;">
-    A ROM download client that supports RomM and /r/Roms Megathread.
+    A ROM download client that supports RomM and Megathread.
 </h3>
 
 <h4 style="font-size: 18px; padding-top: 0; margin-top: 0;">
