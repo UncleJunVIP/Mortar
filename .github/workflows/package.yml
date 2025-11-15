@@ -23,7 +23,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Package
-        run: task build package-next package-muos
+        run: task build extract package-next package-muos
 
       - uses: actions/upload-artifact@v4
         with:
