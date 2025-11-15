@@ -7,7 +7,7 @@ import (
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 )
 
-func QRScreen() {
+func QRScreen(helpText string) {
 
 	ip, err := utils.GetLocalIP()
 	if err != nil {
@@ -26,7 +26,7 @@ func QRScreen() {
 	message := fmt.Sprintf(qrURL)
 
 	gabagool.ConfirmationMessage(message, []gabagool.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Shutdown Configuration API"},
+		{ButtonName: "A", HelpText: helpText},
 	}, gabagool.MessageOptions{
 		ImagePath: tmpQR,
 	})

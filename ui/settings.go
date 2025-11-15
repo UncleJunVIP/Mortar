@@ -179,7 +179,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 
 	if result.IsSome() {
 		if result.Unwrap().SelectedItem.Item.Text == "Launch Configuration API" {
-			web.QRScreen()
+			web.QRScreen("Shutdown Configuration API")
 			config, err := utils.LoadConfig()
 			if err == nil {
 				state.SetConfig(config)

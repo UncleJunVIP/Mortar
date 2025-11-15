@@ -6,6 +6,7 @@ import (
 	"mortar/state"
 	"mortar/ui"
 	"mortar/utils"
+	"mortar/web"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,7 +28,6 @@ func init() {
 	common.InitIncludes()
 
 	if !utils.IsConnectedToInternet() {
-		fmt.Println("No Internet Connection")
 		_, err := gaba.ConfirmationMessage("No Internet Connection!\nMake sure you are connected to Wi-Fi.", []gaba.FooterHelpItem{
 			{ButtonName: "B", HelpText: "Quit"},
 		}, gaba.MessageOptions{})
@@ -37,13 +37,18 @@ func init() {
 
 	config, err := utils.LoadConfig()
 	if err != nil {
-		fmt.Println("Setup Required")
-		_, err := gaba.ConfirmationMessage("Setup Required!\nScan the QR Code for Instructions", []gaba.FooterHelpItem{
-			{ButtonName: "B", HelpText: "Quit"},
-		}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
-		defer cleanup()
-		common.LogStandardFatal("Setup Required", err)
-		return
+		web.QRScreen("Continue")
+
+		config, err = utils.LoadConfig()
+
+		if err != nil {
+			_, _ = gaba.ConfirmationMessage("Setup Incomplete!\nScan the QR Code for Instructions", []gaba.FooterHelpItem{
+				{ButtonName: "B", HelpText: "Quit"},
+			}, gaba.MessageOptions{ImagePath: "resources/setup-qr.png"})
+			defer cleanup()
+			common.LogStandardFatal("Setup Incomplete", err)
+			return
+		}
 	}
 
 	if config.LogLevel != "" {

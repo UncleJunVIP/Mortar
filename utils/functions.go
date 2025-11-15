@@ -120,10 +120,6 @@ func SaveConfig(config *models.Config) error {
 	viper.SetConfigType(configType)
 	viper.AddConfigPath(".")
 
-	if err := viper.ReadInConfig(); err != nil {
-		return fmt.Errorf("error reading config file: %w", err)
-	}
-
 	viper.Set("hosts", config.Hosts)
 	viper.Set("download_art", config.DownloadArt)
 	viper.Set("art_download_type", config.ArtDownloadType)

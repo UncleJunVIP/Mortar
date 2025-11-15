@@ -6,6 +6,7 @@ import (
 	"mortar/models"
 	"mortar/utils"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -30,8 +31,10 @@ func start() {
 
 	e.GET("/config", func(c echo.Context) error {
 		config, err := utils.LoadConfig()
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+		if err != nil && strings.Contains(err.Error(), "no config file found") {
+			return c.JSON(http.StatusNoContent, err)
+		} else if err != nil {
+			return c.JSON(http.StatusInternalServerError, config)
 		}
 		return c.JSON(http.StatusOK, config)
 	})

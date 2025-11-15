@@ -30,12 +30,9 @@ Art Downloads powered by the _[Libretro Thumbnail Project](https://github.com/li
     - Alternatively, download the [latest Mortar release](https://github.com/UncleJunVIP/Mortar/releases/latest) for
       NextUI (look for
       `Mortar.pak.zip`)
-    - If downloading manually, be sure to unzip the release before continuing.
-4. Edit one of the templates [found here](/.github/resources/config_examples).
-5. Save the edited template as `config.json`.
-    - Pak Store Users: upload `config.json` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
-    - Manual Installers: upload the `Mortar.pak` directory that came in the release zip and place `config.json` inside.
-6. Launch `Mortar` from the `Tools` menu and enjoy!
+    - For manual downloads, extract the release zip and place the `Mortar.pak` directory into `SD_ROOT/Tools/tg5040`.
+4. Follow the "How To Configure Mortar" section below to complete the setup.
+5. Launch `Mortar` from the `Tools` menu and enjoy!
 
 ---
 
@@ -52,19 +49,26 @@ Please help by verifying if it works on other devices!
 4. Go to Applications and launch Archive Manager.
 5. Select [SD1-APP] Mortar from the list and let it extract to your applications directory.
 6. Exit Archive Manager.
-7. Edit one of the templates [found here](/.github/resources/config_examples).
-    - **Note**: Mortar currently does not support the `system_tag` ROM directory auto-detection on muOS.
-8. Save the edited template as `config.json`.
-9. Transfer the `config.json` file to SD1 `(mmc)/Applications/Mortar` on your device.
-10. Find an [input mapping config](/.github/resources/input_mappings) for your device.
+7. Follow the "How To Configure Mortar" section below to complete the setup.
+8. Find an [input mapping config](/.github/resources/input_mappings) for your device.
     - If one does not exist, please try one for a different device.
     - If that does not work, please [create an issue](https://github.com/UncleJunVIP/Mortar/issues/new).
     - A first launch setup process is in the works but is not ready for prime-time.
-11. Save the input mapping JSON file as `input_mapping.json` and transfer it to SD1 `(mmc)/Applications/Mortar` on your
-    device.
-12. Select `Apps` on the Main Menu, launch Mortar and enjoy!
+9. Save the input mapping JSON file as `input_mapping.json` and transfer it to SD1 `(mmc)/Applications/Mortar` on your
+   device.
+10. Select `Apps` on the Main Menu, launch Mortar and enjoy!
 
 **Note:** Mortar does not support downloading art on muOS. This will be added in a future release.
+
+---
+
+### How To Configure Mortar
+
+1. Connect your device to a Wi-Fi network.
+2. Launch `Mortar` from the `Tools` menu.
+3. On first launch, Mortar will display a QR Code that leads to a configuration editor.
+    - For the editor to function, the device must be connected to the same Wi-Fi network as your handheld.
+4. Follow the Configuration Reference section below.
 
 ---
 
