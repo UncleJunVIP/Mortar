@@ -10,8 +10,6 @@
 Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
 
-<img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar preview">
-
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar?sort=semver&style=for-the-badge&color=007C77)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
