@@ -40,9 +40,11 @@ tasks:
       - rm -rf build/muOS || true
       - mkdir -p build/muOS/Mortar
       - mkdir -p build/muOS/Mortar/resources/lib
-      - cp build/mortar scripts/muOS/mux_launch.sh README.md LICENSE pak.json build/muOS/Mortar
+      - cp build/mortar scripts/muOS/mux_launch.sh README.md LICENSE build/muOS/Mortar
       - cp -R build/lib build/muOS/Mortar/resources
       - cp -R resources build/muOS/Mortar/
+      - cp -R fonts build/muOS/Mortar/resources
+      - cp .github/resources/input_mappings/rg35xxsp_mapping.json build/muOS/Mortar/input_mapping.json
     silent: true
 
   adb:

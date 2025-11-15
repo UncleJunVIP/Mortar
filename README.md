@@ -10,6 +10,8 @@
 Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
 
+<img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar preview"/>
+
 ## [Download this in Pak Store!](https://github.com/UncleJunVIP/nextui-pak-store)
 
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
