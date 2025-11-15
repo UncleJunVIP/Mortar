@@ -5,10 +5,10 @@ import (
 	"mortar/models"
 	"mortar/state"
 	"mortar/utils"
+	"mortar/web"
 
 	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"github.com/spf13/viper"
 	"qlova.tech/sum"
 )
 
@@ -149,6 +149,17 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 		})
 	}
 
+	items = append(items, gaba.ItemWithOptions{
+		Item: gaba.MenuItem{
+			Text: "Launch Configuration API",
+		},
+		Options: []gaba.Option{
+			{
+				Type: gaba.OptionTypeClickable,
+			},
+		},
+	})
+
 	footerHelpItems := []gaba.FooterHelpItem{
 		{ButtonName: "B", HelpText: "Cancel"},
 		{ButtonName: "←→", HelpText: "Cycle"},
@@ -167,6 +178,16 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 	}
 
 	if result.IsSome() {
+		if result.Unwrap().SelectedItem.Item.Text == "Launch Configuration API" {
+			web.QRScreen()
+			config, err := utils.LoadConfig()
+			if err == nil {
+				state.SetConfig(config)
+				utils.DeleteCache()
+			}
+			return result, 404, nil
+		}
+
 		if result.Unwrap().SelectedItem.Item.Text == "Empty Cache" {
 			_ = utils.DeleteCache()
 
@@ -206,7 +227,7 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 			}
 		}
 
-		err := SaveConfig(appState.Config)
+		err := utils.SaveConfig(appState.Config)
 		if err != nil {
 			logger.Error("Error saving config", "error", err)
 			return nil, 0, err
@@ -218,25 +239,4 @@ func (s SettingsScreen) Draw() (settings interface{}, exitCode int, e error) {
 	}
 
 	return nil, 2, nil
-}
-
-func SaveConfig(config *models.Config) error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yml")
-	viper.AddConfigPath(".")
-
-	if err := viper.ReadInConfig(); err != nil {
-		return fmt.Errorf("error reading config file: %w", err)
-	}
-
-	viper.Set("download_art", config.DownloadArt)
-	viper.Set("art_download_type", config.ArtDownloadType)
-	viper.Set("unzip_downloads", config.UnzipDownloads)
-	viper.Set("group_bin_cue", config.GroupBinCue)
-	viper.Set("group_multi_disc", config.GroupMultiDisc)
-	viper.Set("log_level", config.LogLevel)
-
-	gaba.SetRawLogLevel(config.LogLevel)
-
-	return viper.WriteConfigAs("config.yml")
 }

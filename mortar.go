@@ -35,7 +35,7 @@ func init() {
 		common.LogStandardFatal("No Internet Connection", err)
 	}
 
-	config, err := state.LoadConfig()
+	config, err := utils.LoadConfig()
 	if err != nil {
 		fmt.Println("Setup Required")
 		_, err := gaba.ConfirmationMessage("Setup Required!\nScan the QR Code for Instructions", []gaba.FooterHelpItem{

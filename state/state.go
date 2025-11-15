@@ -1,33 +1,15 @@
 package state
 
 import (
-	"fmt"
 	"mortar/models"
-	"os"
 	"sync"
 
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"go.uber.org/atomic"
-	"gopkg.in/yaml.v3"
 )
 
 var appState atomic.Pointer[models.AppState]
 var onceAppState sync.Once
-
-func LoadConfig() (*models.Config, error) {
-	data, err := os.ReadFile("config.yml")
-	if err != nil {
-		return nil, fmt.Errorf("reading config.yml: %w", err)
-	}
-
-	var config models.Config
-	err = yaml.Unmarshal(data, &config)
-	if err != nil {
-		return nil, fmt.Errorf("parsing config.yml: %w", err)
-	}
-
-	return &config, nil
-}
 
 func GetAppState() *models.AppState {
 	onceAppState.Do(func() {

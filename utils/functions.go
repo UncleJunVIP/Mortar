@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"image/color"
 	"io"
 	"mortar/clients"
 	"mortar/models"
@@ -19,6 +20,9 @@ import (
 	"github.com/UncleJunVIP/nextui-pak-shared-functions/common"
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
 	"github.com/disintegration/imaging"
+	"github.com/skip2/go-qrcode"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 	"qlova.tech/sum"
 )
 
@@ -40,6 +44,42 @@ func GetRomDirectory() string {
 	}
 
 	return common.RomDirectory
+}
+
+func LoadConfig() (*models.Config, error) {
+	data, err := os.ReadFile("config.yml")
+	if err != nil {
+		return nil, fmt.Errorf("reading config.yml: %w", err)
+	}
+
+	var config models.Config
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("parsing config.yml: %w", err)
+	}
+
+	return &config, nil
+}
+
+func SaveConfig(config *models.Config) error {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
+	viper.AddConfigPath(".")
+
+	if err := viper.ReadInConfig(); err != nil {
+		return fmt.Errorf("error reading config file: %w", err)
+	}
+
+	viper.Set("download_art", config.DownloadArt)
+	viper.Set("art_download_type", config.ArtDownloadType)
+	viper.Set("unzip_downloads", config.UnzipDownloads)
+	viper.Set("group_bin_cue", config.GroupBinCue)
+	viper.Set("group_multi_disc", config.GroupMultiDisc)
+	viper.Set("log_level", config.LogLevel)
+
+	gaba.SetRawLogLevel(config.LogLevel)
+
+	return viper.WriteConfigAs("config.yml")
 }
 
 func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {
@@ -580,12 +620,6 @@ func LoadArcadeMapping(filePath string) (map[string]string, error) {
 	return mapping, nil
 }
 
-func IsConnectedToInternet() bool {
-	timeout := 5 * time.Second
-	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
-	return err == nil
-}
-
 func AllPlatformsHaveLocalFolders(config *models.Config) []string {
 	var missingPlatforms []string
 
@@ -598,4 +632,83 @@ func AllPlatformsHaveLocalFolders(config *models.Config) []string {
 	}
 
 	return missingPlatforms
+}
+
+func IsConnectedToInternet() bool {
+	timeout := 5 * time.Second
+	_, err := net.DialTimeout("tcp", "8.8.8.8:53", timeout)
+	return err == nil
+}
+
+func GetLocalIP() (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", fmt.Errorf("failed to get network interfaces: %w", err)
+	}
+
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
+			continue
+		}
+
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+
+		for _, addr := range addrs {
+			if ipNet, ok := addr.(*net.IPNet); ok {
+				ip := ipNet.IP
+				if ip.To4() != nil && !ip.IsLoopback() {
+					if isPrivateIP(ip) {
+						return ip.String(), nil
+					}
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no suitable local IP address found")
+}
+
+func isPrivateIP(ip net.IP) bool {
+	privateRanges := []string{
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+	}
+
+	for _, rangeStr := range privateRanges {
+		_, network, err := net.ParseCIDR(rangeStr)
+		if err != nil {
+			continue
+		}
+		if network.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func CreateTempQRCode(content string, size int) (string, error) {
+	qr, err := qrcode.New(content, qrcode.Medium)
+
+	if err != nil {
+		return "", err
+	}
+
+	qr.BackgroundColor = color.Black
+	qr.ForegroundColor = color.White
+	qr.DisableBorder = true
+
+	tempFile, err := os.CreateTemp("", "qrcode-*")
+
+	err = qr.Write(size, tempFile)
+
+	if err != nil {
+		return "", err
+	}
+	defer tempFile.Close()
+
+	return tempFile.Name(), err
 }
