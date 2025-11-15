@@ -25,6 +25,8 @@ func start() {
 		AllowHeaders: []string{"*"},
 	}))
 
+	e.Static("/", "resources/web")
+
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Pong!")
 	})
