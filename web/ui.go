@@ -14,7 +14,7 @@ func QRScreen(helpText string) {
 		return
 	}
 
-	qrURL := fmt.Sprintf("https://mortar.unclejun.vip?api=%s", ip)
+	qrURL := fmt.Sprintf("http://mortar.unclejun.vip?api=%s", ip)
 
 	tmpQR, err := utils.CreateTempQRCode(qrURL, 128)
 	if err != nil {
