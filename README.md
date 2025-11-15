@@ -1,7 +1,7 @@
 <div align="center">
 
 <img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
-<h3 style="font-size: 25px;">
+<h3 style="font-size: 25px; padding-top: 0; margin-top: 0;">
     A ROM download client that supports RomM and /r/Roms Megathread.
 </h3>
 
@@ -10,15 +10,14 @@
 Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
 
-<img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar preview"/>
-
-## [Download this in Pak Store!](https://github.com/UncleJunVIP/nextui-pak-store)
+<img src=".github/resources/mortar_preview.webp" width="auto" alt="Mortar preview">
 
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar?sort=semver&style=for-the-badge&color=007C77)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/UncleJunVIP/Mortar/total?style=for-the-badge&label=Total%20Downloads&color=007C77)
 
+## [Download this in Pak Store!](https://github.com/UncleJunVIP/nextui-pak-store)
 
 </div>
 
@@ -37,7 +36,6 @@ Art Downloads powered by the _Libretro Thumbnail Project_
       `Mortar.pak.zip`)
     - If downloading manually, be sure to unzip the release before continuing.
 4. Edit one of the templates [found here](/.github/resources/config_examples).
-    - Use your 🧠. I believe in you!
 5. Save the edited template as `config.yml`.
     - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
     - Manual Installers: upload the `Mortar.pak` directory that came in the release zip and place `config.yml` inside.
@@ -150,6 +148,16 @@ You might be interested in my other NextUI Paks!
 community right on device
 
 [Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) - manage your ROM library right on device
+
+---
+
+## Feeling Inspired?
+
+Want to build your own application like Mortar?
+
+Check out [gabagool](https://github.com/UncleJunVIP/gabagool), an SDL 2 UI Library for Retro DooDads.
+
+It comes with a bunch of useful components so you can focus on the fun stuff.
 
 ---
 
