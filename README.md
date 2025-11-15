@@ -32,9 +32,9 @@ Art Downloads powered by the _[Libretro Thumbnail Project](https://github.com/li
       `Mortar.pak.zip`)
     - If downloading manually, be sure to unzip the release before continuing.
 4. Edit one of the templates [found here](/.github/resources/config_examples).
-5. Save the edited template as `config.yml`.
-    - Pak Store Users: upload `config.yml` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
-    - Manual Installers: upload the `Mortar.pak` directory that came in the release zip and place `config.yml` inside.
+5. Save the edited template as `config.json`.
+    - Pak Store Users: upload `config.json` to `SD_ROOT/Tools/tg5040/Mortar.pak`.
+    - Manual Installers: upload the `Mortar.pak` directory that came in the release zip and place `config.json` inside.
 6. Launch `Mortar` from the `Tools` menu and enjoy!
 
 ---
@@ -54,8 +54,8 @@ Please help by verifying if it works on other devices!
 6. Exit Archive Manager.
 7. Edit one of the templates [found here](/.github/resources/config_examples).
     - **Note**: Mortar currently does not support the `system_tag` ROM directory auto-detection on muOS.
-8. Save the edited template as `config.yml`.
-9. Transfer the `config.yml` file to SD1 `(mmc)/Applications/Mortar` on your device.
+8. Save the edited template as `config.json`.
+9. Transfer the `config.json` file to SD1 `(mmc)/Applications/Mortar` on your device.
 10. Find an [input mapping config](/.github/resources/input_mappings) for your device.
     - If one does not exist, please try one for a different device.
     - If that does not work, please [create an issue](https://github.com/UncleJunVIP/Mortar/issues/new).
@@ -70,80 +70,119 @@ Please help by verifying if it works on other devices!
 
 ## Configuration Reference
 
-**Note:** Mortar **_will not_** function without a valid `config.yml` file.
+**Note:** Mortar **_will not_** function without a valid `config.json` file.
 
-If Mortar does not find a config.yml file or if the provided config file has syntax errors you will see an error screen
+If Mortar does not find a config.json file or if the provided config file has syntax errors you will see an error screen
 with a QR Code that leads to this page. If you arrived at this page for this reason, please continue reading.
 
 Please edit one of the templates [found here](/.github/resources/config_examples) and save the edited file as
-`config.yml`.
+`config.json`.
 
-These are templates. They will not function without modification.
-
-YAML files contain indentation that matters. You should edit the template using a plain text editor. If you do not have
-a tool that does syntax highlighting, [YAML Checker](https://yamlchecker.com) can help troubleshoot issues with your
-config file.
+These are templates. They **_will not function_** without modification.
 
 ---
 
-The various configuration options are described in detail below.
-
-```yaml
-hosts:
-  - display_name: "Display Name"
-    host_type: ROMM # Valid Choices: ROMM | MEGATHREAD
-    root_uri: "https://domain.tld" # This can be the start of a URL with protocol (e.g. https://), a host name or an IP Address
-
-    port: 445 # Optional otherwise unless using non-standard ports
-
-    username: "GUEST" # Used by RomM
-    password: "hunter2" # Used by RomM
-
-    platforms: # One or more mappings of the host directory to the local filesystem
-      - platform_name: "Game Boy" # Name it whatever you want
-        system_tag: "GB" # Must match the tag in the `SDCARD_ROOT/Roms` directories
-        local_directory: "/mnt/SDCARD/Roms/Game Boy (GB)/" # Explicitly set the path. This will be overwritten if `system_tag` is set
-        host_subdirectory: "/files/No-Intro/Nintendo%20-%20Game%20Boy/" # The subdirectory on the host, not used by RomM
-        romm_platform_id: "1" # Used by RomM in place of `host_subdirectory`
-        skip_inclusive_filters: false # If true, everything in the host directory will be included
-        skip_exclusive_filters: false # If true, nothing in the host directory will be excluded
-        is_arcade: false # If true, Mortar will use an internal mapping file for arcade names
-
-        # Define more sections if desired
-
-    filters:
-      inclusive_filters: # Inclusive filters are applied first. If the ROM filename contains any of these, it will be included
-        - "USA"
-        - "En,"
-      exclusive_filters: # Exclusive filters are applied second. If the ROM filename contains any of these, it will be excluded
-        - "(Proto"
-        - "(Demo)"
-        - "(Beta)"
-        - "(Aftermarket"
-        - "4-in-1"
-        - "4 in 1"
-        - "(Europe)"
-        - "(Japan)"
-
-  # Define more hosts if desired
-
-download_art: true # If true, Mortar will attempt to find box art. If found, it will display it and let you indicate if you want it
-art_download_type: "BOX_ART" # Optional, defaults to BOX_ART. Does not impact art downloads from RoMM. Valid Choices: BOX_ART | TITLE_SCREEN | LOGOS | SCREENSHOTS
-log_level: "ERROR" # Optional, defaults to error. Handy when shit breaks
+```json
+{
+  "hosts": [
+    {
+      "display_name": "Display Name",
+      "host_type": "ROMM",
+      "root_uri": "https://domain.tld",
+      "port": 445,
+      "username": "GUEST",
+      "password": "hunter2",
+      "platforms": [
+        {
+          "platform_name": "Game Boy",
+          "system_tag": "GB",
+          "local_directory": "/mnt/SDCARD/Roms/Game Boy (GB)/",
+          "host_subdirectory": "/files/No-Intro/Nintendo%20-%20Game%20Boy/",
+          "romm_platform_id": "1",
+          "skip_inclusive_filters": false,
+          "skip_exclusive_filters": false,
+          "is_arcade": false
+        }
+      ],
+      "filters": {
+        "inclusive_filters": [
+          "USA",
+          "En,"
+        ],
+        "exclusive_filters": [
+          "(Proto",
+          "(Demo)",
+          "(Beta)",
+          "(Aftermarket",
+          "4-in-1",
+          "4 in 1",
+          "(Europe)",
+          "(Japan)"
+        ]
+      }
+    }
+  ],
+  "download_art": true,
+  "art_download_type": "BOX_ART",
+  "log_level": "ERROR"
+}
 ```
 
+### Configuration Options Explained
+
+#### Host Configuration
+
+- **host_type**: Valid Choices: `ROMM` | `MEGATHREAD`
+- **root_uri**: This can be the start of a URL with protocol (e.g. https://), a host name or an IP Address
+- **port**: Optional otherwise unless using non-standard ports
+- **username**: Used by RomM
+- **password**: Used by RomM
+- **hosts**: Define more hosts if desired
+
+#### Platform Configuration
+
+- **platform_name**: Name it whatever you want
+- **system_tag**: Must match the tag in the `SDCARD_ROOT/Roms` directories
+- **local_directory**: Explicitly set the path. This will be overwritten if `system_tag` is set
+- **host_subdirectory**: The subdirectory on the host, not used by RomM
+- **romm_platform_id**: Used by RomM in place of `host_subdirectory`
+- **skip_inclusive_filters**: If true, everything in the host directory will be included
+- **skip_exclusive_filters**: If true, nothing in the host directory will be excluded
+- **is_arcade**: If true, Mortar will use an internal mapping file for arcade names
+- **platforms**: One or more mappings of the host directory to the local filesystem. Define more sections if desired
+
+#### Filter Configuration
+
+- **inclusive_filters**: Inclusive filters are applied first. If the ROM filename contains any of these, it will be
+  included
+- **exclusive_filters**: Exclusive filters are applied second. If the ROM filename contains any of these, it will be
+  excluded
+
+#### Art Configuration
+
+- **download_art**: If true, Mortar will attempt to find box art. If found, it will display it and let you indicate if
+  you want it
+- **art_download_type**: Optional, defaults to `BOX_ART`. Does not impact art downloads from RoMM. Valid Choices:
+  `BOX_ART` | `TITLE_SCREEN` | `LOGOS` | `SCREENSHOTS`
+
+#### Logging
+
+- **log_level**: Optional, defaults to error. Handy when shit breaks
+
 Sample configuration files can be [found here](/.github/resources/config_examples).
+
+**Note:** The old YAML format will automatically migrate to the new JSON format. No more fighting indentation!
 
 ---
 
 ## Enjoying Mortar And Use NextUI?
 
-You might be interested in my other NextUI Paks!
+You might be interested in my other Paks!
 
 [Pak Store](https://github.com/UncleJunVIP/nextui-pak-store) - install, update and manage the amazing work from the
-community right on device
+community right on your device
 
-[Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) - manage your ROM library right on device
+[Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) - manage your ROM library right on your device
 
 ---
 

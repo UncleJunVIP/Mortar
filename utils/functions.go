@@ -3,6 +3,7 @@ package utils
 import (
 	"archive/zip"
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image/color"
@@ -47,29 +48,83 @@ func GetRomDirectory() string {
 }
 
 func LoadConfig() (*models.Config, error) {
-	data, err := os.ReadFile("config.yml")
-	if err != nil {
-		return nil, fmt.Errorf("reading config.yml: %w", err)
+	configFiles := []string{"config.json", "config.yml"}
+
+	var data []byte
+	var err error
+	var foundFile string
+
+	for _, filename := range configFiles {
+		data, err = os.ReadFile(filename)
+		if err == nil {
+			foundFile = filename
+			break
+		}
+	}
+
+	if foundFile == "" {
+		return nil, fmt.Errorf("no config file found (tried: %s)", strings.Join(configFiles, ", "))
 	}
 
 	var config models.Config
-	err = yaml.Unmarshal(data, &config)
+
+	ext := strings.ToLower(filepath.Ext(foundFile))
+
+	switch ext {
+	case ".json":
+		err = json.Unmarshal(data, &config)
+	case ".yaml", ".yml":
+		err = yaml.Unmarshal(data, &config)
+	default:
+		return nil, fmt.Errorf("unknown config file type: %s", ext)
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("parsing config.yml: %w", err)
+		return nil, fmt.Errorf("parsing %s: %w", foundFile, err)
+	}
+
+	if ext == ".yaml" || ext == ".yml" {
+		gaba.GetLoggerInstance().Info("Migrating config to JSON")
+		_ = SaveConfig(&config)
 	}
 
 	return &config, nil
 }
 
 func SaveConfig(config *models.Config) error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yml")
+	configFiles := []string{"config.json", "config.yml"}
+
+	var existingFile string
+	var configType string
+
+	for _, filename := range configFiles {
+		if _, err := os.Stat(filename); err == nil {
+			existingFile = filename
+			ext := strings.ToLower(filepath.Ext(filename))
+			switch ext {
+			case ".json":
+				configType = "json"
+			case ".yml":
+				configType = "yml"
+			}
+			break
+		}
+	}
+
+	if existingFile == "" {
+		existingFile = "config.json"
+		configType = "json"
+	}
+
+	viper.SetConfigName(strings.TrimSuffix(filepath.Base(existingFile), filepath.Ext(existingFile)))
+	viper.SetConfigType(configType)
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return fmt.Errorf("error reading config file: %w", err)
 	}
 
+	viper.Set("hosts", config.Hosts)
 	viper.Set("download_art", config.DownloadArt)
 	viper.Set("art_download_type", config.ArtDownloadType)
 	viper.Set("unzip_downloads", config.UnzipDownloads)
@@ -79,7 +134,23 @@ func SaveConfig(config *models.Config) error {
 
 	gaba.SetRawLogLevel(config.LogLevel)
 
-	return viper.WriteConfigAs("config.yml")
+	newConfig := viper.AllSettings()
+
+	pretty, err := json.MarshalIndent(newConfig, "", "  ")
+	if err != nil {
+		gaba.GetLoggerInstance().Error("Failed to marshal config to JSON", "error", err)
+		return err
+	}
+
+	err = os.WriteFile("config.json", pretty, 0644)
+	if err != nil {
+		gaba.GetLoggerInstance().Error("Failed to write config file", "error", err)
+		return err
+	}
+
+	_ = os.Remove("config.yml")
+
+	return nil
 }
 
 func UnzipGame(platform models.Platform, game shared.Item) ([]string, error) {

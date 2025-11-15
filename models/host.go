@@ -6,21 +6,19 @@ import (
 )
 
 type Host struct {
-	DisplayName string                   `yaml:"display_name"`
-	HostType    sum.Int[shared.HostType] `yaml:"host_type"`
-	RootURI     string                   `yaml:"root_uri"`
-	Port        int                      `yaml:"port"`
+	DisplayName string                   `yaml:"display_name,omitempty" json:"display_name,omitempty"`
+	HostType    sum.Int[shared.HostType] `yaml:"host_type,omitempty" json:"host_type,omitempty"`
+	RootURI     string                   `yaml:"root_uri,omitempty" json:"root_uri,omitempty"`
+	Port        int                      `yaml:"port,omitempty" json:"port,omitempty"`
 
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Username string `yaml:"username,omitempty" json:"username,omitempty"`
+	Password string `yaml:"password,omitempty" json:"password,omitempty"`
 
-	Platforms Platforms `yaml:"platforms"`
-	Filters   Filters   `yaml:"filters"`
+	Platforms Platforms `yaml:"platforms,omitempty" json:"platforms,omitempty"`
+	Filters   Filters   `yaml:"filters,omitempty" json:"filters,omitempty"`
 
-	TableColumns       shared.TableColumns `yaml:"table_columns"`
-	SourceReplacements SourceReplacements  `yaml:"source_replacements"`
-
-	PlatformIndices PlatformIndices `yaml:"-"`
+	TableColumns       shared.TableColumns `yaml:"-" json:"-"`
+	SourceReplacements SourceReplacements  `yaml:"-" json:"-"`
 }
 
 func (h Host) Value() interface{} {
@@ -30,30 +28,8 @@ func (h Host) Value() interface{} {
 type Hosts []Host
 
 type Filters struct {
-	InclusiveFilters []string `yaml:"inclusive_filters"`
-	ExclusiveFilters []string `yaml:"exclusive_filters"`
+	InclusiveFilters []string `yaml:"inclusive_filters,omitempty" json:"inclusive_filters,omitempty"`
+	ExclusiveFilters []string `yaml:"exclusive_filters,omitempty" json:"exclusive_filters,omitempty"`
 }
 
 type SourceReplacements map[string]string
-
-type PlatformIndices map[string]int
-
-func (h Host) GetPlatformIndices() PlatformIndices {
-	if h.PlatformIndices == nil {
-		h.PlatformIndices = map[string]int{}
-
-		for idx, section := range h.Platforms {
-			h.PlatformIndices[section.Name] = idx
-		}
-	}
-
-	return h.PlatformIndices
-}
-
-func (h Hosts) Values() []string {
-	var list []string
-	for _, host := range h {
-		list = append(list, host.DisplayName)
-	}
-	return list
-}

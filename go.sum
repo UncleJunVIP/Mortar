@@ -6,6 +6,8 @@ github.com/UncleJunVIP/gabagool v0.1.6 h1:Toz1bvz0LoCEqiiNT+ejLQrH/eYCy8FI/NePfK
 github.com/UncleJunVIP/gabagool v0.1.6/go.mod h1:WsNPFEacGvE+g4sPnsa0xkjHGq9f9j5MNXkRwuQAI+0=
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.16.0 h1:+nX6QW8c3XFfIGx4R1LIXwMGhMN755k0S08ziR0QrtE=
 github.com/UncleJunVIP/nextui-pak-shared-functions v1.16.0/go.mod h1:ofDnAI58RYKdfbqavKyYoVe49jilRhZE8CFmzJWEB6I=
+github.com/UncleJunVIP/nextui-pak-shared-functions v1.17.0 h1:H1F4FpzQTajH0pzk6Dyxm7QL5zeJYAbyyecLoTfHdTE=
+github.com/UncleJunVIP/nextui-pak-shared-functions v1.17.0/go.mod h1:VeSNavnoJf64s51m1luMabW0xVnelAKS555uGLG8r0c=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4 h1:6xQvdHFFMHHW8ubDS+xUW/USUx25kZtC6nfVnY8tZQU=
 github.com/activcoding/HTML-Table-to-JSON v0.0.4/go.mod h1:xStjYiUrfnpo8937cHqbWh4hHGMSpT0sZ+qjvbCTLA0=
 github.com/andybalholm/cascadia v1.3.3 h1:AG2YHrzJIm4BZ19iwJ/DAua6Btl3IwJX+VI4kktS1LM=
@@ -150,6 +152,8 @@ golang.org/x/text v0.31.0 h1:aC8ghyu4JhP8VojJ2lEHBnochRno1sgL6nEi9WGFGMM=
 golang.org/x/text v0.31.0/go.mod h1:tKRAlv61yKIjGGHX/4tP1LTbc13YSec1pxVEWXzfoeM=
 golang.org/x/time v0.11.0 h1:/bpjEDfN9tkoN/ryeYHnv5hcMlc8ncjMcM4XBk5NWV0=
 golang.org/x/time v0.11.0/go.mod h1:CDIdPxbZBQxdj6cxyCIdrNogrJKMJ7pr37NYpMcMDSg=
+golang.org/x/time v0.14.0 h1:MRx4UaLrDotUKUdCIqzPC48t1Y9hANFKIRpNx+Te8PI=
+golang.org/x/time v0.14.0/go.mod h1:eL/Oa2bBBK0TkX57Fyni+NgnyQQN4LitPmob2Hjnqw4=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.1.12/go.mod h1:hNGJHUnrk76NpqgfD5Aqm5Crs+Hm0VOH/i9J2+nxYbc=

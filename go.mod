@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/UncleJunVIP/certifiable v1.0.0
 	github.com/UncleJunVIP/gabagool v0.1.6
-	github.com/UncleJunVIP/nextui-pak-shared-functions v1.16.0
+	github.com/UncleJunVIP/nextui-pak-shared-functions v1.17.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
@@ -43,6 +43,6 @@ require (
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
-	golang.org/x/time v0.11.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

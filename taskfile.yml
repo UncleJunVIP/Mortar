@@ -51,7 +51,7 @@ tasks:
     cmds:
       - adb shell rm -rf /mnt/SDCARD/Tools/tg5040/Mortar.pak || true
       - adb push build/Mortar.pak /mnt/SDCARD/Tools/tg5040
-      - adb push config.yml /mnt/SDCARD/Tools/tg5040/Mortar.pak
+      - adb push config.json /mnt/SDCARD/Tools/tg5040/Mortar.pak
       - say Finished deploying Mortar!
     silent: true
 
