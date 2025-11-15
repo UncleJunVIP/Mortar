@@ -7,7 +7,7 @@
 
 <h4 style="font-size: 18px; padding-top: 0; margin-top: 0;">
 
-Art Downloads powered by the _Libretro Thumbnail Project_
+Art Downloads powered by the _[Libretro Thumbnail Project](https://github.com/libretro-thumbnails/libretro-thumbnails)_
 </h4>
 
 ![GitHub License](https://img.shields.io/github/license/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
