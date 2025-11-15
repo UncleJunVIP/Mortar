@@ -5,7 +5,7 @@
     A ROM download client that supports RomM and /r/Roms Megathread.
 </h3>
 
-<h4 style="font-size: 18px;">
+<h4 style="font-size: 18px; padding-top: 0; margin-top: 0;">
 
 Art Downloads powered by the _Libretro Thumbnail Project_
 </h4>
@@ -14,8 +14,6 @@ Art Downloads powered by the _Libretro Thumbnail Project_
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar?sort=semver&style=for-the-badge&color=007C77)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/UncleJunVIP/Mortar/total?style=for-the-badge&label=Total%20Downloads&color=007C77)
-
-## [Download this in Pak Store!](https://github.com/UncleJunVIP/nextui-pak-store)
 
 </div>
 
