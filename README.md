@@ -64,10 +64,10 @@ Please help by verifying if it works on other devices!
 
 ### How To Configure Mortar
 
-1. Connect your device to a Wi-Fi network.
+1. Connect your handheld to a Wi-Fi network.
 2. Launch `Mortar` from the `Tools` menu.
 3. On first launch, Mortar will display a QR Code that leads to a configuration editor.
-    - For the editor to function, the device must be connected to the same Wi-Fi network as your handheld.
+    - For the editor to function, the editing device (phone, laptop, etc.) must be connected to the same Wi-Fi network as your handheld.
 4. Follow the Configuration Reference section below.
 
 ---
