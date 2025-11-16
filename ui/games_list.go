@@ -192,60 +192,54 @@ func checkCache(platform models.Platform) shared.Items {
 		return nil
 	}
 
-	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
-		cachePath := filepath.Join(cwd, ".cache", utils.CachedMegaThreadJsonFilename(platform.Host.DisplayName, platform.Name))
-		if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-			return nil
-		}
-
-		data, err := os.ReadFile(cachePath)
-		if err != nil {
-			logger.Debug("Unable to read cached Megathread JSON file", "error", err)
-			return nil
-		}
-
-		var items shared.Items
-		err = json.Unmarshal(data, &items)
-		if err != nil {
-			logger.Debug("Unable to unmarshal cached Megathread JSON data", "error", err)
-			return nil
-		}
-
-		return items
+	cachePath := filepath.Join(cwd, ".cache", utils.CachedMegaThreadJsonFilename(platform.Host.DisplayName, platform.Name))
+	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
+		return nil
 	}
 
-	return nil
+	data, err := os.ReadFile(cachePath)
+	if err != nil {
+		logger.Debug("Unable to read cached Megathread JSON file", "error", err)
+		return nil
+	}
+
+	var items shared.Items
+	err = json.Unmarshal(data, &items)
+	if err != nil {
+		logger.Debug("Unable to unmarshal cached Megathread JSON data", "error", err)
+		return nil
+	}
+
+	return items
 }
 
 func cache(platform models.Platform, gamesList shared.Items) {
-	if platform.Host.HostType == shared.HostTypes.MEGATHREAD {
-		logger := gaba.GetLoggerInstance()
+	logger := gaba.GetLoggerInstance()
 
-		jsonData, err := json.Marshal(gamesList)
-		if err != nil {
-			logger.Debug("Unable to get marshal JSON for Megathread", "error", err)
-			return
-		}
-
-		cwd, err := os.Getwd()
-		if err != nil {
-			logger.Debug("Unable to get current working directory for caching Megathread", "error", err)
-			return
-		}
-
-		dir := filepath.Join(cwd, ".cache")
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			logger.Debug("Unable to make cache directory", "error", err)
-			return
-		}
-
-		filePath := path.Join(cwd, ".cache", utils.CachedMegaThreadJsonFilename(platform.Host.DisplayName, platform.Name))
-		err = os.WriteFile(filePath, jsonData, 0644)
-		if err != nil {
-			logger.Debug("Unable to write JSON to file for Megathread", "error", err)
-			return
-		}
-
-		logger.Debug("Cached Megathread Platform", "platform_name", platform.Name)
+	jsonData, err := json.Marshal(gamesList)
+	if err != nil {
+		logger.Debug("Unable to get marshal JSON for Megathread", "error", err)
+		return
 	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		logger.Debug("Unable to get current working directory for caching Megathread", "error", err)
+		return
+	}
+
+	dir := filepath.Join(cwd, ".cache")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		logger.Debug("Unable to make cache directory", "error", err)
+		return
+	}
+
+	filePath := path.Join(cwd, ".cache", utils.CachedMegaThreadJsonFilename(platform.Host.DisplayName, platform.Name))
+	err = os.WriteFile(filePath, jsonData, 0644)
+	if err != nil {
+		logger.Debug("Unable to write JSON to file for Megathread", "error", err)
+		return
+	}
+
+	logger.Debug("Cached Megathread Platform", "platform_name", platform.Name)
 }

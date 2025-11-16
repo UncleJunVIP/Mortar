@@ -2,14 +2,12 @@ package models
 
 import (
 	shared "github.com/UncleJunVIP/nextui-pak-shared-functions/models"
-	"qlova.tech/sum"
 )
 
 type Host struct {
-	DisplayName string                   `yaml:"display_name,omitempty" json:"display_name,omitempty"`
-	HostType    sum.Int[shared.HostType] `yaml:"host_type,omitempty" json:"host_type,omitempty"`
-	RootURI     string                   `yaml:"root_uri,omitempty" json:"root_uri,omitempty"`
-	Port        int                      `yaml:"port,omitempty" json:"port,omitempty"`
+	DisplayName string `yaml:"display_name,omitempty" json:"display_name,omitempty"`
+	RootURI     string `yaml:"root_uri,omitempty" json:"root_uri,omitempty"`
+	Port        int    `yaml:"port,omitempty" json:"port,omitempty"`
 
 	Username string `yaml:"username,omitempty" json:"username,omitempty"`
 	Password string `yaml:"password,omitempty" json:"password,omitempty"`

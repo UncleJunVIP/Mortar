@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"encoding/base64"
-	"mortar/clients"
 	"mortar/models"
 	"mortar/state"
 	"mortar/utils"
@@ -44,14 +42,6 @@ func (d DownloadScreen) Draw() (value interface{}, exitCode int, e error) {
 	downloads := BuildDownload(d.Platform, d.SelectedGames)
 
 	headers := make(map[string]string)
-
-	if d.Platform.Host.HostType == shared.HostTypes.ROMM {
-		auth := d.Platform.Host.Username + ":" + d.Platform.Host.Password
-		authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-		headers["Authorization"] = authHeader
-
-		logger.Debug("RomM Auth Header", "header", authHeader)
-	}
 
 	slices.SortFunc(downloads, func(a, b gaba.Download) int {
 		return strings.Compare(strings.ToLower(a.DisplayName), strings.ToLower(b.DisplayName))
@@ -110,14 +100,7 @@ func BuildDownload(platform models.Platform, games shared.Items) []gaba.Download
 			root = root + ":" + strconv.Itoa(platform.Host.Port)
 		}
 
-		var sourceURL string
-
-		if platform.Host.HostType == shared.HostTypes.ROMM {
-			client := clients.NewRomMClient(platform.Host.RootURI, platform.Host.Port, platform.Host.Username, platform.Host.Password)
-			sourceURL, _ = client.BuildDownloadURL(g.RomID, g.Filename)
-		} else {
-			sourceURL, _ = url.JoinPath(root, platform.HostSubdirectory, g.Filename)
-		}
+		sourceURL, _ := url.JoinPath(root, platform.HostSubdirectory, g.Filename)
 
 		downloads = append(downloads, gaba.Download{
 			URL:         sourceURL,

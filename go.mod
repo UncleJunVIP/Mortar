@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/UncleJunVIP/certifiable v1.0.0
 	github.com/UncleJunVIP/gabagool v0.1.6
-	github.com/UncleJunVIP/nextui-pak-shared-functions v1.17.0
+	github.com/UncleJunVIP/nextui-pak-shared-functions v1.18.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e

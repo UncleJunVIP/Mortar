@@ -2,7 +2,7 @@
 
 <img src=".github/resources/mortar-logo.png" width="auto" alt="Mortar wordmark">
 <h3 style="font-size: 25px; padding-top: 0; margin-top: 0;">
-    A ROM download client that supports RomM and Megathread.
+    A ROM download client for Megathread.
 </h3>
 
 <h4 style="font-size: 18px; padding-top: 0; margin-top: 0;">
@@ -14,6 +14,15 @@ Art Downloads powered by the _[Libretro Thumbnail Project](https://github.com/li
 ![GitHub Release](https://img.shields.io/github/v/release/UncleJunVIP/Mortar?sort=semver&style=for-the-badge&color=007C77)
 ![GitHub Repo stars](https://img.shields.io/github/stars/UncleJunVip/Mortar?style=for-the-badge&color=007C77)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/UncleJunVIP/Mortar/total?style=for-the-badge&label=Total%20Downloads&color=007C77)
+
+<h3 style="font-size: 25px; padding-top: 0; margin-top: 0;">
+    Looking for RomM Support?
+</h3>
+
+<h4 style="font-size: 18px; padding-top: 0; margin-top: 0;">
+
+Go get the official RomM Client [Grout](https://github.com/rommapp/grout)!
+</h4>
 
 </div>
 
@@ -79,7 +88,7 @@ Please help by verifying if it works on other devices!
 If Mortar does not find a config.json file or if the provided config file has syntax errors you will see an error screen
 with a QR Code that leads to this page. If you arrived at this page for this reason, please continue reading.
 
-Please edit one of the templates [found here](/.github/resources/config_examples) and save the edited file as
+Please edit the template [found here](/.github/resources/config_examples/megathread.json) and save the edited file as
 `config.json`.
 
 These are templates. They **_will not function_** without modification.
@@ -91,18 +100,14 @@ These are templates. They **_will not function_** without modification.
   "hosts": [
     {
       "display_name": "Display Name",
-      "host_type": "ROMM",
       "root_uri": "https://domain.tld",
       "port": 445,
-      "username": "GUEST",
-      "password": "hunter2",
       "platforms": [
         {
           "platform_name": "Game Boy",
           "system_tag": "GB",
           "local_directory": "/mnt/SDCARD/Roms/Game Boy (GB)/",
           "host_subdirectory": "/files/No-Intro/Nintendo%20-%20Game%20Boy/",
-          "romm_platform_id": "1",
           "skip_inclusive_filters": false,
           "skip_exclusive_filters": false,
           "is_arcade": false
@@ -136,11 +141,8 @@ These are templates. They **_will not function_** without modification.
 
 #### Host Configuration
 
-- **host_type**: Valid Choices: `ROMM` | `MEGATHREAD`
 - **root_uri**: This can be the start of a URL with protocol (e.g. https://), a host name or an IP Address
 - **port**: Optional otherwise unless using non-standard ports
-- **username**: Used by RomM
-- **password**: Used by RomM
 - **hosts**: Define more hosts if desired
 
 #### Platform Configuration
@@ -148,8 +150,7 @@ These are templates. They **_will not function_** without modification.
 - **platform_name**: Name it whatever you want
 - **system_tag**: Must match the tag in the `SDCARD_ROOT/Roms` directories
 - **local_directory**: Explicitly set the path. This will be overwritten if `system_tag` is set
-- **host_subdirectory**: The subdirectory on the host, not used by RomM
-- **romm_platform_id**: Used by RomM in place of `host_subdirectory`
+- **host_subdirectory**: The subdirectory on the host
 - **skip_inclusive_filters**: If true, everything in the host directory will be included
 - **skip_exclusive_filters**: If true, nothing in the host directory will be excluded
 - **is_arcade**: If true, Mortar will use an internal mapping file for arcade names
@@ -167,7 +168,6 @@ These are templates. They **_will not function_** without modification.
 - **download_art**: If true, Mortar will attempt to find box art. If found, it will display it and let you indicate if
   you want it
 - **art_download_type**: Optional, defaults to `BOX_ART`.
-    - This setting does not impact art downloads from RomM.
     - Valid Choices: `BOX_ART` | `TITLE_SCREEN` | `LOGOS` | `SCREENSHOTS`
 
 #### Logging

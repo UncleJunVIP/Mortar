@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-	"mortar/clients"
 	"mortar/models"
 	"net"
 	"os"
@@ -524,36 +523,6 @@ func FindArt(platform models.Platform, game shared.Item, downloadType sum.Int[sh
 		artDirectory = filepath.Join(romDirectory, ".media")
 	} else {
 		artDirectory = filepath.Join(platform.LocalDirectory, ".media")
-	}
-
-	host := platform.Host
-
-	if host.HostType == shared.HostTypes.ROMM {
-		// Skip all this silliness and grab the art from RoMM
-		client, err := clients.BuildClient(host)
-		if err != nil {
-			return ""
-		}
-
-		rommClient := client.(*clients.RomMClient)
-
-		if game.ArtURL == "" {
-			return ""
-		}
-
-		slashIdx := strings.LastIndex(game.ArtURL, "/")
-		artSubdirectory, artFilename := game.ArtURL[:slashIdx], game.ArtURL[slashIdx+1:]
-
-		artFilename = strings.Split(artFilename, "?")[0] // For the query string caching stuff
-
-		LastSavedArtPath, err := rommClient.DownloadArt(artSubdirectory,
-			artDirectory, artFilename, game.Filename)
-
-		if err != nil {
-			return ""
-		}
-
-		return LastSavedArtPath
 	}
 
 	client := common.NewThumbnailClient(downloadType)

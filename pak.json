@@ -1,8 +1,8 @@
 {
   "name": "Mortar",
-  "version": "v3.0.0",
+  "version": "v3.1.0",
   "type": "TOOL",
-  "description": "ROM Downloader for RomM and Megathread",
+  "description": "ROM Downloader for Megathread",
   "author": "K-Wall",
   "repo_url": "https://github.com/UncleJunVIP/Mortar",
   "release_filename": "Mortar.pak.zip",
@@ -10,6 +10,7 @@
     "BRICK": ".github/resources/banner.png"
   },
   "changelog": {
+    "v3.1.0": "RomM support has a new home! Go grab Grout from the Pak Store!",
     "v3.0.0": "Mortar now has a configuration editor! Go to the Settings menu and select 'Launch Configuration API' and scan the QR code. Additionally, Mortar now uses JSON for the config file instead of YAML. It will be automatically migrated for you.",
     "v2.9.0": "Housekeeping release to keep dependencies up to date.",
     "v2.8.0": "Finally addressed logging and made it more robust. Plus small and uninteresting fixes behind the scenes.",
